@@ -1,7 +1,7 @@
 import type { GeoJSONSource, LngLatLike, MapGeoJSONFeature } from 'maplibre-gl'
 import { Marker } from 'maplibre-gl'
 import { createPinMarker } from './utils/helpers';
-import { createDonutChart, createUncluster } from './utils/clusters';
+import { createUncluster } from './utils/clusters';
 
 export class UnCluster {
   #clusterLeaves: Map<string, GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>[]>
@@ -13,8 +13,15 @@ export class UnCluster {
   #selectedFeatureId: string | null
   #sourceId: string
   #ticking: boolean
+  #renderDefaultClusterHTML: (props: MapGeoJSONFeature['properties']) => HTMLDivElement
+  #renderDefaultMarkerHTML: (feature: GeoJSON.Feature) => HTMLDivElement
 
-  constructor(map: maplibregl.Map, source: string) {
+  constructor(
+    map: maplibregl.Map,
+    source: string,
+    renderDefaultClusterHTML: (props: MapGeoJSONFeature['properties']) => HTMLDivElement,
+    renderDefaultMarkerHTML: (feature: GeoJSON.Feature) => HTMLDivElement
+  ) {
     this.#clusterLeaves = new Map<string, GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>[]>()
     this.#map = map
     this.#markers = {}
@@ -24,6 +31,8 @@ export class UnCluster {
     this.#selectedFeatureId = null
     this.#sourceId = source
     this.#ticking = false
+    this.#renderDefaultClusterHTML = renderDefaultClusterHTML
+    this.#renderDefaultMarkerHTML = renderDefaultMarkerHTML
   }
 
   render = () => {
@@ -65,9 +74,14 @@ export class UnCluster {
           const leaves = this.#clusterLeaves.get(id)
 
           if (leaves && leaves.length <= 5) {
-            element = createUncluster(leaves, (e: Event) => this.#featureClickHandler(e, coords, props))
+            element = createUncluster()
+            leaves.forEach(feature => {
+              const featureHTML = this.#renderDefaultMarkerHTML(feature)
+              featureHTML.addEventListener('click', (e: Event) => this.#featureClickHandler(e, coords, props))
+              element.append(featureHTML)
+            })
           } else {
-            element = createDonutChart(props);
+            element = this.#renderDefaultClusterHTML(props)
           }
 
           marker = this.#markers[id] = new Marker({ element }).setLngLat(coords)
@@ -113,7 +127,7 @@ export class UnCluster {
         // If the removed cluster had a selected feature in it.
         // We display the Pin marker on it's new position
         if ((this.#pinMarker && this.#selectedClusterId && this.#selectedFeatureId) && (id == this.#selectedClusterId)) {
-          let coords: LngLatLike
+          let coords: LngLatLike | undefined
           let offset: number = 0
           const selectedFeature = featuresMap.get(this.#selectedFeatureId)
 
@@ -149,10 +163,12 @@ export class UnCluster {
 
               result = iterator.next()
             }
-          } else
+          } else {
             coords = (selectedFeature.geometry as GeoJSON.Point).coordinates as LngLatLike
+          }
 
-          this.#pinMarker = createPinMarker(coords!, offset).addTo(this.#map)
+          if(coords)
+            this.#pinMarker = createPinMarker(coords, offset).addTo(this.#map)
         }
       }
     }
