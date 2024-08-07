@@ -1,0 +1,33 @@
+{
+  "name": "maplibre-gl-uncluster",
+  "description": "Show cluster's points in one HTML element",
+  "author": "Noé Viricel",
+  "version": "0.1.0",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "dev": "vite",
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "prepare": "tsdx build"
+  },
+  "module": "dist/maplibre-gl-uncluster.esm.js",
+  "devDependencies": {
+    "tsdx": "^0.14.1",
+    "tslib": "^2.6.3",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0"
+  },
+  "packageManager": "yarn@4.4.0",
+  "dependencies": {
+    "maplibre-gl": "^4.5.1"
+  }
+}
