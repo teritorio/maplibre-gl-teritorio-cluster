@@ -1,6 +1,6 @@
-import type { GeoJSONSource, LngLatLike, MapGeoJSONFeature } from 'maplibre-gl'
+import type { GeoJSONSource, LngLatLike, MapGeoJSONFeature, PointLike } from 'maplibre-gl'
 import { Marker } from 'maplibre-gl'
-import { createPinMarker } from './utils/helpers';
+import { createMarker } from './utils/helpers';
 import { createUnclusterHTML } from './utils/clusters';
 
 export class UnCluster {
@@ -51,7 +51,7 @@ export class UnCluster {
 
     for (const feature of features) {
       // Transform to Map in order to have unique features
-      featuresMap.set(feature.id || feature.properties.id || feature.properties.metadata.id, feature)
+      featuresMap.set(feature.properties.metadata?.id || feature.properties.id || feature.id, feature)
 
       // Get cluster's leaves
       if (feature.properties.cluster || feature.id) {
@@ -88,7 +88,7 @@ export class UnCluster {
             element = this.#renderDefaultClusterHTML(props)
           }
 
-          marker = this.#markers[id] = new Marker({ element }).setLngLat(coords)
+          marker = this.#markers[id] = createMarker(coords, undefined, { element })
         }
 
         newMarkers[id] = marker
@@ -96,7 +96,7 @@ export class UnCluster {
         if (!this.#markersOnScreen[id]) {
           marker.addTo(this.#map);
 
-          // If the previously selected feature is now part of this new cluster
+          // If selected feature is now part of this new cluster
           // We position the Pin marker on it's new position
           if ((this.#pinMarker && this.#selectedClusterId && this.#selectedFeatureId) && (id == this.#selectedClusterId)) {
             const featureIndex = this.#clusterLeaves.get(id)!.findIndex(f => f.properties?.id == this.#selectedFeatureId)
@@ -106,25 +106,27 @@ export class UnCluster {
               this.#pinMarker.remove()
 
               // Get selected feature DOM element position within cluster
-              let offset: number = 0
               const { x: clusterX } = marker._pos
               const selectedFeatureHTML = Array.from(marker.getElement().children).find(el => el.id === this.#selectedFeatureId)
 
-              if (selectedFeatureHTML) {
-                const { x, width } = selectedFeatureHTML.getBoundingClientRect()
-                offset = x - clusterX + (width / 2)
-              }
+              if (!selectedFeatureHTML)
+                throw new Error('Selected feature HTML marker was not found !')
 
-              this.#pinMarker = createPinMarker(marker.getLngLat(), offset).addTo(this.#map)
+              const { x, width } = selectedFeatureHTML.getBoundingClientRect()
+              const offset: PointLike = [x - clusterX + (width / 2), -20]
+
+              this.#pinMarker = createMarker(marker.getLngLat(), offset).addTo(this.#map)
             }
           }
         }
       } else {
-        const id = props.id || props.metadata.id
+        const id =  props.metadata?.id || props.id
         let marker = this.#markers[id];
 
         if (!marker) {
-          marker = this.#markers[id] = createPinMarker(coords)
+          var element = this.#renderDefaultMarkerHTML(feature)
+
+          marker = this.#markers[id] = createMarker(coords, undefined, { element })
           marker.getElement().addEventListener('click', (e: Event) => this.#featureClickHandler(e, coords, props))
         }
 
@@ -145,7 +147,7 @@ export class UnCluster {
         // We display the Pin marker on it's new position
         if ((this.#pinMarker && this.#selectedClusterId && this.#selectedFeatureId) && (id == this.#selectedClusterId)) {
           let coords: LngLatLike | undefined
-          let offset: number = 0
+          let offset: PointLike | undefined
           const selectedFeature = featuresMap.get(this.#selectedFeatureId)
 
           // Clear outdated Pin marker
@@ -172,7 +174,7 @@ export class UnCluster {
 
                 if (selectedFeatureHTML) {
                   const { x, width } = selectedFeatureHTML.getBoundingClientRect()
-                  offset = x - clusterX + (width / 2)
+                  offset = [x - clusterX + (width / 2), -20]
                 }
 
                 break
@@ -185,7 +187,7 @@ export class UnCluster {
           }
 
           if (coords)
-            this.#pinMarker = createPinMarker(coords, offset).addTo(this.#map)
+            this.#pinMarker = createMarker(coords, offset).addTo(this.#map)
         }
       }
     }
@@ -211,8 +213,8 @@ export class UnCluster {
     this.#selectedFeatureId = clickedEl.id
     const { x: clusterX } = markerOnScreen._pos
     const { x, width } = clickedEl.getBoundingClientRect()
-    const offset = x - clusterX + (width / 2)
+    const offset: PointLike = [x - clusterX + (width / 2), -20]
 
-    this.#pinMarker = createPinMarker(coords, offset).addTo(this.#map)
+    this.#pinMarker = createMarker(coords, offset).addTo(this.#map)
   }
 }
