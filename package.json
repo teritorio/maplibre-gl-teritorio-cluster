@@ -28,6 +28,6 @@
   },
   "packageManager": "yarn@4.4.0",
   "dependencies": {
-    "maplibre-gl": "^4.5.1"
+    "maplibre-gl": "^4.0.0"
   }
 }
