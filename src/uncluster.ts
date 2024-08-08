@@ -42,6 +42,19 @@ export class UnCluster {
     this.#ticking = true
   }
 
+  #getFeatureId = (feature: MapGeoJSONFeature) => {
+    if(feature.properties.cluster)  
+      return feature.id
+
+    // Vido support: shouldn't be part of this plugin
+    let metadata: { [key: string ]: any } | undefined = feature.properties.metadata
+
+    if(typeof metadata === 'string')
+      metadata = JSON.parse(metadata)
+
+    return metadata?.id || feature.properties.id
+  }
+
   #updateMarkers = async () => {
     const newMarkers: { [key: string]: Marker } = {}
     const features = this.#map.querySourceFeatures(this.#sourceId)
@@ -50,14 +63,16 @@ export class UnCluster {
     this.#clusterLeaves.clear()
 
     for (const feature of features) {
+      const id = this.#getFeatureId(feature)
+
       // Transform to Map in order to have unique features
-      featuresMap.set(feature.properties.metadata?.id || feature.properties.id || feature.id, feature)
+      featuresMap.set(id, feature)
 
       // Get cluster's leaves
-      if (feature.properties.cluster || feature.id) {
+      if (feature.properties.cluster) {
         const source = this.#map.getSource(this.#sourceId) as GeoJSONSource
-        const leaves = await source.getClusterLeaves(feature.id as number, feature.properties.point_count, 0)
-        this.#clusterLeaves.set(feature.id as string, leaves)
+        const leaves = await source.getClusterLeaves(id as number, feature.properties.point_count, 0)
+        this.#clusterLeaves.set(id as string, leaves)
       }
     }
 
@@ -120,7 +135,7 @@ export class UnCluster {
           }
         }
       } else {
-        const id =  props.metadata?.id || props.id
+        const id =  this.#getFeatureId(feature)
         let marker = this.#markers[id];
 
         if (!marker) {
