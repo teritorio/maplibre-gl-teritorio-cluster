@@ -1,4 +1,4 @@
-import type { LngLatLike } from 'maplibre-gl'
+import type { LngLatLike, MarkerOptions } from 'maplibre-gl'
 import { Marker } from 'maplibre-gl'
 
 // Helper to apply styles on DOM element
@@ -9,9 +9,10 @@ export const buildCss = (htmlEl: HTMLElement, styles: { [key: string]: string })
     rules.setProperty(property, styles[property]);
 }
 
-export function createPinMarker(coords: LngLatLike, offset: number = 0) {
-  return new Marker({
-    scale: 1.3,
-    color: '#f44336',
-  }).setLngLat(coords).setOffset([offset, -20])
+export function createPinMarker(
+  coords: LngLatLike,
+  offset: number = 0,
+  options: MarkerOptions = { scale: 1.3, color: '#f44336' }
+) {
+  return new Marker({ ...options }).setLngLat(coords).setOffset([offset, -20])
 }
