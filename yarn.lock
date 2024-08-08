@@ -2121,6 +2121,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@teritorio/maplibre-gl-uncluster@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@teritorio/maplibre-gl-uncluster@workspace:."
+  dependencies:
+    maplibre-gl: "npm:^4.0.0"
+    tsdx: "npm:^0.14.1"
+    tslib: "npm:^2.6.3"
+    typescript: "npm:^5.5.4"
+    vite: "npm:^5.4.0"
+  languageName: unknown
+  linkType: soft
+
 "@types/babel__core@npm:^7.1.7":
   version: 7.20.5
   resolution: "@types/babel__core@npm:7.20.5"
@@ -7068,18 +7080,6 @@ __metadata:
   checksum: 10c0/fb3475e5311939a6147e339999113db607adc11c7c3cd3103e5e9dbf502898416ecba6b1c7c649c6d4d12941de00cee58b939756bdf20a9efe7d4fa5a5738b73
   languageName: node
   linkType: hard
-
-"maplibre-gl-uncluster@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "maplibre-gl-uncluster@workspace:."
-  dependencies:
-    maplibre-gl: "npm:^4.0.0"
-    tsdx: "npm:^0.14.1"
-    tslib: "npm:^2.6.3"
-    typescript: "npm:^5.5.4"
-    vite: "npm:^5.4.0"
-  languageName: unknown
-  linkType: soft
 
 "maplibre-gl@npm:^4.0.0":
   version: 4.5.1

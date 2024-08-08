@@ -1,5 +1,5 @@
 {
-  "name": "maplibre-gl-uncluster",
+  "name": "@teritorio/maplibre-gl-uncluster",
   "description": "Show cluster's points in one HTML element",
   "author": "Noé Viricel",
   "version": "0.1.0",
