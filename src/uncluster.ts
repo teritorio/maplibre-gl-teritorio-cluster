@@ -4,7 +4,7 @@ import { createMarker } from './utils/helpers';
 import { createUnclusterHTML } from './utils/clusters';
 
 export class UnCluster {
-  #clusterLeaves: Map<string, GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>[]>
+  #clusterLeaves: Map<string, MapGeoJSONFeature[]>
   #map: maplibregl.Map
   #markers: { [key: string]: Marker }
   #markersOnScreen: { [key: string]: Marker }
@@ -14,15 +14,15 @@ export class UnCluster {
   #sourceId: string
   #ticking: boolean
   #renderDefaultClusterHTML: (props: MapGeoJSONFeature['properties']) => HTMLDivElement
-  #renderDefaultMarkerHTML: (feature: GeoJSON.Feature) => HTMLDivElement
+  #renderDefaultMarkerHTML: (feature: MapGeoJSONFeature) => HTMLDivElement
 
   constructor(
     map: maplibregl.Map,
     source: string,
     renderDefaultClusterHTML: (props: MapGeoJSONFeature['properties']) => HTMLDivElement,
-    renderDefaultMarkerHTML: (feature: GeoJSON.Feature) => HTMLDivElement
+    renderDefaultMarkerHTML: (feature: MapGeoJSONFeature) => HTMLDivElement
   ) {
-    this.#clusterLeaves = new Map<string, GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>[]>()
+    this.#clusterLeaves = new Map<string, MapGeoJSONFeature[]>()
     this.#map = map
     this.#markers = {}
     this.#markersOnScreen = {}
@@ -71,7 +71,7 @@ export class UnCluster {
       // Get cluster's leaves
       if (feature.properties.cluster) {
         const source = this.#map.getSource(this.#sourceId) as GeoJSONSource
-        const leaves = await source.getClusterLeaves(id as number, feature.properties.point_count, 0)
+        const leaves = await source.getClusterLeaves(id as number, feature.properties.point_count, 0) as MapGeoJSONFeature[]
         this.#clusterLeaves.set(id as string, leaves)
       }
     }
