@@ -1,7 +1,7 @@
 import type { GeoJSONSource, LngLatLike, MapGeoJSONFeature } from 'maplibre-gl'
 import { Marker } from 'maplibre-gl'
 import { createPinMarker } from './utils/helpers';
-import { createUncluster } from './utils/clusters';
+import { createUnclusterHTML } from './utils/clusters';
 
 export class UnCluster {
   #clusterLeaves: Map<string, GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>[]>
@@ -51,10 +51,10 @@ export class UnCluster {
 
     for (const feature of features) {
       // Transform to Map in order to have unique features
-      featuresMap.set(feature.id || feature.properties.id, feature)
+      featuresMap.set(feature.id || feature.properties.id || feature.properties.metadata.id, feature)
 
       // Get cluster's leaves
-      if (feature.id) {
+      if (feature.properties.cluster || feature.id) {
         const source = this.#map.getSource(this.#sourceId) as GeoJSONSource
         const leaves = await source.getClusterLeaves(feature.id as number, feature.properties.point_count, 0)
         this.#clusterLeaves.set(feature.id as string, leaves)
@@ -74,13 +74,17 @@ export class UnCluster {
           const leaves = this.#clusterLeaves.get(id)
 
           if (leaves && leaves.length <= 5) {
-            element = createUncluster()
+            element = createUnclusterHTML()
+
+            // Create Uncluster HTML leaves
             leaves.forEach(feature => {
               const featureHTML = this.#renderDefaultMarkerHTML(feature)
+
               featureHTML.addEventListener('click', (e: Event) => this.#featureClickHandler(e, coords, props))
               element.append(featureHTML)
             })
           } else {
+            // Create default HTML Cluster
             element = this.#renderDefaultClusterHTML(props)
           }
 
@@ -91,7 +95,6 @@ export class UnCluster {
 
         if (!this.#markersOnScreen[id]) {
           marker.addTo(this.#map);
-
 
           // If the previously selected feature is now part of this new cluster
           // We position the Pin marker on it's new position
@@ -107,7 +110,7 @@ export class UnCluster {
               const { x: clusterX } = marker._pos
               const selectedFeatureHTML = Array.from(marker.getElement().children).find(el => el.id === this.#selectedFeatureId)
 
-              if(selectedFeatureHTML) {
+              if (selectedFeatureHTML) {
                 const { x, width } = selectedFeatureHTML.getBoundingClientRect()
                 offset = x - clusterX + (width / 2)
               }
@@ -115,6 +118,20 @@ export class UnCluster {
               this.#pinMarker = createPinMarker(marker.getLngLat(), offset).addTo(this.#map)
             }
           }
+        }
+      } else {
+        const id = props.id || props.metadata.id
+        let marker = this.#markers[id];
+
+        if (!marker) {
+          marker = this.#markers[id] = createPinMarker(coords)
+          marker.getElement().addEventListener('click', (e: Event) => this.#featureClickHandler(e, coords, props))
+        }
+
+        newMarkers[id] = marker
+
+        if (!this.#markersOnScreen[id]) {
+          marker.addTo(this.#map);
         }
       }
     })
@@ -152,8 +169,8 @@ export class UnCluster {
                 coords = selectedClusterHTML.getLngLat()
 
                 const selectedFeatureHTML = selectedClusterHTML.getElement().children[featureIndex]
-                
-                if(selectedFeatureHTML) {
+
+                if (selectedFeatureHTML) {
                   const { x, width } = selectedFeatureHTML.getBoundingClientRect()
                   offset = x - clusterX + (width / 2)
                 }
@@ -167,7 +184,7 @@ export class UnCluster {
             coords = (selectedFeature.geometry as GeoJSON.Point).coordinates as LngLatLike
           }
 
-          if(coords)
+          if (coords)
             this.#pinMarker = createPinMarker(coords, offset).addTo(this.#map)
         }
       }
