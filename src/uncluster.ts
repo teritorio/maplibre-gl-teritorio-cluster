@@ -5,6 +5,7 @@ import { createUnclusterHTML } from './utils/clusters';
 
 export class UnCluster {
   #clusterLeaves: Map<string, MapGeoJSONFeature[]>
+  #clusterMaxZoom: number
   #map: maplibregl.Map
   #markers: { [key: string]: Marker }
   #markersOnScreen: { [key: string]: Marker }
@@ -19,10 +20,12 @@ export class UnCluster {
   constructor(
     map: maplibregl.Map,
     source: string,
+    options: { clusterMaxZoom: number } = { clusterMaxZoom: 17 },
     renderDefaultClusterHTML: (props: MapGeoJSONFeature['properties']) => HTMLDivElement,
     renderDefaultMarkerHTML: (feature: MapGeoJSONFeature) => HTMLDivElement
   ) {
     this.#clusterLeaves = new Map<string, MapGeoJSONFeature[]>()
+    this.#clusterMaxZoom = options.clusterMaxZoom,
     this.#map = map
     this.#markers = {}
     this.#markersOnScreen = {}
@@ -43,13 +46,13 @@ export class UnCluster {
   }
 
   #getFeatureId = (feature: MapGeoJSONFeature) => {
-    if(feature.properties.cluster)  
+    if (feature.properties.cluster)
       return feature.id
 
     // Vido support: shouldn't be part of this plugin
-    let metadata: { [key: string ]: any } | undefined = feature.properties.metadata
+    let metadata: { [key: string]: any } | undefined = feature.properties.metadata
 
-    if(typeof metadata === 'string')
+    if (typeof metadata === 'string')
       metadata = JSON.parse(metadata)
 
     return metadata?.id || feature.properties.id
@@ -59,6 +62,7 @@ export class UnCluster {
     const newMarkers: { [key: string]: Marker } = {}
     const features = this.#map.querySourceFeatures(this.#sourceId)
     const featuresMap = new Map<string, MapGeoJSONFeature>()
+    const maxZoomLimit = this.#map.getZoom() >= this.#clusterMaxZoom
 
     this.#clusterLeaves.clear()
 
@@ -82,20 +86,31 @@ export class UnCluster {
 
       if (props.cluster) {
         const id = props.cluster_id;
-        let marker = this.#markers[id];
+        let marker: Marker | undefined = this.#markers[id];
+
+        if (
+          (marker && maxZoomLimit && !marker.getElement().classList.contains('uncluster'))
+          ||
+          (marker && !maxZoomLimit && marker.getElement().classList.contains('uncluster') && this.#markersOnScreen[id])
+        ) {
+          marker = undefined
+          delete this.#markers[id]
+          this.#markersOnScreen[id].remove();
+          delete this.#markersOnScreen[id]
+        }
 
         if (!marker) {
           let element: HTMLDivElement
           const leaves = this.#clusterLeaves.get(id)
 
-          if (leaves && leaves.length <= 5) {
-            element = createUnclusterHTML()
+          if (leaves && ((leaves.length <= 5) || maxZoomLimit)) {
+            element = createUnclusterHTML(id)
 
             // Create Uncluster HTML leaves
             leaves.forEach(feature => {
               const featureHTML = this.#renderDefaultMarkerHTML(feature)
 
-              featureHTML.addEventListener('click', (e: Event) => this.#featureClickHandler(e, coords, props))
+              featureHTML.addEventListener('click', (e: Event) => this.#featureClickHandler(e, feature))
               element.append(featureHTML)
             })
           } else {
@@ -135,14 +150,14 @@ export class UnCluster {
           }
         }
       } else {
-        const id =  this.#getFeatureId(feature)
+        const id = this.#getFeatureId(feature)
         let marker = this.#markers[id];
 
         if (!marker) {
           var element = this.#renderDefaultMarkerHTML(feature)
 
           marker = this.#markers[id] = createMarker(coords, undefined, { element })
-          marker.getElement().addEventListener('click', (e: Event) => this.#featureClickHandler(e, coords, props))
+          marker.getElement().addEventListener('click', (e: Event) => this.#featureClickHandler(e, feature))
         }
 
         newMarkers[id] = marker
@@ -211,12 +226,11 @@ export class UnCluster {
     this.#ticking = false
   }
 
-  #featureClickHandler = (e: Event, coords: LngLatLike, props: MapGeoJSONFeature['properties']) => {
+  #featureClickHandler = (e: Event, feature: MapGeoJSONFeature) => {
+    const id = this.#getFeatureId(feature)
     const clickedEl = e.target as HTMLDivElement
-    const markerOnScreen = this.#markersOnScreen[props.cluster_id]
-
-    if (!markerOnScreen)
-      throw new Error("Marker clicked is not on screen anymore ...")
+    const markerOnScreen = this.#markersOnScreen[id]
+    const clusterId = clickedEl.parentElement?.id
 
     // Remove existing pin marker if clicked feature is different
     if ((this.#pinMarker && this.#selectedFeatureId) && this.#selectedFeatureId !== clickedEl.id) {
@@ -224,12 +238,19 @@ export class UnCluster {
       this.#pinMarker = null
     }
 
-    this.#selectedClusterId = props.cluster_id
-    this.#selectedFeatureId = clickedEl.id
-    const { x: clusterX } = markerOnScreen._pos
-    const { x, width } = clickedEl.getBoundingClientRect()
-    const offset: PointLike = [x - clusterX + (width / 2), -20]
+    // If element is within Uncluster
+    if (!markerOnScreen && clusterId) {
+      this.#selectedClusterId = clusterId
+     
+      const { x: clusterX } = this.#markersOnScreen[clusterId]._pos
+      const { x, width } = clickedEl.getBoundingClientRect()
+      const offset: PointLike = [x - clusterX + (width / 2), -20]
 
-    this.#pinMarker = createMarker(coords, offset).addTo(this.#map)
+      this.#pinMarker = createMarker(this.#markersOnScreen[clusterId].getLngLat(), offset).addTo(this.#map)
+    } else {
+      this.#pinMarker = createMarker(markerOnScreen.getLngLat()).addTo(this.#map)
+    }
+
+    this.#selectedFeatureId = clickedEl.id
   }
 }

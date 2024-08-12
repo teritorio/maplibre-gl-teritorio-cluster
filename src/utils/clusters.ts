@@ -1,8 +1,10 @@
 import { buildCss } from './helpers';
 
 // code for creating a HTML div of individual earthquakes
-export const createUnclusterHTML = () => {
+export const createUnclusterHTML = (id: string) => {
   const clusterHTML = document.createElement('div')
+  clusterHTML.id = id
+  clusterHTML.classList.add('uncluster')
 
   buildCss(clusterHTML, {
     'display': 'flex',

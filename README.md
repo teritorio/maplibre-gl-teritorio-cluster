@@ -19,6 +19,9 @@ yarn dev
 
 ## Usage
 
+> [!WARNING]  
+> Set your GeoJson source with `clusterMaxZoom: 22` in order to let the plugin handle cluster/individual marker rendering.
+
 ```js
 import { Map } from "maplibre-gl"
 import UnCluster from 'maplibre-gl-uncluster'
@@ -30,7 +33,10 @@ const map = new Map({
   style: 'https://api.maptiler.com/maps/openstreetmap/style.json?key=your_api_key'
 });
 
-const unCluster = new UnCluster(map, 'your_cluster_source')
+// Set `clusterMaxZoom` to force display unclustered points on a certain zoom level
+const clusterMaxZoom = 17
+
+const unCluster = new UnCluster(map, 'your_cluster_source', { clusterMaxZoom }, createClusterHTML, createSingleMarkerHTML)
 
 map.on('data', (e) => {
   if (e.sourceId !== 'your_cluster_source' || !e.isSourceLoaded) return;
@@ -39,4 +45,9 @@ map.on('data', (e) => {
   map.on('moveend', unCluster.render);
   unCluster.render()
 });
+
+// Create whatever HTML element you want as Cluster
+const createClusterHTML = (): HTMLElement => {}
+// Create whatever HTML element you want as individual Marker
+const createSingleMarkerHTML = (): HTMLElement => {}
 ```

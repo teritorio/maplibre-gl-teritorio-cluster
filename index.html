@@ -26,6 +26,7 @@
     // colors to use for the categories
     const colors = ['#fed976', '#feb24c', '#fd8d3c', '#fc4e2a', '#e31a1c'];
 
+    const clusterMaxZoom = 17
     const map = new Map({
       container: "map",
       zoom: 0.3,
@@ -36,14 +37,25 @@
     map.addControl(new NavigationControl());
 
     map.on('load', async () => {
-      const features = await fetch('https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson', { method: 'GET' }).then(res => res.json())
+      let geojson = await fetch('https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson', { method: 'GET' }).then(res => res.json())
+      const superposedGeojson = {
+        ...geojson,
+        features: geojson.features.map((f,index) => {
+          if (index < 20)
+            f.geometry.coordinates = [0,0]
+
+          return f
+        })
+      }
+
 
       // add a clustered GeoJSON source for a sample set of earthquakes
       map.addSource('earthquakes', {
         'type': 'geojson',
-        'data': features,
+        'data': superposedGeojson,
         'cluster': true,
         'clusterRadius': 80,
+        'clusterMaxZoom': 22,
         'clusterProperties': {
           // keep separate counts for each magnitude category in a cluster
           'mag1': ['+', ['case', mag1, 1, 0]],
@@ -102,7 +114,7 @@
         }
       });
 
-      const unCluster = new UnCluster(map, 'earthquakes', createDonutChart, createSingleMarker)
+      const unCluster = new UnCluster(map, 'earthquakes', { clusterMaxZoom }, createClusterHTML, createSingleMarkerHTML)
 
       // after the GeoJSON data is loaded, update markers on the screen and do so on every map move/moveend
       map.on('data', (e) => {
@@ -114,7 +126,7 @@
       });
     })
 
-    const createSingleMarker = (feature) => {
+    const createSingleMarkerHTML = (feature) => {
       const featureHTML = document.createElement('div')
       featureHTML.id = feature.properties?.id
       featureHTML.textContent = feature.properties?.mag
@@ -134,7 +146,7 @@
     }
 
     // code for creating an SVG donut chart from feature properties
-    export const createDonutChart = (props) => {
+    const createClusterHTML = (props) => {
       const offsets = [];
       let total = 0;
       const counts = [
@@ -227,7 +239,6 @@
         `" fill="${color}" />`
       ].join(' ');
     }
-
   </script>
 
 </body>
