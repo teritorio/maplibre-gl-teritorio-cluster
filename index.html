@@ -38,21 +38,21 @@
 
     map.on('load', async () => {
       let geojson = await fetch('https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson', { method: 'GET' }).then(res => res.json())
-      const superposedGeojson = {
-        ...geojson,
-        features: geojson.features.map((f,index) => {
-          if (index < 20)
-            f.geometry.coordinates = [0,0]
+      // const superposedGeojson = {
+      //   ...geojson,
+      //   features: geojson.features.map((f,index) => {
+      //     if (index < 20)
+      //       f.geometry.coordinates = [0,0]
 
-          return f
-        })
-      }
+      //     return f
+      //   })
+      // }
 
 
       // add a clustered GeoJSON source for a sample set of earthquakes
       map.addSource('earthquakes', {
         'type': 'geojson',
-        'data': superposedGeojson,
+        'data': geojson,
         'cluster': true,
         'clusterRadius': 80,
         'clusterMaxZoom': 22,
@@ -115,6 +115,13 @@
       });
 
       const unCluster = new UnCluster(map, 'earthquakes', { clusterMaxZoom }, createClusterHTML, createSingleMarkerHTML)
+
+      // Get selected marker ID
+      // Get Pin Marker instance
+      unCluster.addEventListener('click', (e) => {
+        console.log('selected marker: ', e.detail.markerId)
+        console.log('pin marker instance: ', e.detail.pinMarker)
+      })
 
       // after the GeoJSON data is loaded, update markers on the screen and do so on every map move/moveend
       map.on('data', (e) => {

@@ -3,10 +3,11 @@ import { Marker } from 'maplibre-gl'
 import { createMarker } from './utils/helpers';
 import { createUnclusterHTML } from './utils/clusters';
 
-export class UnCluster {
+export class UnCluster extends EventTarget {  
+  map: maplibregl.Map
+  
   #clusterLeaves: Map<string, MapGeoJSONFeature[]>
   #clusterMaxZoom: number
-  #map: maplibregl.Map
   #markers: { [key: string]: Marker }
   #markersOnScreen: { [key: string]: Marker }
   #pinMarker: Marker | null
@@ -24,9 +25,12 @@ export class UnCluster {
     renderDefaultClusterHTML: (props: MapGeoJSONFeature['properties']) => HTMLDivElement,
     renderDefaultMarkerHTML: (feature: MapGeoJSONFeature) => HTMLDivElement
   ) {
+    super()
+
+    this.map = map
+
     this.#clusterLeaves = new Map<string, MapGeoJSONFeature[]>()
     this.#clusterMaxZoom = options.clusterMaxZoom,
-    this.#map = map
     this.#markers = {}
     this.#markersOnScreen = {}
     this.#pinMarker = null
@@ -60,9 +64,9 @@ export class UnCluster {
 
   #updateMarkers = async () => {
     const newMarkers: { [key: string]: Marker } = {}
-    const features = this.#map.querySourceFeatures(this.#sourceId)
+    const features = this.map.querySourceFeatures(this.#sourceId)
     const featuresMap = new Map<string, MapGeoJSONFeature>()
-    const maxZoomLimit = this.#map.getZoom() >= this.#clusterMaxZoom
+    const maxZoomLimit = this.map.getZoom() >= this.#clusterMaxZoom
 
     this.#clusterLeaves.clear()
 
@@ -74,7 +78,7 @@ export class UnCluster {
 
       // Get cluster's leaves
       if (feature.properties.cluster) {
-        const source = this.#map.getSource(this.#sourceId) as GeoJSONSource
+        const source = this.map.getSource(this.#sourceId) as GeoJSONSource
         const leaves = await source.getClusterLeaves(id as number, feature.properties.point_count, 0) as MapGeoJSONFeature[]
         this.#clusterLeaves.set(id as string, leaves)
       }
@@ -117,14 +121,13 @@ export class UnCluster {
             // Create default HTML Cluster
             element = this.#renderDefaultClusterHTML(props)
           }
-
           marker = this.#markers[id] = createMarker(coords, undefined, { element })
         }
-
+        
         newMarkers[id] = marker
 
         if (!this.#markersOnScreen[id]) {
-          marker.addTo(this.#map);
+          marker.addTo(this.map);
 
           // If selected feature is now part of this new cluster
           // We position the Pin marker on it's new position
@@ -145,7 +148,7 @@ export class UnCluster {
               const { x, width } = selectedFeatureHTML.getBoundingClientRect()
               const offset: PointLike = [x - clusterX + (width / 2), -20]
 
-              this.#pinMarker = createMarker(marker.getLngLat(), offset).addTo(this.#map)
+              this.#pinMarker = createMarker(marker.getLngLat(), offset).addTo(this.map)
             }
           }
         }
@@ -163,7 +166,7 @@ export class UnCluster {
         newMarkers[id] = marker
 
         if (!this.#markersOnScreen[id]) {
-          marker.addTo(this.#map);
+          marker.addTo(this.map);
         }
       }
     })
@@ -217,7 +220,7 @@ export class UnCluster {
           }
 
           if (coords)
-            this.#pinMarker = createMarker(coords, offset).addTo(this.#map)
+            this.#pinMarker = createMarker(coords, offset).addTo(this.map)
         }
       }
     }
@@ -246,11 +249,13 @@ export class UnCluster {
       const { x, width } = clickedEl.getBoundingClientRect()
       const offset: PointLike = [x - clusterX + (width / 2), -20]
 
-      this.#pinMarker = createMarker(this.#markersOnScreen[clusterId].getLngLat(), offset).addTo(this.#map)
+      this.#pinMarker = createMarker(this.#markersOnScreen[clusterId].getLngLat(), offset).addTo(this.map)
     } else {
-      this.#pinMarker = createMarker(markerOnScreen.getLngLat()).addTo(this.#map)
+      this.#pinMarker = createMarker(markerOnScreen.getLngLat()).addTo(this.map)
     }
 
     this.#selectedFeatureId = clickedEl.id
+    
+    this.dispatchEvent(new CustomEvent('click', { detail: { pinMarker: this.#pinMarker, markerId: this.#selectedFeatureId }}))
   }
 }
