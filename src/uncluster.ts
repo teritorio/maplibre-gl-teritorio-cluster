@@ -1,5 +1,5 @@
-import type { GeoJSONSource, LngLatLike, MapGeoJSONFeature, PointLike } from 'maplibre-gl'
-import { Marker } from 'maplibre-gl'
+import type { GeoJSONSource, LngLatLike, MapGeoJSONFeature } from 'maplibre-gl'
+import { Marker, Point } from 'maplibre-gl'
 import { createMarker } from './utils/helpers';
 import { createUnclusterHTML } from './utils/clusters';
 
@@ -146,7 +146,7 @@ export class UnCluster extends EventTarget {
                 throw new Error('Selected feature HTML marker was not found !')
 
               const { x, width } = selectedFeatureHTML.getBoundingClientRect()
-              const offset: PointLike = [x - clusterX + (width / 2), -20]
+              const offset = new Point(x - clusterX + (width / 2), 0)
 
               this.#pinMarker = createMarker(marker.getLngLat(), offset).addTo(this.map)
             }
@@ -180,7 +180,7 @@ export class UnCluster extends EventTarget {
         // We display the Pin marker on it's new position
         if ((this.#pinMarker && this.#selectedClusterId && this.#selectedFeatureId) && (id == this.#selectedClusterId)) {
           let coords: LngLatLike | undefined
-          let offset: PointLike | undefined
+          let offset: Point | undefined
           const selectedFeature = featuresMap.get(this.#selectedFeatureId)
 
           // Clear outdated Pin marker
@@ -207,7 +207,7 @@ export class UnCluster extends EventTarget {
 
                 if (selectedFeatureHTML) {
                   const { x, width } = selectedFeatureHTML.getBoundingClientRect()
-                  offset = [x - clusterX + (width / 2), -20]
+                  offset = new Point(x - clusterX + (width / 2), 0)
                 }
 
                 break
@@ -247,7 +247,7 @@ export class UnCluster extends EventTarget {
      
       const { x: clusterX } = this.#markersOnScreen[clusterId]._pos
       const { x, width } = clickedEl.getBoundingClientRect()
-      const offset: PointLike = [x - clusterX + (width / 2), -20]
+      const offset = new Point(x - clusterX + (width / 2), 0)
 
       this.#pinMarker = createMarker(this.#markersOnScreen[clusterId].getLngLat(), offset).addTo(this.map)
     } else {

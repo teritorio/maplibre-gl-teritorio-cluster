@@ -1,4 +1,4 @@
-# @teritorio/maplibre-gl-uncluster
+# maplibre-gl-teritorio-cluster
 
 ![alt text](image.png)
 
@@ -7,7 +7,7 @@ Show cluster's points in one HTML element
 ## Installation
 
 ```bash
-npm install maplibre-gl maplibre-gl-uncluster
+npm install maplibre-gl maplibre-gl-teritorio-cluster
 ```
 
 ## Demo
@@ -24,7 +24,7 @@ yarn dev
 
 ```js
 import { Map } from "maplibre-gl"
-import UnCluster from 'maplibre-gl-uncluster'
+import UnCluster from 'maplibre-gl-teritorio-cluster'
 
 const map = new Map({
   container: "map_dom_el_id",

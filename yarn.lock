@@ -2121,9 +2121,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@teritorio/maplibre-gl-uncluster@workspace:.":
+"@teritorio/maplibre-gl-teritorio-cluster@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@teritorio/maplibre-gl-uncluster@workspace:."
+  resolution: "@teritorio/maplibre-gl-teritorio-cluster@workspace:."
   dependencies:
     maplibre-gl: "npm:^4.0.0"
     tsdx: "npm:^0.14.1"
