@@ -3,9 +3,8 @@ import { Marker, Point } from 'maplibre-gl'
 import { createMarker } from './utils/helpers';
 import { createUnclusterHTML } from './utils/clusters';
 
-export class UnCluster extends EventTarget {  
+export class UnCluster extends EventTarget {
   map: maplibregl.Map
-  
   clusterLeaves: Map<string, MapGeoJSONFeature[]>
   clusterMaxZoom: number
   markers: { [key: string]: Marker }
@@ -49,9 +48,9 @@ export class UnCluster extends EventTarget {
     this.ticking = true
   }
 
-  getFeatureId = (feature: MapGeoJSONFeature) => {
+  getFeatureId = (feature: MapGeoJSONFeature): string => {
     if (feature.properties.cluster)
-      return feature.id
+      return feature.id!.toString()
 
     // Vido support: shouldn't be part of this plugin
     let metadata: { [key: string]: any } | undefined = feature.properties.metadata
@@ -59,7 +58,7 @@ export class UnCluster extends EventTarget {
     if (typeof metadata === 'string')
       metadata = JSON.parse(metadata)
 
-    return metadata?.id || feature.properties.id
+    return (metadata?.id || feature.properties.id) as string
   }
 
   updateMarkers = async () => {
@@ -79,8 +78,8 @@ export class UnCluster extends EventTarget {
       // Get cluster's leaves
       if (feature.properties.cluster) {
         const source = this.map.getSource(this.sourceId) as GeoJSONSource
-        const leaves = await source.getClusterLeaves(id as number, feature.properties.point_count, 0) as MapGeoJSONFeature[]
-        this.clusterLeaves.set(id as string, leaves)
+        const leaves = await source.getClusterLeaves(Number.parseInt(id), feature.properties.point_count, 0) as MapGeoJSONFeature[]
+        this.clusterLeaves.set(id, leaves)
       }
     }
 
@@ -89,7 +88,7 @@ export class UnCluster extends EventTarget {
       const props = feature.properties;
 
       if (props.cluster) {
-        const id = props.cluster_id;
+        const id = props.cluster_id.toString()
         let marker: Marker | undefined = this.markers[id];
 
         if (
@@ -123,7 +122,7 @@ export class UnCluster extends EventTarget {
           }
           marker = this.markers[id] = createMarker(coords, undefined, { element })
         }
-        
+
         newMarkers[id] = marker
 
         if (!this.markersOnScreen[id]) {
@@ -132,7 +131,7 @@ export class UnCluster extends EventTarget {
           // If selected feature is now part of this new cluster
           // We position the Pin marker on it's new position
           if ((this.pinMarker && this.selectedClusterId && this.selectedFeatureId) && (id === this.selectedClusterId)) {
-            const featureIndex = this.clusterLeaves.get(id)!.findIndex(f => f.properties?.id == this.selectedFeatureId)
+            const featureIndex = this.clusterLeaves.get(id)!.findIndex(f => f.properties?.id === this.selectedFeatureId)
 
             if (featureIndex > -1) {
               // Clear outdated Pin marker
@@ -178,7 +177,7 @@ export class UnCluster extends EventTarget {
 
         // If the removed cluster had a selected feature in it.
         // We display the Pin marker on it's new position
-        if ((this.pinMarker && this.selectedClusterId && this.selectedFeatureId) && (id == this.selectedClusterId)) {
+        if ((this.pinMarker && this.selectedClusterId && this.selectedFeatureId) && (id === this.selectedClusterId || id === this.selectedFeatureId)) {
           let coords: LngLatLike | undefined
           let offset: Point | undefined
           const selectedFeature = featuresMap.get(this.selectedFeatureId)
@@ -193,10 +192,10 @@ export class UnCluster extends EventTarget {
 
             while (!result.done) {
               const [clusterId, leaves] = result.value
-              const featureIndex = leaves.findIndex(f => f.properties?.id == this.selectedFeatureId)
+              const featureIndex = leaves.findIndex(f => f.properties?.id === this.selectedFeatureId)
 
               if (featureIndex > -1) {
-                this.selectedClusterId = clusterId
+                this.selectedClusterId = clusterId.toString()
 
                 // Get selected feature DOM element position within cluster
                 const selectedClusterHTML = newMarkers[this.selectedClusterId]
@@ -223,6 +222,12 @@ export class UnCluster extends EventTarget {
             this.pinMarker = createMarker(coords, offset).addTo(this.map)
         }
       }
+
+      // Keeps Pin Marker over cluster / single markers
+      if (this.pinMarker && this.selectedClusterId && this.selectedFeatureId) {
+        this.pinMarker.remove()
+        this.pinMarker.addTo(this.map)
+      }
     }
 
     this.markersOnScreen = newMarkers;
@@ -237,7 +242,7 @@ export class UnCluster extends EventTarget {
 
     // Remove existing pin marker if clicked feature is different
     if (this.pinMarker && this.selectedFeatureId) {
-      if(this.selectedFeatureId === clickedEl.id)
+      if (this.selectedFeatureId === clickedEl.id)
         return
 
       this.pinMarker.remove()
@@ -247,7 +252,7 @@ export class UnCluster extends EventTarget {
     // If element is within Uncluster
     if (!markerOnScreen && clusterId) {
       this.selectedClusterId = clusterId
-     
+
       const { x: clusterX } = this.markersOnScreen[clusterId]._pos
       const { x, width } = clickedEl.getBoundingClientRect()
       const offset = new Point(x - clusterX + (width / 2), 0)
@@ -258,7 +263,7 @@ export class UnCluster extends EventTarget {
     }
 
     this.selectedFeatureId = clickedEl.id
-    
+
     this.dispatchEvent(new CustomEvent('click'))
   }
 }
