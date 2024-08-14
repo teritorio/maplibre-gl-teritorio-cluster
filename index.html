@@ -119,8 +119,8 @@
       // Get selected marker ID
       // Get Pin Marker instance
       unCluster.addEventListener('click', (e) => {
-        console.log('selected marker: ', e.detail.markerId)
-        console.log('pin marker instance: ', e.detail.pinMarker)
+        console.log('selected marker: ', e.target.markerId)
+        console.log('pin marker instance: ', e.target.pinMarker)
       })
 
       // after the GeoJSON data is loaded, update markers on the screen and do so on every map move/moveend

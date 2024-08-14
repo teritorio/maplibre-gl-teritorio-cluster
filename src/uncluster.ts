@@ -236,7 +236,10 @@ export class UnCluster extends EventTarget {
     const clusterId = clickedEl.parentElement?.id
 
     // Remove existing pin marker if clicked feature is different
-    if ((this.pinMarker && this.selectedFeatureId) && this.selectedFeatureId !== clickedEl.id) {
+    if (this.pinMarker && this.selectedFeatureId) {
+      if(this.selectedFeatureId === clickedEl.id)
+        return
+
       this.pinMarker.remove()
       this.pinMarker = null
     }
@@ -256,6 +259,6 @@ export class UnCluster extends EventTarget {
 
     this.selectedFeatureId = clickedEl.id
     
-    this.dispatchEvent(new CustomEvent('click', { detail: { pinMarker: this.pinMarker, markerId: this.selectedFeatureId }}))
+    this.dispatchEvent(new CustomEvent('click'))
   }
 }
