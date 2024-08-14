@@ -9,14 +9,14 @@ export class UnCluster extends EventTarget {
   #clusterLeaves: Map<string, MapGeoJSONFeature[]>
   #clusterMaxZoom: number
   #markers: { [key: string]: Marker }
-  #markersOnScreen: { [key: string]: Marker }
-  #pinMarker: Marker | null
-  #selectedClusterId: string | null
-  #selectedFeatureId: string | null
+  markersOnScreen: { [key: string]: Marker }
+  pinMarker: Marker | null
+  selectedClusterId: string | null
+  selectedFeatureId: string | null
   #sourceId: string
   #ticking: boolean
-  #renderDefaultClusterHTML: (props: MapGeoJSONFeature['properties']) => HTMLDivElement
-  #renderDefaultMarkerHTML: (feature: MapGeoJSONFeature) => HTMLDivElement
+  renderDefaultClusterHTML: (props: MapGeoJSONFeature['properties']) => HTMLDivElement
+  renderDefaultMarkerHTML: (feature: MapGeoJSONFeature) => HTMLDivElement
 
   constructor(
     map: maplibregl.Map,
@@ -32,14 +32,14 @@ export class UnCluster extends EventTarget {
     this.#clusterLeaves = new Map<string, MapGeoJSONFeature[]>()
     this.#clusterMaxZoom = options.clusterMaxZoom,
     this.#markers = {}
-    this.#markersOnScreen = {}
-    this.#pinMarker = null
-    this.#selectedClusterId = null
-    this.#selectedFeatureId = null
+    this.markersOnScreen = {}
+    this.pinMarker = null
+    this.selectedClusterId = null
+    this.selectedFeatureId = null
     this.#sourceId = source
     this.#ticking = false
-    this.#renderDefaultClusterHTML = renderDefaultClusterHTML
-    this.#renderDefaultMarkerHTML = renderDefaultMarkerHTML
+    this.renderDefaultClusterHTML = renderDefaultClusterHTML
+    this.renderDefaultMarkerHTML = renderDefaultMarkerHTML
   }
 
   render = () => {
@@ -49,7 +49,7 @@ export class UnCluster extends EventTarget {
     this.#ticking = true
   }
 
-  #getFeatureId = (feature: MapGeoJSONFeature) => {
+  getFeatureId = (feature: MapGeoJSONFeature) => {
     if (feature.properties.cluster)
       return feature.id
 
@@ -71,7 +71,7 @@ export class UnCluster extends EventTarget {
     this.#clusterLeaves.clear()
 
     for (const feature of features) {
-      const id = this.#getFeatureId(feature)
+      const id = this.getFeatureId(feature)
 
       // Transform to Map in order to have unique features
       featuresMap.set(id, feature)
@@ -95,12 +95,12 @@ export class UnCluster extends EventTarget {
         if (
           (marker && maxZoomLimit && !marker.getElement().classList.contains('uncluster'))
           ||
-          (marker && !maxZoomLimit && marker.getElement().classList.contains('uncluster') && this.#markersOnScreen[id])
+          (marker && !maxZoomLimit && marker.getElement().classList.contains('uncluster') && this.markersOnScreen[id])
         ) {
           marker = undefined
           delete this.#markers[id]
-          this.#markersOnScreen[id].remove();
-          delete this.#markersOnScreen[id]
+          this.markersOnScreen[id].remove();
+          delete this.markersOnScreen[id]
         }
 
         if (!marker) {
@@ -112,35 +112,35 @@ export class UnCluster extends EventTarget {
 
             // Create Uncluster HTML leaves
             leaves.forEach(feature => {
-              const featureHTML = this.#renderDefaultMarkerHTML(feature)
+              const featureHTML = this.renderDefaultMarkerHTML(feature)
 
-              featureHTML.addEventListener('click', (e: Event) => this.#featureClickHandler(e, feature))
+              featureHTML.addEventListener('click', (e: Event) => this.featureClickHandler(e, feature))
               element.append(featureHTML)
             })
           } else {
             // Create default HTML Cluster
-            element = this.#renderDefaultClusterHTML(props)
+            element = this.renderDefaultClusterHTML(props)
           }
           marker = this.#markers[id] = createMarker(coords, undefined, { element })
         }
         
         newMarkers[id] = marker
 
-        if (!this.#markersOnScreen[id]) {
+        if (!this.markersOnScreen[id]) {
           marker.addTo(this.map);
 
           // If selected feature is now part of this new cluster
           // We position the Pin marker on it's new position
-          if ((this.#pinMarker && this.#selectedClusterId && this.#selectedFeatureId) && (id == this.#selectedClusterId)) {
-            const featureIndex = this.#clusterLeaves.get(id)!.findIndex(f => f.properties?.id == this.#selectedFeatureId)
+          if ((this.pinMarker && this.selectedClusterId && this.selectedFeatureId) && (id == this.selectedClusterId)) {
+            const featureIndex = this.#clusterLeaves.get(id)!.findIndex(f => f.properties?.id == this.selectedFeatureId)
 
             if (featureIndex >= -1) {
               // Clear outdated Pin marker
-              this.#pinMarker.remove()
+              this.pinMarker.remove()
 
               // Get selected feature DOM element position within cluster
               const { x: clusterX } = marker._pos
-              const selectedFeatureHTML = Array.from(marker.getElement().children).find(el => el.id === this.#selectedFeatureId)
+              const selectedFeatureHTML = Array.from(marker.getElement().children).find(el => el.id === this.selectedFeatureId)
 
               if (!selectedFeatureHTML)
                 throw new Error('Selected feature HTML marker was not found !')
@@ -148,43 +148,43 @@ export class UnCluster extends EventTarget {
               const { x, width } = selectedFeatureHTML.getBoundingClientRect()
               const offset = new Point(x - clusterX + (width / 2), 0)
 
-              this.#pinMarker = createMarker(marker.getLngLat(), offset).addTo(this.map)
+              this.pinMarker = createMarker(marker.getLngLat(), offset).addTo(this.map)
             }
           }
         }
       } else {
-        const id = this.#getFeatureId(feature)
+        const id = this.getFeatureId(feature)
         let marker = this.#markers[id];
 
         if (!marker) {
-          var element = this.#renderDefaultMarkerHTML(feature)
+          var element = this.renderDefaultMarkerHTML(feature)
 
           marker = this.#markers[id] = createMarker(coords, undefined, { element })
-          marker.getElement().addEventListener('click', (e: Event) => this.#featureClickHandler(e, feature))
+          marker.getElement().addEventListener('click', (e: Event) => this.featureClickHandler(e, feature))
         }
 
         newMarkers[id] = marker
 
-        if (!this.#markersOnScreen[id]) {
+        if (!this.markersOnScreen[id]) {
           marker.addTo(this.map);
         }
       }
     })
 
     // for every marker we've added previously, remove those that are no longer visible
-    for (const id in this.#markersOnScreen) {
+    for (const id in this.markersOnScreen) {
       if (!newMarkers[id]) {
-        this.#markersOnScreen[id].remove();
+        this.markersOnScreen[id].remove();
 
         // If the removed cluster had a selected feature in it.
         // We display the Pin marker on it's new position
-        if ((this.#pinMarker && this.#selectedClusterId && this.#selectedFeatureId) && (id == this.#selectedClusterId)) {
+        if ((this.pinMarker && this.selectedClusterId && this.selectedFeatureId) && (id == this.selectedClusterId)) {
           let coords: LngLatLike | undefined
           let offset: Point | undefined
-          const selectedFeature = featuresMap.get(this.#selectedFeatureId)
+          const selectedFeature = featuresMap.get(this.selectedFeatureId)
 
           // Clear outdated Pin marker
-          this.#pinMarker.remove()
+          this.pinMarker.remove()
 
           // If selected feature is in a cluster
           if (!selectedFeature) {
@@ -193,13 +193,13 @@ export class UnCluster extends EventTarget {
 
             while (!result.done) {
               const [clusterId, leaves] = result.value
-              const featureIndex = leaves.findIndex(f => f.properties?.id == this.#selectedFeatureId)
+              const featureIndex = leaves.findIndex(f => f.properties?.id == this.selectedFeatureId)
 
               if (featureIndex > -1) {
-                this.#selectedClusterId = clusterId
+                this.selectedClusterId = clusterId
 
                 // Get selected feature DOM element position within cluster
-                const selectedClusterHTML = newMarkers[this.#selectedClusterId]
+                const selectedClusterHTML = newMarkers[this.selectedClusterId]
                 const { x: clusterX } = selectedClusterHTML._pos
                 coords = selectedClusterHTML.getLngLat()
 
@@ -220,42 +220,42 @@ export class UnCluster extends EventTarget {
           }
 
           if (coords)
-            this.#pinMarker = createMarker(coords, offset).addTo(this.map)
+            this.pinMarker = createMarker(coords, offset).addTo(this.map)
         }
       }
     }
 
-    this.#markersOnScreen = newMarkers;
+    this.markersOnScreen = newMarkers;
     this.#ticking = false
   }
 
-  #featureClickHandler = (e: Event, feature: MapGeoJSONFeature) => {
-    const id = this.#getFeatureId(feature)
+  featureClickHandler = (e: Event, feature: MapGeoJSONFeature) => {
+    const id = this.getFeatureId(feature)
     const clickedEl = e.target as HTMLDivElement
-    const markerOnScreen = this.#markersOnScreen[id]
+    const markerOnScreen = this.markersOnScreen[id]
     const clusterId = clickedEl.parentElement?.id
 
     // Remove existing pin marker if clicked feature is different
-    if ((this.#pinMarker && this.#selectedFeatureId) && this.#selectedFeatureId !== clickedEl.id) {
-      this.#pinMarker.remove()
-      this.#pinMarker = null
+    if ((this.pinMarker && this.selectedFeatureId) && this.selectedFeatureId !== clickedEl.id) {
+      this.pinMarker.remove()
+      this.pinMarker = null
     }
 
     // If element is within Uncluster
     if (!markerOnScreen && clusterId) {
-      this.#selectedClusterId = clusterId
+      this.selectedClusterId = clusterId
      
-      const { x: clusterX } = this.#markersOnScreen[clusterId]._pos
+      const { x: clusterX } = this.markersOnScreen[clusterId]._pos
       const { x, width } = clickedEl.getBoundingClientRect()
       const offset = new Point(x - clusterX + (width / 2), 0)
 
-      this.#pinMarker = createMarker(this.#markersOnScreen[clusterId].getLngLat(), offset).addTo(this.map)
+      this.pinMarker = createMarker(this.markersOnScreen[clusterId].getLngLat(), offset).addTo(this.map)
     } else {
-      this.#pinMarker = createMarker(markerOnScreen.getLngLat()).addTo(this.map)
+      this.pinMarker = createMarker(markerOnScreen.getLngLat()).addTo(this.map)
     }
 
-    this.#selectedFeatureId = clickedEl.id
+    this.selectedFeatureId = clickedEl.id
     
-    this.dispatchEvent(new CustomEvent('click', { detail: { pinMarker: this.#pinMarker, markerId: this.#selectedFeatureId }}))
+    this.dispatchEvent(new CustomEvent('click', { detail: { pinMarker: this.pinMarker, markerId: this.selectedFeatureId }}))
   }
 }
