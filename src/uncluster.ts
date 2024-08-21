@@ -1,7 +1,6 @@
 import type { GeoJSONSource, LngLatLike, MapGeoJSONFeature } from 'maplibre-gl'
 import { Marker, Point } from 'maplibre-gl'
-import { createMarker } from './utils/helpers';
-import { createUnclusterHTML } from './utils/clusters';
+import { createMarker, buildCss } from './utils/helpers';
 
 export class UnCluster extends EventTarget {
   map: maplibregl.Map
@@ -14,22 +13,24 @@ export class UnCluster extends EventTarget {
   selectedFeatureId: string | null
   sourceId: string
   ticking: boolean
-  renderDefaultClusterHTML: (props: MapGeoJSONFeature['properties']) => HTMLDivElement
-  renderDefaultMarkerHTML: (feature: MapGeoJSONFeature) => HTMLDivElement
+  renderCluster: (props: MapGeoJSONFeature['properties']) => HTMLDivElement
+  renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement
+  renderUncluster: (id: string, leaves: MapGeoJSONFeature[]) => HTMLDivElement
 
   constructor(
     map: maplibregl.Map,
     source: string,
     options: { clusterMaxZoom: number } = { clusterMaxZoom: 17 },
-    renderDefaultClusterHTML: (props: MapGeoJSONFeature['properties']) => HTMLDivElement,
-    renderDefaultMarkerHTML: (feature: MapGeoJSONFeature) => HTMLDivElement
+    renderClusterFn?: (props: MapGeoJSONFeature['properties']) => HTMLDivElement,
+    renderMarkerFn?: (feature: MapGeoJSONFeature) => HTMLDivElement,
+    renderUnclusterFn?: (id: string, leaves: MapGeoJSONFeature[]) => HTMLDivElement
   ) {
     super()
 
     this.map = map
 
     this.clusterLeaves = new Map<string, MapGeoJSONFeature[]>()
-    this.clusterMaxZoom = options.clusterMaxZoom,
+    this.clusterMaxZoom = options.clusterMaxZoom
     this.markers = {}
     this.markersOnScreen = {}
     this.pinMarker = null
@@ -37,8 +38,9 @@ export class UnCluster extends EventTarget {
     this.selectedFeatureId = null
     this.sourceId = source
     this.ticking = false
-    this.renderDefaultClusterHTML = renderDefaultClusterHTML
-    this.renderDefaultMarkerHTML = renderDefaultMarkerHTML
+    this.renderCluster = renderClusterFn || this.renderDefaultClusterHTML
+    this.renderMarker = renderMarkerFn || this.renderDefaultMarkerHTML
+    this.renderUncluster = renderUnclusterFn || this.renderDefaultUnclusterHTML
   }
 
   render = () => {
@@ -46,6 +48,67 @@ export class UnCluster extends EventTarget {
       requestAnimationFrame(this.updateMarkers)
 
     this.ticking = true
+  }
+
+  renderDefaultUnclusterHTML = (id: string, leaves: MapGeoJSONFeature[]) => {
+    const clusterHTML = document.createElement('div')
+    clusterHTML.id = id
+    clusterHTML.classList.add('uncluster')
+
+    buildCss(clusterHTML, {
+      'display': 'flex',
+      'gap': '2px',
+      'flex-wrap': 'wrap',
+      'max-width': '200px',
+      'cursor': 'pointer'
+    })
+
+    // Create Uncluster HTML leaves
+    leaves.forEach(feature => {
+      const featureHTML = this.renderMarker(feature)
+      
+      featureHTML.addEventListener('click', (e: Event) => this.featureClickHandler(e, feature))
+      clusterHTML.append(featureHTML)
+    })
+
+    return clusterHTML
+  }
+
+  renderDefaultClusterHTML = (props: MapGeoJSONFeature['properties']) => {
+    const el = document.createElement('div');
+
+    el.innerHTML = props.point_count
+    buildCss(el, {
+      'background-color': 'red',
+      'border-radius': '100%',
+      'justify-content': 'center',
+      'align-items': 'center',
+      'display': 'flex',
+      'color': 'white',
+      'width': '38px',
+      'height': '38px',
+      'cursor': 'pointer'
+    });
+
+    return el;
+  }
+
+  renderDefaultMarkerHTML = () => {
+    const el = document.createElement('div');
+
+    buildCss(el, {
+      'background-color': 'blue',
+      'border-radius': '100%',
+      'justify-content': 'center',
+      'align-items': 'center',
+      'display': 'flex',
+      'color': 'white',
+      'width': '24px',
+      'height': '24px',
+      'cursor': 'pointer'
+    });
+
+    return el;
   }
 
   getFeatureId = (feature: MapGeoJSONFeature): string => {
@@ -107,18 +170,10 @@ export class UnCluster extends EventTarget {
           const leaves = this.clusterLeaves.get(id)
 
           if (leaves && ((leaves.length <= 5) || maxZoomLimit)) {
-            element = createUnclusterHTML(id)
-
-            // Create Uncluster HTML leaves
-            leaves.forEach(feature => {
-              const featureHTML = this.renderDefaultMarkerHTML(feature)
-
-              featureHTML.addEventListener('click', (e: Event) => this.featureClickHandler(e, feature))
-              element.append(featureHTML)
-            })
+            element = this.renderUncluster(id, leaves)
           } else {
             // Create default HTML Cluster
-            element = this.renderDefaultClusterHTML(props)
+            element = this.renderCluster(props)
           }
           marker = this.markers[id] = createMarker(coords, undefined, { element })
         }
@@ -156,7 +211,7 @@ export class UnCluster extends EventTarget {
         let marker = this.markers[id];
 
         if (!marker) {
-          var element = this.renderDefaultMarkerHTML(feature)
+          var element = this.renderMarker(feature)
 
           marker = this.markers[id] = createMarker(coords, undefined, { element })
           marker.getElement().addEventListener('click', (e: Event) => this.featureClickHandler(e, feature))

@@ -114,7 +114,7 @@
         }
       });
 
-      const unCluster = new UnCluster(map, 'earthquakes', { clusterMaxZoom }, createClusterHTML, createSingleMarkerHTML)
+      const unCluster = new UnCluster(map, 'earthquakes', { clusterMaxZoom }, createClusterHTML, createSingleMarkerHTML, createUnclusterHTML)
 
       // Get selected marker ID
       // Get Pin Marker instance
@@ -133,6 +133,31 @@
       });
     })
 
+    const createUnclusterHTML = (id, leaves) => {
+      const clusterHTML = document.createElement('div')
+      clusterHTML.id = id
+      clusterHTML.classList.add('uncluster')
+
+      buildCss(clusterHTML, {
+        'display': 'flex',
+        'flex-direction': 'column',
+        'gap': '2px',
+        'flex-wrap': 'wrap',
+        'max-width': '200px',
+        'cursor': 'pointer'
+      })
+
+      // Create Uncluster HTML leaves
+      leaves.forEach(feature => {
+        const featureHTML = createSingleMarkerHTML(feature)
+
+        // featureHTML.addEventListener('click', (e) => ctx.featureClickHandler(e, feature))
+        clusterHTML.append(featureHTML)
+      })
+
+      return clusterHTML
+    }
+
     const createSingleMarkerHTML = (feature) => {
       const featureHTML = document.createElement('div')
       featureHTML.id = feature.properties?.id
@@ -147,12 +172,12 @@
         'color': 'white',
         'width': '24px',
         'height': '24px',
+        'cursor': 'pointer'
       });
 
       return featureHTML
     }
 
-    // code for creating an SVG donut chart from feature properties
     const createClusterHTML = (props) => {
       const offsets = [];
       let total = 0;
@@ -180,7 +205,7 @@
         }" viewbox="0 0 ${w
         } ${w
         }" text-anchor="middle" style="font: ${fontSize
-        }px sans-serif; display: block">`;
+        }px sans-serif; display: block; cursor: pointer;">`;
 
       for (let i = 0; i < counts.length; i++) {
         html += donutSegment(
