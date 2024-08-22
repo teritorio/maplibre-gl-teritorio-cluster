@@ -1,46 +1,57 @@
 import type { GeoJSONSource, LngLatLike, MapGeoJSONFeature } from 'maplibre-gl'
 import { Marker, Point } from 'maplibre-gl'
-import { createMarker, buildCss } from './utils/helpers';
+import { createMarker, displayUnclusterInCircle, displayUnclusterDefault, displayMarkerDefault, displayClusterDefault } from './utils/helpers';
+
+type UnClusterMode = 'default' | 'circle'
+type ClusterMode = 'default' | ((element: HTMLDivElement, props: MapGeoJSONFeature['properties'], size?: number) => void)
+type MarkerMode = 'default' | ((element: HTMLDivElement, feature: MapGeoJSONFeature, size?: number) => void)
 
 export class UnCluster extends EventTarget {
   map: maplibregl.Map
   clusterLeaves: Map<string, MapGeoJSONFeature[]>
   clusterMaxZoom: number
+  clusterMode: ClusterMode
+  clusterSize: number
   markers: { [key: string]: Marker }
+  markerMode: MarkerMode
   markersOnScreen: { [key: string]: Marker }
+  markerSize: number
   pinMarker: Marker | null
   selectedClusterId: string | null
   selectedFeatureId: string | null
   sourceId: string
   ticking: boolean
-  renderCluster: (props: MapGeoJSONFeature['properties']) => HTMLDivElement
-  renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement
-  renderUncluster: (id: string, leaves: MapGeoJSONFeature[]) => HTMLDivElement
+  unClusterMode: UnClusterMode
 
   constructor(
     map: maplibregl.Map,
     source: string,
-    options: { clusterMaxZoom: number } = { clusterMaxZoom: 17 },
-    renderClusterFn?: (props: MapGeoJSONFeature['properties']) => HTMLDivElement,
-    renderMarkerFn?: (feature: MapGeoJSONFeature) => HTMLDivElement,
-    renderUnclusterFn?: (id: string, leaves: MapGeoJSONFeature[]) => HTMLDivElement
+    options: {
+      clusterMaxZoom?: number,
+      clusterMode?: ClusterMode,
+      clusterSize?: number
+      markerMode?: MarkerMode,
+      markerSize?: number,
+      unClusterMode?: UnClusterMode
+    }
   ) {
     super()
 
     this.map = map
-
     this.clusterLeaves = new Map<string, MapGeoJSONFeature[]>()
-    this.clusterMaxZoom = options.clusterMaxZoom
+    this.clusterMaxZoom = options.clusterMaxZoom || 17
+    this.clusterMode = options.clusterMode || 'default'
+    this.clusterSize = options.clusterSize || 38
     this.markers = {}
+    this.markerMode = options.markerMode || 'default'
     this.markersOnScreen = {}
+    this.markerSize = options.markerSize || 24
     this.pinMarker = null
     this.selectedClusterId = null
     this.selectedFeatureId = null
     this.sourceId = source
     this.ticking = false
-    this.renderCluster = renderClusterFn || this.renderDefaultClusterHTML
-    this.renderMarker = renderMarkerFn || this.renderDefaultMarkerHTML
-    this.renderUncluster = renderUnclusterFn || this.renderDefaultUnclusterHTML
+    this.unClusterMode = options.unClusterMode || 'default'
   }
 
   render = () => {
@@ -50,65 +61,44 @@ export class UnCluster extends EventTarget {
     this.ticking = true
   }
 
-  renderDefaultUnclusterHTML = (id: string, leaves: MapGeoJSONFeature[]) => {
-    const clusterHTML = document.createElement('div')
-    clusterHTML.id = id
-    clusterHTML.classList.add('uncluster')
+  renderMarker = (feature: MapGeoJSONFeature) => {
+    const element = document.createElement('div')
+    element.id = this.getFeatureId(feature)
 
-    buildCss(clusterHTML, {
-      'display': 'flex',
-      'gap': '2px',
-      'flex-wrap': 'wrap',
-      'max-width': '200px',
-      'cursor': 'pointer'
-    })
+    if (this.markerMode === 'default')
+      displayMarkerDefault(element, this.markerSize)
+    else
+      this.markerMode(element, feature, this.markerSize)
 
-    // Create Uncluster HTML leaves
-    leaves.forEach(feature => {
-      const featureHTML = this.renderMarker(feature)
-      
-      featureHTML.addEventListener('click', (e: Event) => this.featureClickHandler(e, feature))
-      clusterHTML.append(featureHTML)
-    })
-
-    return clusterHTML
+    return element
   }
 
-  renderDefaultClusterHTML = (props: MapGeoJSONFeature['properties']) => {
-    const el = document.createElement('div');
+  renderUncluster = (id: string, leaves: MapGeoJSONFeature[]) => {
+    const element = document.createElement('div')
+    element.id = id
+    element.classList.add('uncluster')
 
-    el.innerHTML = props.point_count
-    buildCss(el, {
-      'background-color': 'red',
-      'border-radius': '100%',
-      'justify-content': 'center',
-      'align-items': 'center',
-      'display': 'flex',
-      'color': 'white',
-      'width': '38px',
-      'height': '38px',
-      'cursor': 'pointer'
-    });
+    switch (this.unClusterMode) {
+      case 'circle':
+        displayUnclusterInCircle(element, leaves, this.markerSize, this.renderMarker, this.featureClickHandler)
+        break
+      default:
+        displayUnclusterDefault(element, leaves, this.renderMarker, this.featureClickHandler)
+        break
+    }
 
-    return el;
+    return element
   }
 
-  renderDefaultMarkerHTML = () => {
-    const el = document.createElement('div');
+  renderCluster = (props: MapGeoJSONFeature['properties']) => {
+    const element = document.createElement('div')
 
-    buildCss(el, {
-      'background-color': 'blue',
-      'border-radius': '100%',
-      'justify-content': 'center',
-      'align-items': 'center',
-      'display': 'flex',
-      'color': 'white',
-      'width': '24px',
-      'height': '24px',
-      'cursor': 'pointer'
-    });
+    if (this.clusterMode === 'default')
+      displayClusterDefault(element, props, this.clusterSize)
+    else
+      this.clusterMode(element, props)
 
-    return el;
+    return element;
   }
 
   getFeatureId = (feature: MapGeoJSONFeature): string => {
@@ -121,7 +111,7 @@ export class UnCluster extends EventTarget {
     if (typeof metadata === 'string')
       metadata = JSON.parse(metadata)
 
-    return (metadata?.id || feature.properties.id) as string
+    return (metadata?.id.toString() || feature.properties.id.toString()) as string
   }
 
   updateMarkers = async () => {
@@ -291,7 +281,7 @@ export class UnCluster extends EventTarget {
 
   featureClickHandler = (e: Event, feature: MapGeoJSONFeature) => {
     const id = this.getFeatureId(feature)
-    const clickedEl = e.target as HTMLDivElement
+    const clickedEl = e.currentTarget as HTMLDivElement
     const markerOnScreen = this.markersOnScreen[id]
     const clusterId = clickedEl.parentElement?.id
 
@@ -319,6 +309,13 @@ export class UnCluster extends EventTarget {
 
     this.selectedFeatureId = clickedEl.id
 
-    this.dispatchEvent(new CustomEvent('click'))
+    const event = new CustomEvent("marker-click", {
+      detail: {
+        selectedFeatureId: this.selectedFeatureId,
+        pinMarker: this.pinMarker
+      }
+    })
+
+    this.dispatchEvent(event)
   }
 }

@@ -47,7 +47,7 @@ map.on('data', (e) => {
 });
 
 // Create whatever HTML element you want as Cluster
-const createClusterHTML = (): HTMLElement => {}
+const displayCluster = (): HTMLElement => {}
 // Create whatever HTML element you want as individual Marker
-const createSingleMarkerHTML = (): HTMLElement => {}
+const displayMarker = (): HTMLElement => {}
 ```

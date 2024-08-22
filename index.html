@@ -26,7 +26,6 @@
     // colors to use for the categories
     const colors = ['#fed976', '#feb24c', '#fd8d3c', '#fc4e2a', '#e31a1c'];
 
-    const clusterMaxZoom = 17
     const map = new Map({
       container: "map",
       zoom: 0.3,
@@ -114,14 +113,22 @@
         }
       });
 
-      const unCluster = new UnCluster(map, 'earthquakes', { clusterMaxZoom }, createClusterHTML, createSingleMarkerHTML, createUnclusterHTML)
+      const unCluster = new UnCluster(
+        map,
+        'earthquakes',
+        {
+          clusterMode: displayCluster,
+          markerMode: displayMarker,
+          unClusterMode: 'circle',
+        },
+      )
 
       // Get selected marker ID
       // Get Pin Marker instance
-      unCluster.addEventListener('click', (e) => {
-        console.log('selected marker: ', e.target.selectedFeatureId)
-        console.log('pin marker instance: ', e.target.pinMarker)
-      })
+      unCluster.addEventListener('marker-click', (e) => {
+        console.log('event handler', e.type)
+        console.log(e.detail)
+      }, false)
 
       // after the GeoJSON data is loaded, update markers on the screen and do so on every map move/moveend
       map.on('data', (e) => {
@@ -133,52 +140,23 @@
       });
     })
 
-    const createUnclusterHTML = (id, leaves) => {
-      const clusterHTML = document.createElement('div')
-      clusterHTML.id = id
-      clusterHTML.classList.add('uncluster')
+    const displayMarker = (element, feature, size) => {
+      element.textContent = feature.properties?.mag
 
-      buildCss(clusterHTML, {
-        'display': 'flex',
-        'flex-direction': 'column',
-        'gap': '2px',
-        'flex-wrap': 'wrap',
-        'max-width': '200px',
-        'cursor': 'pointer'
-      })
-
-      // Create Uncluster HTML leaves
-      leaves.forEach(feature => {
-        const featureHTML = createSingleMarkerHTML(feature)
-
-        // featureHTML.addEventListener('click', (e) => ctx.featureClickHandler(e, feature))
-        clusterHTML.append(featureHTML)
-      })
-
-      return clusterHTML
-    }
-
-    const createSingleMarkerHTML = (feature) => {
-      const featureHTML = document.createElement('div')
-      featureHTML.id = feature.properties?.id
-      featureHTML.textContent = feature.properties?.mag
-
-      buildCss(featureHTML, {
-        'background-color': 'blue',
+      buildCss(element, {
+        'background-color': 'green',
         'border-radius': '100%',
         'justify-content': 'center',
         'align-items': 'center',
         'display': 'flex',
         'color': 'white',
-        'width': '24px',
-        'height': '24px',
+        'width': `${size}px`,
+        'height': `${size}px`,
         'cursor': 'pointer'
       });
-
-      return featureHTML
     }
 
-    const createClusterHTML = (props) => {
+    const displayCluster = (element, props) => {
       const offsets = [];
       let total = 0;
       const counts = [
@@ -226,10 +204,7 @@
         })">${total.toLocaleString()
         }</text></svg>`;
 
-      const el = document.createElement('div');
-      el.innerHTML = html;
-
-      return el;
+      element.innerHTML = html;
     }
 
     const donutSegment = (start, end, r, r0, color) => {
