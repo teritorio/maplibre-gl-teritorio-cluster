@@ -27,6 +27,7 @@
     const colors = ['#fed976', '#feb24c', '#fd8d3c', '#fc4e2a', '#e31a1c'];
 
     const map = new Map({
+      hash: true,
       container: "map",
       zoom: 0.3,
       center: [0, 20],
@@ -125,10 +126,9 @@
 
       // Get selected marker ID
       // Get Pin Marker instance
-      unCluster.addEventListener('marker-click', (e) => {
-        console.log('event handler', e.type)
-        console.log(e.detail)
-      }, false)
+      unCluster.addEventListener('teritorioClick', (e) => {
+        console.log(e)
+      })
 
       // after the GeoJSON data is loaded, update markers on the screen and do so on every map move/moveend
       map.on('data', (e) => {

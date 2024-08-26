@@ -183,14 +183,14 @@ export class UnCluster extends EventTarget {
               this.pinMarker.remove()
 
               // Get selected feature DOM element position within cluster
-              const { x: clusterX } = marker._pos
+              const { x: clusterX, y: clusterY } = marker._pos
               const selectedFeatureHTML = Array.from(marker.getElement().children).find(el => el.id === this.selectedFeatureId)
 
               if (!selectedFeatureHTML)
                 throw new Error('Selected feature HTML marker was not found !')
 
-              const { x, width } = selectedFeatureHTML.getBoundingClientRect()
-              const offset = new Point(x - clusterX + (width / 2), 0)
+              const { x, y, height, width } = selectedFeatureHTML.getBoundingClientRect()
+              const offset = new Point(x - clusterX + (width / 2), y - clusterY + (height / 2))
 
               this.pinMarker = createMarker(marker.getLngLat(), offset).addTo(this.map)
             }
@@ -244,14 +244,14 @@ export class UnCluster extends EventTarget {
 
                 // Get selected feature DOM element position within cluster
                 const selectedClusterHTML = newMarkers[this.selectedClusterId]
-                const { x: clusterX } = selectedClusterHTML._pos
+                const { x: clusterX, y: clusterY } = selectedClusterHTML._pos
                 coords = selectedClusterHTML.getLngLat()
 
                 const selectedFeatureHTML = selectedClusterHTML.getElement().children[featureIndex]
 
                 if (selectedFeatureHTML) {
-                  const { x, width } = selectedFeatureHTML.getBoundingClientRect()
-                  offset = new Point(x - clusterX + (width / 2), 0)
+                  const { x, y, height, width } = selectedFeatureHTML.getBoundingClientRect()
+                  offset = new Point(x - clusterX + (width / 2), y - clusterY + (height / 2))
                 }
 
                 break
@@ -298,9 +298,9 @@ export class UnCluster extends EventTarget {
     if (!markerOnScreen && clusterId) {
       this.selectedClusterId = clusterId
 
-      const { x: clusterX } = this.markersOnScreen[clusterId]._pos
-      const { x, width } = clickedEl.getBoundingClientRect()
-      const offset = new Point(x - clusterX + (width / 2), 0)
+      const { x: clusterX, y: clusterY } = this.markersOnScreen[clusterId]._pos
+      const { x, y, height, width } = clickedEl.getBoundingClientRect()
+      const offset = new Point(x - clusterX + (width / 2), y - clusterY + (height / 2))
 
       this.pinMarker = createMarker(this.markersOnScreen[clusterId].getLngLat(), offset).addTo(this.map)
     } else {
@@ -309,7 +309,7 @@ export class UnCluster extends EventTarget {
 
     this.selectedFeatureId = clickedEl.id
 
-    const event = new CustomEvent("marker-click", {
+    const event = new CustomEvent("teritorioClick", {
       detail: {
         selectedFeatureId: this.selectedFeatureId,
         pinMarker: this.pinMarker
