@@ -1,4 +1,4 @@
-import type { LngLatLike, MarkerOptions, MapGeoJSONFeature } from 'maplibre-gl'
+import type { LngLatLike, MapGeoJSONFeature } from 'maplibre-gl'
 import { Marker, Point } from 'maplibre-gl'
 
 // Helper to apply styles on DOM element
@@ -113,10 +113,6 @@ export const displayMarkerDefault = (element: HTMLDivElement, size: number) => {
   });
 }
 
-export function createMarker(
-  coords: LngLatLike,
-  offset: Point = new Point(0, 0),
-  options: MarkerOptions = { scale: 1.3, color: '#f44336', anchor: 'bottom' }
-) {
-  return new Marker({ ...options }).setLngLat(coords).setOffset(offset)
+export const displayPinMarkerDefault = (coords: LngLatLike, offset: Point = new Point(0, 0)) => {
+  return new Marker({ anchor: 'bottom' }).setLngLat(coords).setOffset(offset)
 }
