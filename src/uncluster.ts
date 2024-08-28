@@ -203,7 +203,7 @@ export class UnCluster extends EventTarget {
           // If selected feature is now part of this new cluster
           // We position the Pin marker on it's new position
           if ((this.pinMarker && this.selectedClusterId && this.selectedFeatureId) && (id === this.selectedClusterId)) {
-            const featureIndex = this.clusterLeaves.get(id)!.findIndex(f => f.properties?.id === this.selectedFeatureId)
+            const featureIndex = this.clusterLeaves.get(id)!.findIndex(f => this.getFeatureId(f) === this.selectedFeatureId)
 
             if (featureIndex > -1) {
               // Clear outdated Pin marker
@@ -264,7 +264,7 @@ export class UnCluster extends EventTarget {
 
             while (!result.done) {
               const [clusterId, leaves] = result.value
-              const featureIndex = leaves.findIndex(f => f.properties?.id === this.selectedFeatureId)
+              const featureIndex = leaves.findIndex(f => this.getFeatureId(f) === this.selectedFeatureId)
 
               if (featureIndex > -1) {
                 this.selectedClusterId = clusterId.toString()
