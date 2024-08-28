@@ -1,73 +1,72 @@
-import type { GeoJSONSource, LngLatLike, MapGeoJSONFeature, MapMouseEvent } from 'maplibre-gl'
+import type { GeoJSONSource, LngLatLike, MapGeoJSONFeature } from 'maplibre-gl'
 import { Marker, Point } from 'maplibre-gl'
 import {
   displayPinMarkerDefault,
-  displayUnclusterInCircle,
-  displayUnclusterDefault,
+  displayTeritorioClusterInCircle,
+  displayTeritorioClusterDefault,
   displayMarkerDefault,
   displayClusterDefault
 } from './utils/helpers';
 
-type UnClusterMode = 'default' | 'circle'
-type ClusterMode = 'default' | ((element: HTMLDivElement, props: MapGeoJSONFeature['properties'], size?: number) => void)
-type MarkerMode = 'default' | ((element: HTMLDivElement, feature: MapGeoJSONFeature, size?: number) => void)
-type PinMarkerMode = 'default' | ((coords: LngLatLike, offset: Point) => Marker)
+type TeritorioClusterMode = 'default' | 'circle'
+type ClusterMode = ((element: HTMLDivElement, props: MapGeoJSONFeature['properties'], size?: number) => void)
+type MarkerMode = ((element: HTMLDivElement, feature: MapGeoJSONFeature, size?: number) => void)
+type PinMarkerMode = ((coords: LngLatLike, offset: Point) => Marker)
 
-export class UnCluster extends EventTarget {
+export class TeritorioCluster extends EventTarget {
   map: maplibregl.Map
   clusterLeaves: Map<string, MapGeoJSONFeature[]>
   clusterMaxZoom: number
-  clusterMode: ClusterMode
+  clusterMode?: ClusterMode
   clusterSize: number
   markers: { [key: string]: Marker }
-  markerMode: MarkerMode
+  markerMode?: MarkerMode
   markersOnScreen: { [key: string]: Marker }
   markerSize: number
   pinMarker: Marker | null
-  pinMarkerMode: PinMarkerMode
+  pinMarkerMode?: PinMarkerMode
   selectedClusterId: string | null
   selectedFeatureId: string | null
   sourceId: string
   ticking: boolean
-  unClusterMode: UnClusterMode
+  teritorioClusterMode: TeritorioClusterMode
 
   constructor(
     map: maplibregl.Map,
     source: string,
-    options: {
-      clusterMaxZoom?: number,
-      clusterMode?: ClusterMode,
-      clusterSize?: number
-      markerMode?: MarkerMode,
-      markerSize?: number,
-      unClusterMode?: UnClusterMode,
-      pinMarkerMode?: PinMarkerMode
+    options?: {
+      clusterMaxZoom: number,
+      clusterMode: ClusterMode,
+      clusterSize: number
+      markerMode: MarkerMode,
+      markerSize: number,
+      teritorioClusterMode: TeritorioClusterMode,
+      pinMarkerMode: PinMarkerMode
     }
   ) {
     super()
 
     this.map = map
     this.clusterLeaves = new Map<string, MapGeoJSONFeature[]>()
-    this.clusterMaxZoom = options.clusterMaxZoom || 17
-    this.clusterMode = options.clusterMode || 'default'
-    this.clusterSize = options.clusterSize || 38
+    this.clusterMaxZoom = options?.clusterMaxZoom || 17
+    this.clusterMode = options?.clusterMode
+    this.clusterSize = options?.clusterSize || 38
     this.markers = {}
-    this.markerMode = options.markerMode || 'default'
+    this.markerMode = options?.markerMode
     this.markersOnScreen = {}
-    this.markerSize = options.markerSize || 24
+    this.markerSize = options?.markerSize || 24
     this.pinMarker = null
-    this.pinMarkerMode = options.pinMarkerMode || 'default'
+    this.pinMarkerMode = options?.pinMarkerMode
     this.selectedClusterId = null
     this.selectedFeatureId = null
     this.sourceId = source
     this.ticking = false
-    this.unClusterMode = options.unClusterMode || 'default'
+    this.teritorioClusterMode = options?.teritorioClusterMode || 'default'
 
     this.map.on('click', this.onClick)
   }
 
-  onClick = (e: MapMouseEvent) => {
-    console.log('click', e)
+  onClick = () => {
     this.selectedClusterId = null
     this.selectedFeatureId = null
     this.pinMarker?.remove()
@@ -82,35 +81,33 @@ export class UnCluster extends EventTarget {
   }
 
   renderPinMarker = (coords: LngLatLike, offset: Point = new Point(0, 0)) => {
-    if (this.pinMarkerMode === 'default')
-      return displayPinMarkerDefault(coords, offset)
-    else
-      return this.pinMarkerMode(coords, offset)
+    return !this.pinMarkerMode
+      ? displayPinMarkerDefault(coords, offset)
+      : this.pinMarkerMode(coords, offset)
   }
 
   renderMarker = (feature: MapGeoJSONFeature) => {
     const element = document.createElement('div')
     element.id = this.getFeatureId(feature)
 
-    if (this.markerMode === 'default')
-      displayMarkerDefault(element, this.markerSize)
-    else
-      this.markerMode(element, feature, this.markerSize)
+    !this.markerMode
+      ? displayMarkerDefault(element, this.markerSize)
+      : this.markerMode(element, feature, this.markerSize)
 
     return element
   }
 
-  renderUncluster = (id: string, leaves: MapGeoJSONFeature[]) => {
+  renderTeritorioCluster = (id: string, leaves: MapGeoJSONFeature[]) => {
     const element = document.createElement('div')
     element.id = id
-    element.classList.add('uncluster')
+    element.classList.add('teritorio-cluster')
 
-    switch (this.unClusterMode) {
+    switch (this.teritorioClusterMode) {
       case 'circle':
-        displayUnclusterInCircle(element, leaves, this.markerSize, this.renderMarker, this.featureClickHandler)
+        displayTeritorioClusterInCircle(element, leaves, this.markerSize, this.renderMarker, this.featureClickHandler)
         break
       default:
-        displayUnclusterDefault(element, leaves, this.renderMarker, this.featureClickHandler)
+        displayTeritorioClusterDefault(element, leaves, this.renderMarker, this.featureClickHandler)
         break
     }
 
@@ -120,10 +117,9 @@ export class UnCluster extends EventTarget {
   renderCluster = (props: MapGeoJSONFeature['properties']) => {
     const element = document.createElement('div')
 
-    if (this.clusterMode === 'default')
-      displayClusterDefault(element, props, this.clusterSize)
-    else
-      this.clusterMode(element, props)
+    !this.clusterMode
+      ? displayClusterDefault(element, props, this.clusterSize)
+      : this.clusterMode(element, props)
 
     return element;
   }
@@ -172,9 +168,9 @@ export class UnCluster extends EventTarget {
         let marker: Marker | undefined = this.markers[id];
 
         if (
-          (marker && maxZoomLimit && !marker.getElement().classList.contains('uncluster'))
+          (marker && maxZoomLimit && !marker.getElement().classList.contains('teritorio-cluster'))
           ||
-          (marker && !maxZoomLimit && marker.getElement().classList.contains('uncluster') && this.markersOnScreen[id])
+          (marker && !maxZoomLimit && marker.getElement().classList.contains('teritorio-cluster') && this.markersOnScreen[id])
         ) {
           marker = undefined
           delete this.markers[id]
@@ -187,7 +183,7 @@ export class UnCluster extends EventTarget {
           const leaves = this.clusterLeaves.get(id)
 
           if (leaves && ((leaves.length <= 5) || maxZoomLimit)) {
-            element = this.renderUncluster(id, leaves)
+            element = this.renderTeritorioCluster(id, leaves)
           } else {
             // Create default HTML Cluster
             element = this.renderCluster(props)
@@ -322,7 +318,7 @@ export class UnCluster extends EventTarget {
       this.pinMarker = null
     }
 
-    // If element is within Uncluster
+    // If element is within TeritorioCluster
     if (!markerOnScreen && clusterId) {
       this.selectedClusterId = clusterId
 

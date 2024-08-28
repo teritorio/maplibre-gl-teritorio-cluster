@@ -10,7 +10,7 @@ export const buildCss = (htmlEl: HTMLElement, styles: { [key: string]: string })
 }
 
 // Circle shape
-export const displayUnclusterInCircle = (
+export const displayTeritorioClusterInCircle = (
   parent: HTMLDivElement,
   items: MapGeoJSONFeature[],
   itemSize: number,
@@ -53,8 +53,8 @@ export const displayUnclusterInCircle = (
   })
 }
 
-// Uncluster default styles
-export const displayUnclusterDefault = (
+// TeritorioCluster default styles
+export const displayTeritorioClusterDefault = (
   parent: HTMLDivElement,
   items: MapGeoJSONFeature[],
   renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement,
@@ -68,7 +68,7 @@ export const displayUnclusterDefault = (
     'cursor': 'pointer'
   })
 
-  // Create Uncluster HTML leaves
+  // Create TeritorioCluster HTML leaves
   items.forEach(feature => {
     const featureHTML = renderMarker(feature)
 

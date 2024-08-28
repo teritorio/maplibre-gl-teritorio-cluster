@@ -1,3 +1,3 @@
-import { UnCluster } from "./uncluster";
+import { TeritorioCluster } from "./teritorioCluster";
 
-export { UnCluster }
+export { TeritorioCluster }
