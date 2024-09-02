@@ -10,14 +10,14 @@ export const buildCss = (htmlEl: HTMLElement, styles: { [key: string]: string })
 }
 
 // Circle shape
-export const displayTeritorioClusterInCircle = (
+export const unfoldedClusterRenderCircle = (
   parent: HTMLDivElement,
   items: MapGeoJSONFeature[],
-  itemSize: number,
+  markerSize: number,
   renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement,
   clickHandler: (e: Event, feature: MapGeoJSONFeature) => void
-) => {
-  const radius = (itemSize / 2) / Math.sin(Math.PI / items.length)
+): void => {
+  const radius = (markerSize / 2) / Math.sin(Math.PI / items.length)
   let angle = 360 / items.length
   let rot = 0
 
@@ -31,19 +31,11 @@ export const displayTeritorioClusterInCircle = (
     const featureHTML = renderMarker(feature)
 
     buildCss(featureHTML, {
-      'display': 'block',
-      'height': `${itemSize}px`,
-      'left': '50%',
-      'line-height': `${itemSize}px`,
-      'margin': `-${itemSize / 2}px`,
       'position': 'absolute',
-      'text-align': 'center',
-      'top': '50%',
-      'width': `${itemSize}px`,
-    })
-
-    buildCss(featureHTML, {
-      'transform': `rotate(${rot * 1}deg) translate(${radius}px) rotate(${rot * -1}deg)`
+      'left': `calc(50% - ${markerSize / 2}px)`,
+      'top': `calc(50% - ${markerSize / 2}px)`,
+      'transform': `rotate(${rot * 1}deg) translate(${radius}px) rotate(${rot * -1}deg)`,
+      'transform-origin': 'center'
     })
 
     rot += angle
@@ -53,13 +45,13 @@ export const displayTeritorioClusterInCircle = (
   })
 }
 
-// TeritorioCluster default styles
-export const displayTeritorioClusterDefault = (
+// Unfolded Cluster default styles
+export const unfoldedClusterRenderDefault = (
   parent: HTMLDivElement,
   items: MapGeoJSONFeature[],
   renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement,
   clickHandler: (e: Event, feature: MapGeoJSONFeature) => void
-) => {
+): void => {
   buildCss(parent, {
     'display': 'flex',
     'gap': '2px',
@@ -68,7 +60,7 @@ export const displayTeritorioClusterDefault = (
     'cursor': 'pointer'
   })
 
-  // Create TeritorioCluster HTML leaves
+  // Create Unfolded Cluster HTML leaves
   items.forEach(feature => {
     const featureHTML = renderMarker(feature)
 
@@ -78,11 +70,10 @@ export const displayTeritorioClusterDefault = (
 }
 
 // Cluster default styles
-export const displayClusterDefault = (
+export const clusterRenderDefault = (
   element: HTMLDivElement,
-  props: MapGeoJSONFeature['properties'],
-  size: number
-) => {
+  props: MapGeoJSONFeature['properties']
+): void => {
   element.innerHTML = props.point_count
 
   buildCss(element, {
@@ -92,14 +83,17 @@ export const displayClusterDefault = (
     'align-items': 'center',
     'display': 'flex',
     'color': 'white',
-    'width': `${size}px`,
-    'height': `${size}px`,
+    'width': '38px',
+    'height': '38px',
     'cursor': 'pointer'
   });
 }
 
 // Single Marker default styles
-export const displayMarkerDefault = (element: HTMLDivElement, size: number) => {
+export const markerRenderDefault = (
+  element: HTMLDivElement,
+  markerSize: number
+): void => {
   buildCss(element, {
     'background-color': 'blue',
     'border-radius': '100%',
@@ -107,12 +101,16 @@ export const displayMarkerDefault = (element: HTMLDivElement, size: number) => {
     'align-items': 'center',
     'display': 'flex',
     'color': 'white',
-    'width': `${size}px`,
-    'height': `${size}px`,
+    'width': `${markerSize}px`,
+    'height': `${markerSize}px`,
     'cursor': 'pointer'
   });
 }
 
-export const displayPinMarkerDefault = (coords: LngLatLike, offset: Point = new Point(0, 0)) => {
+// Pin Marker default styles
+export const pinMarkerRenderDefault = (
+  coords: LngLatLike,
+  offset: Point = new Point(0, 0)
+): Marker => {
   return new Marker({ anchor: 'bottom' }).setLngLat(coords).setOffset(offset)
 }

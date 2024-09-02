@@ -16,7 +16,7 @@
   <script type="module">
     import { Map, NavigationControl, Marker } from "maplibre-gl"
     import { TeritorioCluster } from './src'
-    import { buildCss } from './src/utils/helpers'
+    import { buildCss, unfoldedClusterRenderCircle as unfoldedClusterRender } from './src/utils/helpers'
 
     const map = new Map({
       hash: true,
@@ -61,17 +61,18 @@
         map,
         'earthquakes',
         {
-          clusterMode: displayCluster,
-          markerMode: displayMarker,
-          teritorioClusterMode: 'circle',
-          pinMarkerMode: displayPinMarker
+          clusterRenderFn: clusterRender,
+          markerRenderFn: markerRender,
+          markerSize: 28,
+          unfoldedClusterRenderFn: unfoldedClusterRender,
+          pinMarkerRenderFn: pinMarkerRender
         },
       )
 
       teritorioCluster.render()
 
       // Get feature click event
-      teritorioCluster.addEventListener('teritorioClick', (e) => {
+      teritorioCluster.addEventListener('click', (e) => {
         console.log(e.detail.selectedFeature)
       })
 
@@ -87,7 +88,7 @@
       });
     })
 
-    const displayPinMarker = (coords, offset) => {
+    const pinMarkerRender = (coords, offset) => {
       return new Marker({
         scale: 1.3,
         color: '#f44336',
@@ -97,7 +98,7 @@
         .setOffset(offset)
     }
 
-    const displayMarker = (element, feature, size) => {
+    const markerRender = (element, feature, markerSize) => {
       element.textContent = feature.properties?.mag
 
       buildCss(element, {
@@ -107,14 +108,15 @@
         'align-items': 'center',
         'display': 'flex',
         'color': 'white',
-        'width': `${size}px`,
-        'height': `${size}px`,
+        'width': `${markerSize}px`,
+        'height': `${markerSize}px`,
         'cursor': 'pointer'
       });
     }
 
-    const displayCluster = (element, props) => {
+    const clusterRender = (element, props) => {
       element.innerHTML = props.point_count.toLocaleString();
+
       buildCss(element, {
         'background-color': 'white',
         'border-radius': '100%',
