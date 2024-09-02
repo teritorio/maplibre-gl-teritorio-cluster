@@ -30,6 +30,7 @@ export class TeritorioCluster extends EventTarget {
   sourceId: string
   ticking: boolean
   teritorioClusterMode: TeritorioClusterMode
+  teritorioClusterMaxLeaves: number
 
   constructor(
     map: maplibregl.Map,
@@ -41,6 +42,7 @@ export class TeritorioCluster extends EventTarget {
       markerMode: MarkerMode,
       markerSize: number,
       teritorioClusterMode: TeritorioClusterMode,
+      teritorioClusterMaxLeaves: number,
       pinMarkerMode: PinMarkerMode
     }
   ) {
@@ -62,6 +64,7 @@ export class TeritorioCluster extends EventTarget {
     this.sourceId = source
     this.ticking = false
     this.teritorioClusterMode = options?.teritorioClusterMode || 'default'
+    this.teritorioClusterMaxLeaves = options?.teritorioClusterMaxLeaves || 5
 
     this.map.on('click', this.onClick)
   }
@@ -182,7 +185,7 @@ export class TeritorioCluster extends EventTarget {
           let element: HTMLDivElement
           const leaves = this.clusterLeaves.get(id)
 
-          if (leaves && ((leaves.length <= 5) || maxZoomLimit)) {
+          if (leaves && ((leaves.length <= this.teritorioClusterMaxLeaves) || maxZoomLimit)) {
             element = this.renderTeritorioCluster(id, leaves)
           } else {
             // Create default HTML Cluster

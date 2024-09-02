@@ -83,6 +83,7 @@ Create a new Maplibre GL JS plugin for feature (cluster / individual marker) ren
     - `options.markerMode`: `(element: HTMLDivElement, feature: MapGeoJSONFeature, size?: number): void` Custom function for individual marker rendering (optional)
     - `options.markerSize`: `number` Set the size for default individual marker rendering mode (optional, default `24`)
     - `options.teritorioClusterMode`: `'circle'` TeritorioCluster rendering preset (optional)
+    - `options.teritorioClusterMaxLeaves`: `number` TeritorioCluster max leaves number (optional, default `5`)
     - `options.pinMarkerMode`: `(coords: LngLatLike, offset: Point): Marker` Custom function for pin marker rendering (optional)
 
 #### addEventListener
