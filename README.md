@@ -8,7 +8,7 @@ Render:
 - Pin Marker on feature click
 
 Allow visualization and interaction with all markers, even when superposed.
-Can display and interact with small cluster without the need to zoom or TeritorioCluster.
+Can display and interact with small cluster without the need to zoom or uncluster.
 
 See the [Demo page](https://teritorio.github.io/maplibre-gl-teritorio-cluster/index.html).
 
@@ -29,15 +29,51 @@ import { Map } from "maplibre-gl"
 import { TeritorioCluster } from 'maplibre-gl-teritorio-cluster'
 
 const map = new Map({
-  container: "map_dom_el_id",
-  style: './style.json'
+  container: "map",
+  style: {
+    version: 8,
+    name: "Empty Style",
+    metadata: { "maputnik:renderer": "mlgljs" },
+    sources: {
+      points: {
+        type: "geojson",
+        cluster: true,
+        clusterRadius: 80,
+        clusterMaxZoom: 22,
+        data: {
+          type: "FeatureCollection",
+          features: [
+            {
+              type: "Feature",
+              properties: { id: 1 },
+              geometry: { type: "Point", coordinates: [0, 0] }
+            },
+            {
+              type: "Feature",
+              properties: { id: 2 },
+              geometry: { type: "Point", coordinates: [0, 1] }
+            }
+          ]
+        }
+      }
+    },
+    glyphs: "https://orangemug.github.io/font-glyphs/glyphs/{fontstack}/{range}.pbf",
+    layers: [
+      {
+        id: "cluster",
+        type: "circle",
+        source: "points"
+      }
+    ],
+    id: "muks8j3"
+  }
 });
 
 map.on('load', () => {
   const TeritorioCluster = new TeritorioCluster(map, 'your_source_name', options)
 
   // Get feature click event
-  TeritorioCluster.addEventListener('teritorioClick', (e) => {
+  TeritorioCluster.addEventListener('click', (e) => {
     console.log(e)
   })
 
@@ -53,7 +89,7 @@ map.on('load', () => {
 })
 
 // Create whatever HTML element you want as Cluster
-const clusterMode = (element: HTMLDivElement, props: MapGeoJSONFeature['properties'], size?: number): void => {}
+const clusterRender = (element: HTMLDivElement, props: MapGeoJSONFeature['properties'], size?: number): void => {}
 
 // Create whatever HTML element you want as individual Marker
 const displayMarker = (element: HTMLDivElement, feature: MapGeoJSONFeature, size?: number): void => {}
@@ -77,21 +113,20 @@ Create a new Maplibre GL JS plugin for feature (cluster / individual marker) ren
   - `map`: [`maplibregl.Map`](https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/) The Map object represents the map on your page
   - `source`: `string` The ID of the vector tile or GeoJSON source to query
   - `options`: `object` Options to configure the plugin
-    - `options.clusterMaxZoom`: `number` The cluster's max zoom (optional, default `17`)
-    - `options.clusterMode`: `(element: HTMLDivElement, props: MapGeoJSONFeature['properties'], size?: number): void` Custom function for cluster rendering (optional)
-    - `options.clusterSize`: `number` Set the size for default cluster rendering mode (optional, default `38`)
-    - `options.markerMode`: `(element: HTMLDivElement, feature: MapGeoJSONFeature, size?: number): void` Custom function for individual marker rendering (optional)
-    - `options.markerSize`: `number` Set the size for default individual marker rendering mode (optional, default `24`)
-    - `options.teritorioClusterMode`: `'circle'` TeritorioCluster rendering preset (optional)
-    - `options.teritorioClusterMaxLeaves`: `number` TeritorioCluster max leaves number (optional, default `5`)
-    - `options.pinMarkerMode`: `(coords: LngLatLike, offset: Point): Marker` Custom function for pin marker rendering (optional)
+    - `options.clusterMaxZoom`: `number` Zoom level at which we force the rendering of the Unfolded Cluster (default `17`)
+    - `options.clusterRenderFn`: `(element: HTMLDivElement, props: MapGeoJSONFeature['properties']): void` Cluster render function (default `src/utils/helpers.ts/clusterRenderDefault()`)
+    - `options.markerRenderFn`: `(element: HTMLDivElement, feature: MapGeoJSONFeature, markerSize: number): void` Individual Marker render function (default `src/utils/helpers.ts/markerRenderDefault()`)
+    - `options.unfoldedClusterRenderFn`: `(parent: HTMLDivElement, items: MapGeoJSONFeature[], markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void) => void` Unfolded Cluster render function (default `src/utils/helpers.ts/unfoldedClusterRenderDefault()`)
+      - `src/utils/helpers.ts/unfoldedClusterRenderCircle()` Circular Unfolder Cluster render function
+    - `options.unfoldedClusterMaxLeaves`: `number` Unfolded Cluster max leaves number (optional, default `5`)
+    - `options.pinMarkerRenderFn`: `(coords: LngLatLike, offset: Point): Marker` Pin Marker render function (default `src/utils/helpers.ts/pinMarkerRenderDefault()`)
 
 #### addEventListener
 
-Listen to feature click and returns it for external control.
+Listen to feature click and return a `maplibregl.Feature` for external control.
 
 ```js
-TeritorioCluster.addEventListener('teritorioClick', (e) => {
+TeritorioCluster.addEventListener('click', (e) => {
   console.log(e.detail.selectedFeature)
 })
 
