@@ -39,7 +39,7 @@ const map = new Map({
         type: "geojson",
         cluster: true,
         clusterRadius: 80,
-        clusterMaxZoom: 22,
+        clusterMaxZoom: 22, // Required, set a value for clusterMaxZoom
         data: {
           type: "FeatureCollection",
           features: [
@@ -70,11 +70,11 @@ const map = new Map({
 });
 
 map.on('load', () => {
-  const TeritorioCluster = new TeritorioCluster(map, 'your_source_name', options)
+  const TeritorioCluster = new TeritorioCluster(map, 'points', options)
 
   // Get feature click event
   TeritorioCluster.addEventListener('click', (e) => {
-    console.log(e)
+    console.log(e.detail.selectedFeature)
   })
 
   // Render feature on map data updates
