@@ -6,13 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta property="og:description" content="Show all cluster's points in one HTML element" />
   <title>MapLibre GL Teritorio Cluster</title>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css">
 </head>
 
 <body style="margin: 0; padding: 0;">
   <div id="map" style="height: 100vh;"></div>
 
+  <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
   <script type="module">
-    import 'maplibre-gl/dist/maplibre-gl.css'
     import { Map, NavigationControl, Marker } from "maplibre-gl"
     import { TeritorioCluster } from './src'
     import { buildCss } from './src/utils/helpers'
