@@ -77,17 +77,6 @@
       teritorioCluster.addEventListener('click', (e) => {
         console.log(e.detail.selectedFeature)
       })
-
-      // after the GeoJSON data is loaded, update markers on the screen and do so on every map move/moveend
-      map.on('data', (e) => {
-        if (e.sourceId !== 'earthquakes' || !e.isSourceLoaded)
-          return
-
-        map.on('move', teritorioCluster.render);
-        map.on('moveend', teritorioCluster.render);
-
-        teritorioCluster.render()
-      });
     })
 
     const pinMarkerRender = (coords, offset) => {
