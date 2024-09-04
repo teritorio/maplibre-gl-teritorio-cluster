@@ -14,7 +14,7 @@
 <body style="margin: 0; padding: 0;">
   <div id="map" style="height: 100vh;"></div>
   <script type="module">
-    import { buildCss, unfoldedClusterRenderCircle as unfoldedClusterRender, TeritorioCluster } from '../src'
+    import { buildCss, unfoldedClusterRenderSmart as unfoldedClusterRender, TeritorioCluster } from '../src'
 
     const map = new maplibregl.Map({
       hash: true,
@@ -63,6 +63,7 @@
           markerRenderFn: markerRender,
           markerSize: 28,
           unfoldedClusterRenderFn: unfoldedClusterRender,
+          unfoldedClusterMaxLeaves: 10,
           pinMarkerRenderFn: pinMarkerRender
         },
       )

@@ -35,7 +35,6 @@ export const unfoldedClusterRenderCircle = (
       'left': `calc(50% - ${markerSize / 2}px)`,
       'top': `calc(50% - ${markerSize / 2}px)`,
       'transform': `rotate(${rot * 1}deg) translate(${radius}px) rotate(${rot * -1}deg)`,
-      'transform-origin': 'center'
     })
 
     rot += angle
@@ -54,13 +53,14 @@ export const unfoldedClusterRenderHexaGrid = (
   clickHandler: (e: Event, feature: MapGeoJSONFeature) => void
 ): void => {
   const radius = (markerSize / 2) / Math.sin(Math.PI / items.length)
+
   buildCss(parent, {
     'height': `${radius * 2}px`,
     'width': `${radius * 2}px`,
   })
 
   // Function inspired from https://stackoverflow.com/questions/2142431/algorithm-for-creating-cells-by-spiral-on-the-hexagonal-field
-  function getHexPosition(i:number) {
+  function getHexPosition(i: number) {
     let x = 0, y = 0;
 
     if (i === 0) return { x, y };
@@ -80,13 +80,12 @@ export const unfoldedClusterRenderHexaGrid = (
   items.forEach((feature, index) => {
     const featureHTML = renderMarker(feature)
 
-    const {x, y} = getHexPosition(index)
+    const { x, y } = getHexPosition(index)
     buildCss(featureHTML, {
       'position': 'absolute',
       'left': `calc(50% - ${markerSize / 2}px)`,
       'top': `calc(50% - ${markerSize / 2}px)`,
       'transform': `translate(${x * markerSize}px, ${y * markerSize}px)`,
-      'transform-origin': 'center'
     })
 
     featureHTML.addEventListener('click', (e) => clickHandler(e, feature))
@@ -94,7 +93,7 @@ export const unfoldedClusterRenderHexaGrid = (
   })
 }
 
-// Smart: mix of Cricle and HexaGrid shape
+// Smart: mix between Circle and HexaGrid shape
 export const unfoldedClusterRenderSmart = (
   parent: HTMLDivElement,
   items: MapGeoJSONFeature[],
@@ -109,8 +108,8 @@ export const unfoldedClusterRenderSmart = (
   }
 }
 
-// Unfolded Cluster default styles
-export const unfoldedClusterRenderDefault = (
+// Grid shape
+export const unfoldedClusterRenderGrid = (
   parent: HTMLDivElement,
   items: MapGeoJSONFeature[],
   renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement,

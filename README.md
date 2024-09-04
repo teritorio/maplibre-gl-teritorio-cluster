@@ -116,8 +116,11 @@ Create a new Maplibre GL JS plugin for feature (cluster / individual marker) ren
     - `options.clusterMaxZoom`: `number` Zoom level at which we force the rendering of the Unfolded Cluster (default `17`)
     - `options.clusterRenderFn`: `(element: HTMLDivElement, props: MapGeoJSONFeature['properties']): void` Cluster render function (default `src/utils/helpers.ts/clusterRenderDefault()`)
     - `options.markerRenderFn`: `(element: HTMLDivElement, feature: MapGeoJSONFeature, markerSize: number): void` Individual Marker render function (default `src/utils/helpers.ts/markerRenderDefault()`)
-    - `options.unfoldedClusterRenderFn`: `(parent: HTMLDivElement, items: MapGeoJSONFeature[], markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void) => void` Unfolded Cluster render function (default `src/utils/helpers.ts/unfoldedClusterRenderDefault()`)
-      - `src/utils/helpers.ts/unfoldedClusterRenderCircle()` Circular Unfolder Cluster render function
+    - `options.unfoldedClusterRenderFn`: `(parent: HTMLDivElement, items: MapGeoJSONFeature[], markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void) => void` Unfolded Cluster render function (default `src/utils/helpers.ts/unfoldedClusterRenderSmart()`)
+      - `src/utils/helpers.ts/unfoldedClusterRenderSmart()` Mix between Circular and HexaShape shape Unfolded Cluster render function
+      - `src/utils/helpers.ts/unfoldedClusterRenderGrid()` Grid shape Unfolded Cluster render function
+      - `src/utils/helpers.ts/unfoldedClusterRenderCircle()` Circular shape Unfolded Cluster render function
+      - `src/utils/helpers.ts/unfoldedClusterRenderHexaGrid()` HexaGrid shape Unfolded Cluster render function
     - `options.unfoldedClusterMaxLeaves`: `number` Unfolded Cluster max leaves number (optional, default `5`)
     - `options.pinMarkerRenderFn`: `(coords: LngLatLike, offset: Point): Marker` Pin Marker render function (default `src/utils/helpers.ts/pinMarkerRenderDefault()`)
 

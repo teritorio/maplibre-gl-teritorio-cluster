@@ -4,7 +4,7 @@ import {
   clusterRenderDefault,
   markerRenderDefault,
   pinMarkerRenderDefault,
-  unfoldedClusterRenderDefault
+  unfoldedClusterRenderSmart
 } from './utils/helpers';
 
 type UnfoldedCluster = (
@@ -126,7 +126,7 @@ export class TeritorioCluster extends EventTarget {
     element.classList.add('teritorio-cluster')
 
     !this.unfoldedClusterRender
-      ? unfoldedClusterRenderDefault(element, leaves, this.renderMarker, this.featureClickHandler)
+      ? unfoldedClusterRenderSmart(element, leaves, this.markerSize, this.renderMarker, this.featureClickHandler)
       : this.unfoldedClusterRender(element, leaves, this.markerSize, this.renderMarker, this.featureClickHandler)
 
     return element
