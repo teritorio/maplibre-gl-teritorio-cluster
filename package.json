@@ -1,11 +1,8 @@
 {
   "name": "@teritorio/maplibre-gl-teritorio-cluster",
   "description": "Allow visualization and interaction with all markers, even when superposed. Can display and interact with small cluster without the need to zoom or uncluster.",
-  "version": "0.1.0",
+  "version": "0.1.0-pre",
   "license": "MIT",
-  "publishConfig": {
-    "access": "public"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/teritorio/maplibre-gl-teritorio-cluster.git"
@@ -23,9 +20,9 @@
   "module": "dist/maplibre-gl-teritorio-cluster.esm.js",
   "scripts": {
     "dev": "vite serve docs",
-    "start": "tsdx watch",
-    "build": "tsdx build",
-    "prepare": "tsdx build"
+    "start": "tsdx watch --format cjs,esm,umd --name teritorio",
+    "build": "tsdx build --format cjs,esm,umd --name teritorio",
+    "prepare": "tsdx build --format cjs,esm,umd --name teritorio"
   },
   "dependencies": {
     "maplibre-gl": "^4.0.0"
