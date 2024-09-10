@@ -58,13 +58,13 @@ export class TeritorioCluster extends EventTarget {
     map: maplibregl.Map,
     source: string,
     options?: {
-      clusterMaxZoom: number,
-      clusterRenderFn: ClusterRender,
-      markerRenderFn: MarkerRender,
-      markerSize: number
-      unfoldedClusterRenderFn: UnfoldedCluster,
-      unfoldedClusterMaxLeaves: number,
-      pinMarkerRenderFn: PinMarkerRender
+      clusterMaxZoom?: number,
+      clusterRenderFn?: ClusterRender,
+      markerRenderFn?: MarkerRender,
+      markerSize?: number
+      unfoldedClusterRenderFn?: UnfoldedCluster,
+      unfoldedClusterMaxLeaves?: number,
+      pinMarkerRenderFn?: PinMarkerRender
     }
   ) {
     super()

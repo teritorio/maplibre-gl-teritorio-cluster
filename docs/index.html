@@ -3,22 +3,33 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/png" href="/teritorio.png" />
+  <link rel="icon" type="image/png" href="teritorio.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta property="og:description" content="Allow visualization and interaction with all markers, even when superposed. Can display and interact with small cluster without the need to zoom or uncluster." />
+  <meta property="og:description"
+    content="Allow visualization and interaction with all markers, even when superposed. Can display and interact with small cluster without the need to zoom or uncluster." />
   <title>MapLibre GL Teritorio Cluster</title>
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.5.1/dist/maplibre-gl.css">
-  <script src="https://unpkg.com/maplibre-gl@4.5.1/dist/maplibre-gl.js"></script>
-  <script src="https://unpkg.com/@teritorio/maplibre-gl-teritorio-cluster/dist/teritorio.umd.production.js"></script>
+  <script type="module" src="https://unpkg.com/maplibre-gl@4.5.1/dist/maplibre-gl.js"></script>
+  <script type="module" src="https://unpkg.com/@teritorio/maplibre-gl-teritorio-cluster/dist/maplibre-gl-teritorio-cluster.esm.js"></script>
   <style>
-    body { margin: 0; padding: 0; }
-    html, body, #map { height: 100%; }
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body,
+    #map {
+      height: 100%;
+    }
   </style>
 </head>
 
 <body>
   <div id="map"></div>
   <script type="module">
+    // import { buildCss, unfoldedClusterRenderSmart as unfoldedClusterRender, TeritorioCluster } from 'https://unpkg.com/@teritorio/maplibre-gl-teritorio-cluster/dist/maplibre-gl-teritorio-cluster.esm.js'
+
     const map = new maplibregl.Map({
       hash: true,
       container: "map",
@@ -58,14 +69,14 @@
         }
       });
 
-      const teritorioCluster = new teritorio.TeritorioCluster(
+      const teritorioCluster = new TeritorioCluster(
         map,
         'earthquakes',
         {
           clusterRenderFn: clusterRender,
           markerRenderFn: markerRender,
           markerSize: 28,
-          unfoldedClusterRenderFn: teritorio.unfoldedClusterRenderSmart,
+          unfoldedClusterRenderFn: unfoldedClusterRender,
           pinMarkerRenderFn: pinMarkerRender
         },
       )
@@ -91,7 +102,7 @@
     const markerRender = (element, feature, markerSize) => {
       element.textContent = feature.properties?.mag
 
-      teritorio.buildCss(element, {
+      buildCss(element, {
         'background-color': 'green',
         'border-radius': '100%',
         'justify-content': 'center',
@@ -107,7 +118,7 @@
     const clusterRender = (element, props) => {
       element.innerHTML = props.point_count.toLocaleString();
 
-      teritorio.buildCss(element, {
+      buildCss(element, {
         'background-color': 'white',
         'border-radius': '100%',
         'border': '2px solid green',
@@ -121,7 +132,6 @@
       });
     }
   </script>
-
 </body>
 
 </html>
