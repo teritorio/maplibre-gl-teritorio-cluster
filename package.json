@@ -10,11 +10,12 @@
     "src"
   ],
   "scripts": {
+    "dev": "npm run build:esm && vite serve docs",
     "clean": "rimraf dist esm",
     "prebuild": "npm run clean",
+    "build": "npm run build:esm && npm run build:cjs",
     "build:cjs": "tsc --module commonjs --outDir dist",
     "build:esm": "tsc --target es2018 --outDir esm",
-    "build": "npm run build:esm && npm run build:cjs",
     "preversion": "npm run build"
   },
   "repository": {
@@ -29,7 +30,8 @@
   "homepage": "https://github.com/teritorio/maplibre-gl-teritorio-cluster#readme",
   "devDependencies": {
     "rimraf": "^6.0.1",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.2",
+    "vite": "^5.4.4"
   },
   "dependencies": {
     "maplibre-gl": "^4.7.0"

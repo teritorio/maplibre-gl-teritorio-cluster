@@ -8,9 +8,8 @@
   <meta property="og:description"
     content="Allow visualization and interaction with all markers, even when superposed. Can display and interact with small cluster without the need to zoom or uncluster." />
   <title>MapLibre GL Teritorio Cluster</title>
-  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.5.1/dist/maplibre-gl.css">
-  <script type="module" src="https://unpkg.com/maplibre-gl@4.5.1/dist/maplibre-gl.js"></script>
-  <script type="module" src="https://unpkg.com/@teritorio/maplibre-gl-teritorio-cluster/dist/maplibre-gl-teritorio-cluster.esm.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css">
+  <script type="module" src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
   <style>
     body {
       margin: 0;
@@ -28,7 +27,7 @@
 <body>
   <div id="map"></div>
   <script type="module">
-    // import { buildCss, unfoldedClusterRenderSmart as unfoldedClusterRender, TeritorioCluster } from 'https://unpkg.com/@teritorio/maplibre-gl-teritorio-cluster/dist/maplibre-gl-teritorio-cluster.esm.js'
+    import { buildCss, unfoldedClusterRenderSmart as unfoldedClusterRender, TeritorioCluster } from '../esm/index.js'
 
     const map = new maplibregl.Map({
       hash: true,
