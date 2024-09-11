@@ -1,27 +1,30 @@
 # Contributing
 
-This project was bootstrapped with [TSDX](https://github.com/jaredpalmer/tsdx).
+This document contains a set of guidelines to help developers during the contribution process.
 
-## Local Development
+## Development
 
-Below is a list of commands you will probably find useful.
+### Download and install dependencies
 
-### `npm start` or `yarn start`
+```shell
+git clone https://github.com/teritorio/maplibre-gl-teritorio-cluster.git
+cd maplibre-gl-teritorio-cluster
+yarn install
+```
 
-Runs the project in development/watch mode. Your project will be rebuilt upon changes. TSDX has a special logger for you convenience. Error messages are pretty printed and formatted for compatibility VS Code's Problems tab.
+### Run locally
 
-<img src="https://user-images.githubusercontent.com/4060187/52168303-574d3a00-26f6-11e9-9f3b-71dbec9ebfcb.gif" width="600" />
+Runs the project in development/watch mode with [Vite Dev server](https://vitejs.dev/guide/cli.html#dev-server).
 
-Your library will be rebuilt if you make edits.
+```shell
+yarn dev
+```
 
-### `npm run build` or `yarn build`
+### Build package
 
 Bundles the package to the `dist` folder.
-The package is optimized and bundled with Rollup into multiple formats (CommonJS, UMD, and ES Module).
+The package is bundled with [Typescript tsc CLI](https://www.typescriptlang.org/docs/handbook/compiler-options.html) into multiple formats (CommonJS, ESM).
 
-<img src="https://user-images.githubusercontent.com/4060187/52168322-a98e5b00-26f6-11e9-8cf6-222d716b75ef.gif" width="600" />
-
-### `npm test` or `yarn test`
-
-Runs the test watcher (Jest) in an interactive mode.
-By default, runs tests related to files changed since the last commit.
+```shell
+yarn build
+```
