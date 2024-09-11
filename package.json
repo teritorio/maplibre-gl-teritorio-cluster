@@ -1,36 +1,37 @@
 {
   "name": "@teritorio/maplibre-gl-teritorio-cluster",
+  "version": "0.0.0-development",
   "description": "Allow visualization and interaction with all markers, even when superposed. Can display and interact with small cluster without the need to zoom or uncluster.",
-  "version": "0.1.1-pre",
-  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "esm/index.js",
+  "files": [
+    "dist",
+    "esm",
+    "src"
+  ],
+  "scripts": {
+    "clean": "rimraf dist esm",
+    "prebuild": "npm run clean",
+    "build:cjs": "tsc --module commonjs --outDir dist",
+    "build:esm": "tsc --target es2018 --outDir esm",
+    "build": "npm run build:esm && npm run build:cjs",
+    "preversion": "npm run build"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/teritorio/maplibre-gl-teritorio-cluster.git"
   },
+  "author": "Teritorio",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/teritorio/maplibre-gl-teritorio-cluster/issues"
   },
   "homepage": "https://github.com/teritorio/maplibre-gl-teritorio-cluster#readme",
-  "files": [
-    "./dist"
-  ],
-  "type": "module",
-  "main": "./dist/maplibre-gl-teritorio-cluster.esm.js",
-  "types": "./dist/index.d.ts",
-  "scripts": {
-    "dev": "vite serve docs",
-    "start": "tsdx watch --format esm",
-    "build": "tsdx build --format esm",
-    "prepare": "tsdx build --format esm"
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "typescript": "^5.6.2"
   },
   "dependencies": {
-    "maplibre-gl": "^4.0.0"
-  },
-  "devDependencies": {
-    "tsdx": "^0.14.1",
-    "tslib": "^2.7.0",
-    "typescript": "^5.5.4",
-    "vite": "^5.4.3"
-  },
-  "packageManager": "yarn@4.4.1"
+    "maplibre-gl": "^4.7.0"
+  }
 }
