@@ -1,8 +1,16 @@
-import type { UserConfig } from 'vite'
+import { defineConfig } from 'vite'
 
-export default {
-  base: '/maplibre-gl-teritorio-cluster/',
-  build: {
-    outDir: 'docs'
+export default defineConfig(({ command }) => {
+  if (command === 'serve') {
+    return {
+      base: '/',
+    }
+  } else {
+    return {
+      base: '/maplibre-gl-teritorio-cluster/',
+      build: {
+        outDir: 'docs'
+      }
+    }
   }
-} satisfies UserConfig
+})
