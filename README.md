@@ -18,7 +18,7 @@ See the [Demo page](https://teritorio.github.io/maplibre-gl-teritorio-cluster/in
 
 Add to you project (or use CDN).
 ```bash
-yarn add maplibre-gl-teritorio-cluster
+yarn add @teritorio/maplibre-gl-teritorio-cluster
 ```
 
 > [!WARNING]
@@ -136,12 +136,6 @@ TeritorioCluster.addEventListener('click', (e) => {
 ```
 
 ## Dev
-
-Install Maplibre GL JS as peer dependency
-```bash
-yarn add maplibre-gl
-```
-
 Install dependencies
 ```bash
 yarn install
@@ -154,7 +148,7 @@ yarn dev
 
 ## Requirements
 
-Requires [maplibre-gl-js](https://maplibre.org/projects/#js) >= v4.0.0.
+Requires [maplibre-gl-js](https://github.com/maplibre/maplibre-gl-js) >= v4.0.0.
 
 ## Contribution
 
