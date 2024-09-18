@@ -1,6 +1,6 @@
 {
   "name": "@teritorio/maplibre-gl-teritorio-cluster",
-  "version": "0.0.0-development",
+  "version": "0.0.1",
   "description": "Allow visualization and interaction with all markers, even when superposed. Can display and interact with small cluster without the need to zoom or uncluster.",
   "type": "module",
   "files": [
@@ -18,8 +18,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && tsc",
+    "build:demo": "vite build --mode development",
     "preview": "vite preview",
-    "preversion": "npm run build"
+    "preversion": "yarn build"
   },
   "repository": {
     "type": "git",
