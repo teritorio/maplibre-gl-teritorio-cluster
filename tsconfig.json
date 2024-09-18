@@ -1,12 +1,23 @@
 {
-  "include": ["src"],
   "compilerOptions": {
-    "target": "es2018",
-    "moduleResolution": "node", // don't have to import actual filenames, can import extensionless files
-    "declaration": true, // generate .d.ts files
-    "sourceMap": true, // generate source map
-    "outDir": "dist", // output compiled js, d.ts, and source map to dist folder
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Linting */
     "strict": true,
-    "esModuleInterop": true
-  }
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"],
 }

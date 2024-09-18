@@ -1,15 +1,21 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig(({ command }) => {
-  if (command === 'serve') {
-    return {
-      base: '/',
-    }
-  } else {
-    return {
-      base: '/maplibre-gl-teritorio-cluster/',
-      build: {
-        outDir: 'docs'
+  return {
+    base: command === 'serve' ? '/' : '/maplibre-gl-teritorio-cluster/',
+    build: {
+      lib: {
+        entry: 'src/index.ts',
+        name: 'MaplibreGlTeritorioCluster',
+        fileName: 'maplibre-gl-teritorio-cluster'
+      },
+      rollupOptions: {
+        external: ['maplibre-gl'],
+        output: {
+          globals: {
+            'maplibre-gl': 'maplibreGl'
+          }
+        }
       }
     }
   }

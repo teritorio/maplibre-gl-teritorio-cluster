@@ -2,23 +2,23 @@
   "name": "@teritorio/maplibre-gl-teritorio-cluster",
   "version": "0.0.0-development",
   "description": "Allow visualization and interaction with all markers, even when superposed. Can display and interact with small cluster without the need to zoom or uncluster.",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "files": [
-    "dist",
-    "src"
-  ],
+  "type": "module",
+  "files": ["dist"],
+  "main": "./dist/maplibre-gl-teritorio-cluster.umd.cjs",
+  "module": "./dist/maplibre-gl-teritorio-cluster.js",
+  "exports": {
+    ".": {
+      "import": "./dist/maplibre-gl-teritorio-cluster.js",
+      "require": "./dist/maplibre-gl-teritorio-cluster.umd.cjs"
+    }
+  },
   "scripts": {
-    "dev": "vite serve",
-    "clean": "rimraf dist esm",
-    "prebuild": "npm run clean",
-    "build": "npm run build:esm && npm run build:cjs",
-    "build:cjs": "tsc --module commonjs --outDir dist/cjs",
-    "build:esm": "tsc --target es2018 --outDir dist/esm",
-    "build:demo": "vite build",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
     "preversion": "npm run build"
   },
-  "repository": {
+  "repository": { 
     "type": "git",
     "url": "git+https://github.com/teritorio/maplibre-gl-teritorio-cluster.git"
   },
@@ -29,7 +29,6 @@
   },
   "homepage": "https://github.com/teritorio/maplibre-gl-teritorio-cluster#readme",
   "devDependencies": {
-    "rimraf": "^6.0.1",
     "typescript": "^5.6.2",
     "vite": "^5.4.4"
   },
