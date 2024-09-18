@@ -9,14 +9,6 @@ export default defineConfig(({ command }) => {
         name: 'MaplibreGlTeritorioCluster',
         fileName: 'maplibre-gl-teritorio-cluster'
       },
-      rollupOptions: {
-        external: ['maplibre-gl'],
-        output: {
-          globals: {
-            'maplibre-gl': 'maplibreGl'
-          }
-        }
-      }
     }
   }
 })

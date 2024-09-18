@@ -3,9 +3,12 @@
   "version": "0.0.0-development",
   "description": "Allow visualization and interaction with all markers, even when superposed. Can display and interact with small cluster without the need to zoom or uncluster.",
   "type": "module",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/maplibre-gl-teritorio-cluster.umd.cjs",
   "module": "./dist/maplibre-gl-teritorio-cluster.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/maplibre-gl-teritorio-cluster.js",
@@ -14,11 +17,11 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build && tsc",
     "preview": "vite preview",
     "preversion": "npm run build"
   },
-  "repository": { 
+  "repository": {
     "type": "git",
     "url": "git+https://github.com/teritorio/maplibre-gl-teritorio-cluster.git"
   },
@@ -34,5 +37,6 @@
   },
   "dependencies": {
     "maplibre-gl": "^4.7.0"
-  }
+  },
+  "packageManager": "yarn@4.5.0"
 }
