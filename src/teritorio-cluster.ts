@@ -41,6 +41,7 @@ export class TeritorioCluster extends EventTarget {
   clusterLeaves: Map<string, MapGeoJSONFeature[]>
   clusterMaxZoom: number
   clusterRender?: ClusterRender
+  initialFeature?: MapGeoJSONFeature
   markers: { [key: string]: Marker }
   markerRender?: MarkerRender
   markerSize: number
@@ -60,6 +61,7 @@ export class TeritorioCluster extends EventTarget {
     options?: {
       clusterMaxZoom?: number,
       clusterRenderFn?: ClusterRender,
+      initialFeature?: MapGeoJSONFeature,
       markerRenderFn?: MarkerRender,
       markerSize?: number
       unfoldedClusterRenderFn?: UnfoldedCluster,
@@ -73,6 +75,7 @@ export class TeritorioCluster extends EventTarget {
     this.clusterLeaves = new Map<string, MapGeoJSONFeature[]>()
     this.clusterMaxZoom = options?.clusterMaxZoom || 17
     this.clusterRender = options?.clusterRenderFn
+    this.initialFeature = options?.initialFeature
     this.markers = {}
     this.markerRender = options?.markerRenderFn
     this.markerSize = options?.markerSize || 24
@@ -195,6 +198,10 @@ export class TeritorioCluster extends EventTarget {
       if (props.cluster) {
         const id = props.cluster_id.toString()
         let marker: Marker | undefined = this.markers[id];
+        const leaves = this.clusterLeaves.get(id)
+
+        if(!leaves)
+          throw new Error('Cluster has no leaves')
 
         if (
           (marker && maxZoomLimit && !marker.getElement().classList.contains('teritorio-cluster'))
@@ -209,14 +216,13 @@ export class TeritorioCluster extends EventTarget {
 
         if (!marker) {
           let element: HTMLDivElement
-          const leaves = this.clusterLeaves.get(id)
 
           if (leaves && ((leaves.length <= this.unfoldedClusterMaxLeaves) || maxZoomLimit)) {
             element = this.renderUnfoldedCluster(id, leaves)
           } else {
-            // Create default HTML Cluster
             element = this.renderCluster(props)
           }
+          
           marker = this.markers[id] = new Marker({ element }).setLngLat(coords)
         }
 
@@ -247,6 +253,37 @@ export class TeritorioCluster extends EventTarget {
               this.pinMarker = this.renderPinMarker(marker.getLngLat(), offset).addTo(this.map)
             }
           }
+
+          // If initialFeature is part of this new cluster
+          // We position the Pin marker on it
+          if(this.initialFeature) {
+            const featureId = this.getFeatureId(this.initialFeature)
+            const featureIndex = leaves.findIndex(f => this.getFeatureId(f) === featureId)
+            
+            if(featureIndex > -1) {
+              const isUnfoldedCluster = marker.getElement().classList.contains('teritorio-cluster')
+              
+              this.selectedClusterId = id
+              this.selectedFeatureId = this.getFeatureId(this.initialFeature)
+
+              if(!isUnfoldedCluster) {
+                this.pinMarker = this.renderPinMarker(marker.getLngLat()).addTo(this.map)
+              } else {
+                const { x: clusterX, y: clusterY } = marker._pos
+                const selectedFeatureHTML = Array.from(marker.getElement().children).find(el => el.id === this.selectedFeatureId)
+
+                if (!selectedFeatureHTML)
+                  throw new Error('Selected feature HTML marker was not found !')
+  
+                const { x, y, height, width } = selectedFeatureHTML.getBoundingClientRect()
+                const offset = new Point(x - clusterX + (width / 2), y - clusterY + (height / 2))
+  
+                this.pinMarker = this.renderPinMarker(marker.getLngLat(), offset).addTo(this.map)
+              }
+
+              this.initialFeature = undefined
+            }
+          }
         }
       } else {
         const id = this.getFeatureId(feature)
@@ -263,6 +300,14 @@ export class TeritorioCluster extends EventTarget {
 
         if (!this.markersOnScreen[id]) {
           marker.addTo(this.map);
+
+          // If initialFeature is this new marker
+          // We position the Pin marker on it
+          if(this.initialFeature && (this.getFeatureId(this.initialFeature) === id)) {
+            this.selectedFeatureId = id
+            this.pinMarker = this.renderPinMarker(marker.getLngLat()).addTo(this.map)
+            this.initialFeature = undefined
+          }
         }
       }
     })
@@ -274,7 +319,7 @@ export class TeritorioCluster extends EventTarget {
 
         // If the removed cluster had a selected feature in it.
         // We display the Pin marker on it's new position
-        if ((this.pinMarker && this.selectedClusterId && this.selectedFeatureId) && (id === this.selectedClusterId || id === this.selectedFeatureId)) {
+        if ((this.pinMarker && this.selectedFeatureId) && (id === this.selectedClusterId || id === this.selectedFeatureId)) {
           let coords: LngLatLike | undefined
           let offset: Point | undefined
           const selectedFeature = featuresMap.get(this.selectedFeatureId)
