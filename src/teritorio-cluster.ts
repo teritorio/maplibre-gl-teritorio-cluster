@@ -36,6 +36,8 @@ type PinMarkerRender = (
   ) => Marker
 )
 
+const UnfoldedClusterClass = 'teritorio-unfolded-cluster'
+
 export class TeritorioCluster extends EventTarget {
   map: maplibregl.Map
   clusterLeaves: Map<string, MapGeoJSONFeature[]>
@@ -100,14 +102,12 @@ export class TeritorioCluster extends EventTarget {
       this.render()
     });
 
-    this.map.on('click', this.onClick)
-  }
-
-  onClick = () => {
-    this.selectedClusterId = null
-    this.selectedFeatureId = null
-    this.pinMarker?.remove()
-    this.pinMarker = null
+    this.map.on('click', () => {
+      this.selectedClusterId = null
+      this.selectedFeatureId = null
+      this.pinMarker?.remove()
+      this.pinMarker = null
+    })
   }
 
   render = () => {
@@ -137,7 +137,7 @@ export class TeritorioCluster extends EventTarget {
   renderUnfoldedCluster = (id: string, leaves: MapGeoJSONFeature[]) => {
     const element = document.createElement('div')
     element.id = id
-    element.classList.add('teritorio-cluster')
+    element.classList.add(UnfoldedClusterClass)
 
     !this.unfoldedClusterRender
       ? unfoldedClusterRenderSmart(element, leaves, this.markerSize, this.renderMarker, this.featureClickHandler)
@@ -204,9 +204,9 @@ export class TeritorioCluster extends EventTarget {
           throw new Error('Cluster has no leaves')
 
         if (
-          (marker && maxZoomLimit && !marker.getElement().classList.contains('teritorio-cluster'))
+          (marker && maxZoomLimit && !marker.getElement().classList.contains(UnfoldedClusterClass))
           ||
-          (marker && !maxZoomLimit && marker.getElement().classList.contains('teritorio-cluster') && this.markersOnScreen[id])
+          (marker && !maxZoomLimit && marker.getElement().classList.contains(UnfoldedClusterClass) && this.markersOnScreen[id])
         ) {
           marker = undefined
           delete this.markers[id]
@@ -261,7 +261,7 @@ export class TeritorioCluster extends EventTarget {
             const featureIndex = leaves.findIndex(f => this.getFeatureId(f) === featureId)
             
             if(featureIndex > -1) {
-              const isUnfoldedCluster = marker.getElement().classList.contains('teritorio-cluster')
+              const isUnfoldedCluster = marker.getElement().classList.contains(UnfoldedClusterClass)
               
               this.selectedClusterId = id
               this.selectedFeatureId = this.getFeatureId(this.initialFeature)
