@@ -110,11 +110,12 @@ Create a new Maplibre GL JS plugin for feature (cluster / individual marker) ren
 
 #### Parameters
 
-  - `map`: [`maplibregl.Map`](https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/) The Map object represents the map on your page
+  - `map`: [`Map`](https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/) The Map object represents the map on your page
   - `source`: `string` The ID of the vector tile or GeoJSON source to query
   - `options`: `object` Options to configure the plugin
     - `options.clusterMaxZoom`: `number` Zoom level at which we force the rendering of the Unfolded Cluster (default `17`)
     - `options.clusterRenderFn`: `(element: HTMLDivElement, props: MapGeoJSONFeature['properties']): void` Cluster render function (default `src/utils/helpers.ts/clusterRenderDefault()`)
+    - `options.initialFeature`: [`MapGeoJSONFeature`](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/MapGeoJSONFeature/) This feature to select on initial rendering (default `undefined`)
     - `options.markerRenderFn`: `(element: HTMLDivElement, feature: MapGeoJSONFeature, markerSize: number): void` Individual Marker render function (default `src/utils/helpers.ts/markerRenderDefault()`)
     - `options.unfoldedClusterRenderFn`: `(parent: HTMLDivElement, items: MapGeoJSONFeature[], markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void) => void` Unfolded Cluster render function (default `src/utils/helpers.ts/unfoldedClusterRenderSmart()`)
       - `src/utils/helpers.ts/unfoldedClusterRenderSmart()` Mix between Circular and HexaShape shape Unfolded Cluster render function
