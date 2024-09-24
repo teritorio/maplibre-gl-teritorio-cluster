@@ -59,7 +59,7 @@ export class TeritorioCluster extends EventTarget {
 
   constructor(
     map: maplibregl.Map,
-    source: string,
+    sourceId: string,
     options?: {
       clusterMaxZoom?: number,
       clusterRenderFn?: ClusterRender,
@@ -86,7 +86,7 @@ export class TeritorioCluster extends EventTarget {
     this.pinMarkerRender = options?.pinMarkerRenderFn
     this.selectedClusterId = null
     this.selectedFeatureId = null
-    this.sourceId = source
+    this.sourceId = sourceId
     this.ticking = false
     this.unfoldedClusterRender = options?.unfoldedClusterRenderFn
     this.unfoldedClusterMaxLeaves = options?.unfoldedClusterMaxLeaves || 7

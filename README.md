@@ -79,7 +79,7 @@ map.on('load', () => {
 
   // Render feature on map data updates
   map.on('data', (e) => {
-    if (e.sourceId !== 'your_source_name' || !e.isSourceLoaded)
+    if (e.sourceId !== 'points' || !e.isSourceLoaded)
       return;
 
     map.on('move', TeritorioCluster.render);
@@ -102,6 +102,7 @@ const displayPinMarker = (coords: LngLatLike, offset: Point): Marker => {}
 
 - [TeritorioCluster](#teritoriocluster)
   - [Parameters](#parameters)
+  - [Options](#options)
   - [addEventListener](#addeventlistener)
 
 ### TeritorioCluster
@@ -109,21 +110,27 @@ const displayPinMarker = (coords: LngLatLike, offset: Point): Marker => {}
 Create a new Maplibre GL JS plugin for feature (cluster / individual marker) rendering
 
 #### Parameters
+| Name     | Type                                                               | Description                                                                                      | Required | Default value |
+|----------|--------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|----------|---------------|
+| map      | [`Map`](https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/) | The Map object represents the map on your page                                                   | ✅        | ❌             |
+| sourceId | `string`                                                           | The ID of the source. Should be a vector source, preferably of type GeoJSON and not vector tiles | ✅        | ❌             |
+| options  | `object`                                                           | Options to configure the plugin                                                                  | ❌        | `undefined`   |
 
-  - `map`: [`Map`](https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/) The Map object represents the map on your page
-  - `source`: `string` The ID of the vector tile or GeoJSON source to query
-  - `options`: `object` Options to configure the plugin
-    - `options.clusterMaxZoom`: `number` Zoom level at which we force the rendering of the Unfolded Cluster (default `17`)
-    - `options.clusterRenderFn`: `(element: HTMLDivElement, props: MapGeoJSONFeature['properties']): void` Cluster render function (default `src/utils/helpers.ts/clusterRenderDefault()`)
-    - `options.initialFeature`: [`MapGeoJSONFeature`](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/MapGeoJSONFeature/) This feature to select on initial rendering (default `undefined`)
-    - `options.markerRenderFn`: `(element: HTMLDivElement, feature: MapGeoJSONFeature, markerSize: number): void` Individual Marker render function (default `src/utils/helpers.ts/markerRenderDefault()`)
-    - `options.unfoldedClusterRenderFn`: `(parent: HTMLDivElement, items: MapGeoJSONFeature[], markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void) => void` Unfolded Cluster render function (default `src/utils/helpers.ts/unfoldedClusterRenderSmart()`)
-      - `src/utils/helpers.ts/unfoldedClusterRenderSmart()` Mix between Circular and HexaShape shape Unfolded Cluster render function
-      - `src/utils/helpers.ts/unfoldedClusterRenderGrid()` Grid shape Unfolded Cluster render function
-      - `src/utils/helpers.ts/unfoldedClusterRenderCircle()` Circular shape Unfolded Cluster render function
-      - `src/utils/helpers.ts/unfoldedClusterRenderHexaGrid()` HexaGrid shape Unfolded Cluster render function
-    - `options.unfoldedClusterMaxLeaves`: `number` Unfolded Cluster max leaves number (optional, default `5`)
-    - `options.pinMarkerRenderFn`: `(coords: LngLatLike, offset: Point): Marker` Pin Marker render function (default `src/utils/helpers.ts/pinMarkerRenderDefault()`)
+#### Options
+| Name                          | Type                                                                                                                                                                                                           | Description                                                        | Required | Default value                                       |
+|-------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|----------|-----------------------------------------------------|
+| clusterMaxZoom                | `number`                                                                                                                                                                                                       | Zoom level at which we force the rendering of the Unfolded Cluster | ❌        | `17`                                                |
+| clusterRenderFn               | `(element: HTMLDivElement, props: MapGeoJSONFeature['properties']): void`                                                                                                                                      | Cluster render function                                            | ❌        | `src/utils/helpers.ts/clusterRenderDefault()`       |
+| initialFeature                | [`MapGeoJSONFeature`](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/MapGeoJSONFeature/)                                                                                                            | Feature to select on initial rendering                             | ❌        | `undefined`                                         |
+| markerRenderFn                | `(element: HTMLDivElement, feature: MapGeoJSONFeature, markerSize: number): void`                                                                                                                              | Individual Marker render function                                  | ❌        | `src/utils/helpers.ts/markerRenderDefault()`        |
+| unfoldedClusterRenderFn       | `(parent: HTMLDivElement, items: MapGeoJSONFeature[], markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void) => void` | Unfolded Cluster render function                                   | ❌        | `src/utils/helpers.ts/unfoldedClusterRenderSmart()` |
+| unfoldedClusterRenderSmart    | Mix between Circular and HexaShape shape Unfolded Cluster render function                                                                                                                                      | -                                                                  | -        | -                                                   |
+| unfoldedClusterRenderGrid     | Grid shape Unfolded Cluster render function function                                                                                                                                                           | -                                                                  | -        | -                                                   |
+| unfoldedClusterRenderCircle   | Circular shape Unfolded Cluster render function function                                                                                                                                                       | -                                                                  | -        | -                                                   |
+| unfoldedClusterRenderHexaGrid | HexaGrid shape Unfolded Cluster render function function                                                                                                                                                       | -                                                                  | -        | -                                                   |
+| unfoldedClusterMaxLeaves      | `number`                                                                                                                                                                                                       | Unfolded Cluster max leaves number                                 | ❌        | `5`                                                 |
+| pinMarkerRenderFn             | `(coords: LngLatLike, offset: Point): Marker`                                                                                                                                                                  | Pin Marker render function                                         | ❌        | `src/utils/helpers.ts/pinMarkerRenderDefault()`     |
+
 
 #### addEventListener
 
