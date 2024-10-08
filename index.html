@@ -41,7 +41,7 @@
   <script type="module">
     import { buildCss, unfoldedClusterRenderSmart as unfoldedClusterRender, TeritorioCluster } from './src/index'
 
-    let geojson = await fetch('https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson', { method: 'GET' }).then(res => res.json())
+    let geojson;
     const map = new maplibregl.Map({
       hash: true,
       container: "map",
@@ -50,7 +50,8 @@
 
     map.addControl(new maplibregl.NavigationControl());
     map.on('load', async () => {
-
+      geojson = await fetch('https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson', { method: 'GET' }).then(res => res.json())
+      
       // add a clustered GeoJSON source for a sample set of earthquakes
       map.addSource('earthquakes', {
         'type': 'geojson',
