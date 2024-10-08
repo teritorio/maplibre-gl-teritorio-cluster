@@ -99,7 +99,8 @@ export class TeritorioCluster extends EventTarget {
       map.on('move', this.render);
       map.on('moveend', this.render);
 
-      this.render()
+      if(e.isSourceLoaded && e.sourceDataType !== 'metadata')
+        this.render()
     });
 
     this.map.on('click', this.resetSelectedFeature)
@@ -152,7 +153,6 @@ export class TeritorioCluster extends EventTarget {
   }
 
   resetSelectedFeature = () => {
-    console.log('reset')
     this.selectedClusterId = null
     this.selectedFeatureId = null
     this.pinMarker?.remove()

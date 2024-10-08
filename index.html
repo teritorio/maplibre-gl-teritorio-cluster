@@ -12,6 +12,8 @@
   <script type="module" src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
   <style>
     body {
+      display: flex;
+      flex-direction: column;
       margin: 0;
       padding: 0;
     }
@@ -21,14 +23,25 @@
     #map {
       height: 100%;
     }
+
+    header {
+      display: flex;
+      padding: 8px;
+      width: 100%;
+    }
   </style>
 </head>
 
 <body>
+  <header>
+    <input id="custom-url" type="url" placeholder="GeoJSON source URL..." />
+    <button id="load-data">Load external data</button>
+  </header>
   <div id="map"></div>
   <script type="module">
     import { buildCss, unfoldedClusterRenderSmart as unfoldedClusterRender, TeritorioCluster } from './src/index'
 
+    let geojson = await fetch('https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson', { method: 'GET' }).then(res => res.json())
     const map = new maplibregl.Map({
       hash: true,
       container: "map",
@@ -36,9 +49,7 @@
     });
 
     map.addControl(new maplibregl.NavigationControl());
-
     map.on('load', async () => {
-      let geojson = await fetch('https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson', { method: 'GET' }).then(res => res.json())
 
       // add a clustered GeoJSON source for a sample set of earthquakes
       map.addSource('earthquakes', {
@@ -85,6 +96,8 @@
       teritorioCluster.addEventListener('click', (e) => {
         console.log(e.detail.selectedFeature)
       })
+
+      document.getElementById('load-data').addEventListener('click', loadData)
     })
 
     const pinMarkerRender = (coords, offset) => {
@@ -128,6 +141,21 @@
         'height': `60px`,
         'cursor': 'pointer'
       });
+    }
+
+    const loadData = async () => {
+      const url = document.getElementById('custom-url').value
+      
+      if(!url)
+        return
+      
+      let vidoGeojson = await fetch(url, { method: 'GET' }).then(res => res.json())
+      const source = map.getSource('earthquakes')
+
+      source.setData({
+        type: 'FeatureCollection',
+        features: [ ...geojson.features, ...vidoGeojson.features]
+      })
     }
   </script>
 </body>
