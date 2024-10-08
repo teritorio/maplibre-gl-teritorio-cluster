@@ -96,10 +96,17 @@ export class TeritorioCluster extends EventTarget {
       if (e.sourceId !== this.sourceId || !e.isSourceLoaded)
         return
 
-      map.on('move', this.render);
-      map.on('moveend', this.render);
+      map.on('move', () => {
+        if (e.isSourceLoaded && e.sourceDataType !== 'metadata')
+          this.render
+      });
 
-      if(e.isSourceLoaded && e.sourceDataType !== 'metadata')
+      map.on('moveend', () => {
+        if (e.isSourceLoaded && e.sourceDataType !== 'metadata')
+          this.render
+      });
+
+      if (e.isSourceLoaded && e.sourceDataType !== 'metadata')
         this.render()
     });
 
