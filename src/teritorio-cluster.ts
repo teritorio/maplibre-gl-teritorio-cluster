@@ -109,8 +109,6 @@ export class TeritorioCluster extends EventTarget {
       if (e.isSourceLoaded && e.sourceDataType !== 'metadata')
         this.render()
     });
-
-    this.map.on('click', this.resetSelectedFeature)
   }
 
   render = () => {
