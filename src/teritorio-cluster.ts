@@ -160,6 +160,10 @@ export class TeritorioCluster extends EventTarget {
   resetSelectedFeature = () => {
     this.selectedClusterId = null
     this.selectedFeatureId = null
+    this.resetPinMarker()
+  }
+
+  resetPinMarker = () => {
     this.pinMarker?.remove()
     this.pinMarker = null
   }
@@ -247,8 +251,7 @@ export class TeritorioCluster extends EventTarget {
             const featureIndex = this.clusterLeaves.get(id)!.findIndex(f => this.getFeatureId(f) === this.selectedFeatureId)
 
             if (featureIndex > -1) {
-              // Clear outdated Pin marker
-              this.pinMarker.remove()
+              this.resetPinMarker()
 
               // Get selected feature DOM element position within cluster
               const selectedFeatureHTML = Array.from(clusterHTML.children).find(el => el.id === this.selectedFeatureId) as HTMLElement
@@ -332,8 +335,7 @@ export class TeritorioCluster extends EventTarget {
           let offset: Point | undefined
           const selectedFeature = featuresMap.get(this.selectedFeatureId)
 
-          // Clear outdated Pin marker
-          this.pinMarker.remove()
+          this.resetPinMarker()
 
           // If selected feature is in a cluster
           if (!selectedFeature) {
@@ -370,12 +372,6 @@ export class TeritorioCluster extends EventTarget {
             this.pinMarker = this.renderPinMarker(coords, offset).addTo(this.map)
         }
       }
-
-      // Keeps Pin Marker over cluster / single markers
-      if (this.pinMarker && this.selectedClusterId && this.selectedFeatureId) {
-        this.pinMarker.remove()
-        this.pinMarker.addTo(this.map)
-      }
     }
 
     this.markersOnScreen = newMarkers;
@@ -391,8 +387,7 @@ export class TeritorioCluster extends EventTarget {
     if (this.selectedFeatureId === id)
       return
 
-    this.pinMarker?.remove()
-    this.pinMarker = null
+    this.resetPinMarker()
 
     if(this.markersOnScreen[id]) {
       this.pinMarker = this.renderPinMarker(this.markersOnScreen[id].getLngLat()).addTo(this.map)
