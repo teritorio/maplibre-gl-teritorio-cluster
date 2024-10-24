@@ -39,7 +39,7 @@ export const unfoldedClusterRenderCircle = (
 
     rot += angle
 
-    featureHTML.addEventListener('click', (e) => clickHandler(e, feature))
+    featureHTML.addEventListener('click', (e: Event) => clickHandler(e, feature))
     parent.append(featureHTML)
   })
 }
@@ -88,7 +88,7 @@ export const unfoldedClusterRenderHexaGrid = (
       'transform': `translate(${x * markerSize}px, ${y * markerSize}px)`,
     })
 
-    featureHTML.addEventListener('click', (e) => clickHandler(e, feature))
+    featureHTML.addEventListener('click', (e: Event) => clickHandler(e, feature))
     parent.append(featureHTML)
   })
 }
