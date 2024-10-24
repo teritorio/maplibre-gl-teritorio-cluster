@@ -237,6 +237,8 @@ export class TeritorioCluster extends EventTarget {
         newMarkers[id] = marker
 
         if (!this.markersOnScreen[id]) {
+          const clusterHTML = marker.getElement()
+
           marker.addTo(this.map);
 
           // If selected feature is now part of this new cluster
@@ -249,16 +251,15 @@ export class TeritorioCluster extends EventTarget {
               this.pinMarker.remove()
 
               // Get selected feature DOM element position within cluster
-              const { x: clusterX, y: clusterY } = marker._pos
-              const selectedFeatureHTML = Array.from(marker.getElement().children).find(el => el.id === this.selectedFeatureId)
+              const selectedFeatureHTML = Array.from(clusterHTML.children).find(el => el.id === this.selectedFeatureId) as HTMLElement
 
               if (!selectedFeatureHTML)
                 throw new Error('Selected feature HTML marker was not found !')
 
-              const { x, y, height, width } = selectedFeatureHTML.getBoundingClientRect()
-              const offset = new Point(x - clusterX + (width / 2), y - clusterY - (height / 2))
-
-              this.pinMarker = this.renderPinMarker(marker.getLngLat(), offset).addTo(this.map)
+              this.pinMarker = this.renderPinMarker(
+                marker.getLngLat(),
+                this._calculatePinMarkerOffset(clusterHTML, selectedFeatureHTML)
+              ).addTo(this.map)
             }
           }
 
@@ -269,7 +270,7 @@ export class TeritorioCluster extends EventTarget {
             const featureIndex = leaves.findIndex(f => this.getFeatureId(f) === featureId)
 
             if (featureIndex > -1) {
-              const isUnfoldedCluster = marker.getElement().classList.contains(UnfoldedClusterClass)
+              const isUnfoldedCluster = clusterHTML.classList.contains(UnfoldedClusterClass)
 
               this.selectedClusterId = id
               this.selectedFeatureId = this.getFeatureId(this.initialFeature)
@@ -277,16 +278,15 @@ export class TeritorioCluster extends EventTarget {
               if (!isUnfoldedCluster) {
                 this.pinMarker = this.renderPinMarker(marker.getLngLat()).addTo(this.map)
               } else {
-                const { x: clusterX, y: clusterY } = marker._pos
-                const selectedFeatureHTML = Array.from(marker.getElement().children).find(el => el.id === this.selectedFeatureId)
+                const selectedFeatureHTML = Array.from(clusterHTML.children).find(el => el.id === this.selectedFeatureId) as HTMLElement
 
                 if (!selectedFeatureHTML)
                   throw new Error('Selected feature HTML marker was not found !')
 
-                const { x, y, height, width } = selectedFeatureHTML.getBoundingClientRect()
-                const offset = new Point(x - clusterX + (width / 2), y - clusterY - (height / 2))
-
-                this.pinMarker = this.renderPinMarker(marker.getLngLat(), offset).addTo(this.map)
+                this.pinMarker = this.renderPinMarker(
+                  marker.getLngLat(),
+                  this._calculatePinMarkerOffset(clusterHTML, selectedFeatureHTML)
+                ).addTo(this.map)
               }
 
               this.initialFeature = undefined
@@ -348,15 +348,13 @@ export class TeritorioCluster extends EventTarget {
                 this.selectedClusterId = clusterId.toString()
 
                 // Get selected feature DOM element position within cluster
-                const selectedClusterHTML = newMarkers[this.selectedClusterId]
-                const { x: clusterX, y: clusterY } = selectedClusterHTML._pos
-                coords = selectedClusterHTML.getLngLat()
-
-                const selectedFeatureHTML = selectedClusterHTML.getElement().children[featureIndex]
+                const cluster = newMarkers[this.selectedClusterId]
+                const clusterHTML = cluster.getElement()
+                coords = cluster.getLngLat()
+                const selectedFeatureHTML = clusterHTML.children[featureIndex] as HTMLElement
 
                 if (selectedFeatureHTML) {
-                  const { x, y, height, width } = selectedFeatureHTML.getBoundingClientRect()
-                  offset = new Point(x - clusterX + (width / 2), y - clusterY - (height / 2))
+                  offset = this._calculatePinMarkerOffset(clusterHTML, selectedFeatureHTML)
                 }
 
                 break
@@ -402,13 +400,13 @@ export class TeritorioCluster extends EventTarget {
 
     // If element is within Unfolded Cluster
     if (!markerOnScreen && clusterId) {
+      const cluster = this.markersOnScreen[clusterId]
+      
       this.selectedClusterId = clusterId
-
-      const { x: clusterX, y: clusterY } = this.markersOnScreen[clusterId]._pos
-      const { x, y, height, width } = clickedEl.getBoundingClientRect()
-      const offset = new Point(x - clusterX + (width / 2), y - clusterY - (height / 2))
-
-      this.pinMarker = this.renderPinMarker(this.markersOnScreen[clusterId].getLngLat(), offset).addTo(this.map)
+      this.pinMarker = this.renderPinMarker(
+        cluster.getLngLat(),
+        this._calculatePinMarkerOffset(cluster.getElement(), clickedEl)
+      ).addTo(this.map)
     } else {
       this.pinMarker = this.renderPinMarker(markerOnScreen.getLngLat()).addTo(this.map)
     }
@@ -422,5 +420,16 @@ export class TeritorioCluster extends EventTarget {
     })
 
     this.dispatchEvent(event)
+  }
+
+  _getClusterCenter = (cluster: HTMLElement) => {
+    const { left, right, top, bottom } = cluster.getBoundingClientRect()
+    return { clusterXCenter: (left + right) / 2, clusterYCenter: (top + bottom) / 2 }
+  }
+
+  _calculatePinMarkerOffset = (cluster: HTMLElement, marker: HTMLElement) => {
+    const { clusterXCenter, clusterYCenter } = this._getClusterCenter(cluster)
+    const { x, y, height, width } = marker.getBoundingClientRect()
+    return new Point(x - clusterXCenter + (width / 2), y - clusterYCenter + (height / 2))
   }
 }
