@@ -384,34 +384,30 @@ export class TeritorioCluster extends EventTarget {
 
   featureClickHandler = (e: Event, feature: MapGeoJSONFeature) => {
     e.stopPropagation()
-    const id = this.getFeatureId(feature)
-    const clickedEl = e.currentTarget as HTMLDivElement
-    const markerOnScreen = this.markersOnScreen[id]
-    const clusterId = clickedEl.parentElement?.id
 
-    // Remove existing pin marker if clicked feature is different
-    if (this.pinMarker && this.selectedFeatureId) {
-      if (this.selectedFeatureId === clickedEl.id)
-        return
+    const clickedEl = e.currentTarget as HTMLElement
+    const id = clickedEl.id
 
-      this.pinMarker.remove()
-      this.pinMarker = null
-    }
+    if (this.selectedFeatureId === id)
+      return
 
-    // If element is within Unfolded Cluster
-    if (!markerOnScreen && clusterId) {
-      const cluster = this.markersOnScreen[clusterId]
-      
-      this.selectedClusterId = clusterId
+    this.pinMarker?.remove()
+    this.pinMarker = null
+
+    if(this.markersOnScreen[id]) {
+      this.pinMarker = this.renderPinMarker(this.markersOnScreen[id].getLngLat()).addTo(this.map)
+    } else {
+      const cluster = this.markersOnScreen[clickedEl.parentElement!.id]
+      const clusterHTML = cluster.getElement()
+
+      this.selectedClusterId = clusterHTML.id
       this.pinMarker = this.renderPinMarker(
         cluster.getLngLat(),
-        this._calculatePinMarkerOffset(cluster.getElement(), clickedEl)
+        this._calculatePinMarkerOffset(clusterHTML, clickedEl)
       ).addTo(this.map)
-    } else {
-      this.pinMarker = this.renderPinMarker(markerOnScreen.getLngLat()).addTo(this.map)
     }
 
-    this.selectedFeatureId = clickedEl.id
+    this.selectedFeatureId = id
 
     const event = new CustomEvent("click", {
       detail: {
