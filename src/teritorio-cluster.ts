@@ -256,7 +256,7 @@ export class TeritorioCluster extends EventTarget {
                 throw new Error('Selected feature HTML marker was not found !')
 
               const { x, y, height, width } = selectedFeatureHTML.getBoundingClientRect()
-              const offset = new Point(x - clusterX + (width / 2), y - clusterY + (height / 2))
+              const offset = new Point(x - clusterX + (width / 2), y - clusterY - (height / 2))
 
               this.pinMarker = this.renderPinMarker(marker.getLngLat(), offset).addTo(this.map)
             }
@@ -284,7 +284,7 @@ export class TeritorioCluster extends EventTarget {
                   throw new Error('Selected feature HTML marker was not found !')
 
                 const { x, y, height, width } = selectedFeatureHTML.getBoundingClientRect()
-                const offset = new Point(x - clusterX + (width / 2), y - clusterY + (height / 2))
+                const offset = new Point(x - clusterX + (width / 2), y - clusterY - (height / 2))
 
                 this.pinMarker = this.renderPinMarker(marker.getLngLat(), offset).addTo(this.map)
               }
@@ -356,7 +356,7 @@ export class TeritorioCluster extends EventTarget {
 
                 if (selectedFeatureHTML) {
                   const { x, y, height, width } = selectedFeatureHTML.getBoundingClientRect()
-                  offset = new Point(x - clusterX + (width / 2), y - clusterY + (height / 2))
+                  offset = new Point(x - clusterX + (width / 2), y - clusterY - (height / 2))
                 }
 
                 break
@@ -406,7 +406,7 @@ export class TeritorioCluster extends EventTarget {
 
       const { x: clusterX, y: clusterY } = this.markersOnScreen[clusterId]._pos
       const { x, y, height, width } = clickedEl.getBoundingClientRect()
-      const offset = new Point(x - clusterX + (width / 2), y - clusterY + (height / 2))
+      const offset = new Point(x - clusterX + (width / 2), y - clusterY - (height / 2))
 
       this.pinMarker = this.renderPinMarker(this.markersOnScreen[clusterId].getLngLat(), offset).addTo(this.map)
     } else {
