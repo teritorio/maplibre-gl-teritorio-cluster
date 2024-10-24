@@ -381,7 +381,13 @@ export class TeritorioCluster extends EventTarget {
   featureClickHandler = (e: Event, feature: MapGeoJSONFeature) => {
     e.stopPropagation()
 
-    const clickedEl = e.currentTarget as HTMLElement
+    if(!(e.currentTarget instanceof HTMLElement))
+      return
+
+    if (this.selectedFeatureId === e.currentTarget.id)
+      return
+
+    const clickedEl = e.currentTarget
     const id = clickedEl.id
 
     if (this.selectedFeatureId === id)
