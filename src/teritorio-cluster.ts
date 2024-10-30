@@ -1,4 +1,4 @@
-import type { GeoJSONSource, LngLatLike, MapGeoJSONFeature } from 'maplibre-gl'
+import type { FitBoundsOptions, GeoJSONSource, LngLatLike, MapGeoJSONFeature } from 'maplibre-gl'
 import { Marker, Point } from 'maplibre-gl'
 import {
   clusterRenderDefault,
@@ -6,6 +6,8 @@ import {
   pinMarkerRenderDefault,
   unfoldedClusterRenderSmart
 } from './utils/helpers';
+import bbox from '@turf/bbox'
+import { featureCollection } from '@turf/helpers'
 
 type UnfoldedCluster = (
   (
@@ -43,6 +45,7 @@ export class TeritorioCluster extends EventTarget {
   clusterLeaves: Map<string, MapGeoJSONFeature[]>
   clusterMaxZoom: number
   clusterRender?: ClusterRender
+  fitBoundsOptions: FitBoundsOptions
   initialFeature?: MapGeoJSONFeature
   markers: { [key: string]: Marker }
   markerRender?: MarkerRender
@@ -63,6 +66,7 @@ export class TeritorioCluster extends EventTarget {
     options?: {
       clusterMaxZoom?: number,
       clusterRenderFn?: ClusterRender,
+      fitBoundsOptions?: FitBoundsOptions,
       initialFeature?: MapGeoJSONFeature,
       markerRenderFn?: MarkerRender,
       markerSize?: number
@@ -77,6 +81,7 @@ export class TeritorioCluster extends EventTarget {
     this.clusterLeaves = new Map<string, MapGeoJSONFeature[]>()
     this.clusterMaxZoom = options?.clusterMaxZoom || 17
     this.clusterRender = options?.clusterRenderFn
+    this.fitBoundsOptions = options?.fitBoundsOptions || { padding: 20 }
     this.initialFeature = options?.initialFeature
     this.markers = {}
     this.markerRender = options?.markerRenderFn
@@ -147,12 +152,21 @@ export class TeritorioCluster extends EventTarget {
     return element
   }
 
-  renderCluster = (props: MapGeoJSONFeature['properties']) => {
+  renderCluster = (id: string, props: MapGeoJSONFeature['properties']) => {
     const element = document.createElement('div')
+    element.id = id
 
     !this.clusterRender
       ? clusterRenderDefault(element, props)
       : this.clusterRender(element, props)
+
+    element.addEventListener('click', (e: Event) => {
+      if (!(e.currentTarget instanceof HTMLElement))
+        return
+
+      // Fit map to cluster leaves bounding box
+      this._fitBoundsToClusterLeaves(this.clusterLeaves.get(e.currentTarget.id))
+    })
 
     return element;
   }
@@ -232,7 +246,7 @@ export class TeritorioCluster extends EventTarget {
           if (leaves && ((leaves.length <= this.unfoldedClusterMaxLeaves) || maxZoomLimit)) {
             element = this.renderUnfoldedCluster(id, leaves)
           } else {
-            element = this.renderCluster(props)
+            element = this.renderCluster(id, props)
           }
 
           marker = this.markers[id] = new Marker({ element }).setLngLat(coords)
@@ -381,7 +395,7 @@ export class TeritorioCluster extends EventTarget {
   featureClickHandler = (e: Event, feature: MapGeoJSONFeature) => {
     e.stopPropagation()
 
-    if(!(e.currentTarget instanceof HTMLElement))
+    if (!(e.currentTarget instanceof HTMLElement))
       return
 
     if (this.selectedFeatureId === e.currentTarget.id)
@@ -395,7 +409,7 @@ export class TeritorioCluster extends EventTarget {
 
     this.resetPinMarker()
 
-    if(this.markersOnScreen[id]) {
+    if (this.markersOnScreen[id]) {
       this.pinMarker = this.renderPinMarker(this.markersOnScreen[id].getLngLat()).addTo(this.map)
     } else {
       const cluster = this.markersOnScreen[clickedEl.parentElement!.id]
@@ -428,5 +442,14 @@ export class TeritorioCluster extends EventTarget {
     const { clusterXCenter, clusterYCenter } = this._getClusterCenter(cluster)
     const { x, y, height, width } = marker.getBoundingClientRect()
     return new Point(x - clusterXCenter + (width / 2), y - clusterYCenter + (height / 2))
+  }
+
+  _fitBoundsToClusterLeaves(features?: MapGeoJSONFeature[]) {
+    if(!features)
+      throw new Error('This cluster has no leaves !')
+
+    const bounds = bbox(featureCollection(features))
+
+    this.map.fitBounds(bounds as [number, number, number, number], this.fitBoundsOptions)
   }
 }

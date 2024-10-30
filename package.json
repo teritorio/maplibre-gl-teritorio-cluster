@@ -37,6 +37,8 @@
     "vite": "^5.4.4"
   },
   "dependencies": {
+    "@turf/bbox": "^7.1.0",
+    "@turf/helpers": "^7.1.0",
     "maplibre-gl": "^4.7.0"
   },
   "packageManager": "yarn@4.5.0"
