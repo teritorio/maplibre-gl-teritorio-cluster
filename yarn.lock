@@ -401,11 +401,45 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@teritorio/maplibre-gl-teritorio-cluster@workspace:."
   dependencies:
+    "@turf/bbox": "npm:^7.1.0"
+    "@turf/helpers": "npm:^7.1.0"
     maplibre-gl: "npm:^4.7.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.4"
   languageName: unknown
   linkType: soft
+
+"@turf/bbox@npm:^7.1.0":
+  version: 7.1.0
+  resolution: "@turf/bbox@npm:7.1.0"
+  dependencies:
+    "@turf/helpers": "npm:^7.1.0"
+    "@turf/meta": "npm:^7.1.0"
+    "@types/geojson": "npm:^7946.0.10"
+    tslib: "npm:^2.6.2"
+  checksum: 10c0/901ed437ad1241b1c7cf76ee3f1dd998b32a59647074216d076a62080281693cc3f1d66d1dedd02fd5617ea57434ec059843bcc275d20f667019f3e1f378b05d
+  languageName: node
+  linkType: hard
+
+"@turf/helpers@npm:^7.1.0":
+  version: 7.1.0
+  resolution: "@turf/helpers@npm:7.1.0"
+  dependencies:
+    "@types/geojson": "npm:^7946.0.10"
+    tslib: "npm:^2.6.2"
+  checksum: 10c0/0b07c01584d8bee977edec8752109b4f79ab5b149e55a7dbe051e412e150c0a96f2464c9647676a092b7ab4429271eee4a31400ea45e9b55095ae53ad22f43d6
+  languageName: node
+  linkType: hard
+
+"@turf/meta@npm:^7.1.0":
+  version: 7.1.0
+  resolution: "@turf/meta@npm:7.1.0"
+  dependencies:
+    "@turf/helpers": "npm:^7.1.0"
+    "@types/geojson": "npm:^7946.0.10"
+  checksum: 10c0/c7aa77ddb28ef5068b031c1b422d2d5dc1df51975f727be42e2d8d500a026a2e667242d6aa06453f757cbd5ead2db0ba6b9a5d2fcf5ab496574cd4c0ae4fe325
+  languageName: node
+  linkType: hard
 
 "@types/estree@npm:1.0.5":
   version: 1.0.5
@@ -423,7 +457,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/geojson@npm:*, @types/geojson@npm:^7946.0.14":
+"@types/geojson@npm:*, @types/geojson@npm:^7946.0.10, @types/geojson@npm:^7946.0.14":
   version: 7946.0.14
   resolution: "@types/geojson@npm:7946.0.14"
   checksum: 10c0/54f3997708fa2970c03eeb31f7e4540a0eb6387b15e9f8a60513a1409c23cafec8d618525404573468b59c6fecbfd053724b3327f7fca416729c26271d799f55
@@ -1714,6 +1748,13 @@ __metadata:
   version: 3.0.0
   resolution: "tinyqueue@npm:3.0.0"
   checksum: 10c0/edd6f1a6146aa3aa7bc85b44b3aacf44cddfa805b0901019272d7e9235894b4f28b2f9d09c1bce500ae48883b03708b6b871aa33920e895d2943720f7a9ad3ba
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.6.2":
+  version: 2.8.0
+  resolution: "tslib@npm:2.8.0"
+  checksum: 10c0/31e4d14dc1355e9b89e4d3c893a18abb7f90b6886b089c2da91224d0a7752c79f3ddc41bc1aa0a588ac895bd97bb99c5bc2bfdb2f86de849f31caeb3ba79bbe5
   languageName: node
   linkType: hard
 
