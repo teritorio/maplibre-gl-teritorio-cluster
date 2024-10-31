@@ -274,17 +274,22 @@ export class TeritorioCluster extends EventTarget {
 
             if (featureIndex > -1) {
               this.resetPinMarker()
+              const isUnfoldedCluster = clusterHTML.classList.contains(UnfoldedClusterClass)
 
-              // Get selected feature DOM element position within cluster
-              const selectedFeatureHTML = Array.from(clusterHTML.children).find(el => el.id === this.selectedFeatureId) as HTMLElement
+              if (!isUnfoldedCluster) {
+                this.pinMarker = this.renderPinMarker(marker.getLngLat()).addTo(this.map)
+              } else {
+                // Get selected feature DOM element position within cluster
+                const selectedFeatureHTML = Array.from(clusterHTML.children).find(el => el.id === this.selectedFeatureId) as HTMLElement
 
-              if (!selectedFeatureHTML)
-                throw new Error('Selected feature HTML marker was not found !')
+                if (!selectedFeatureHTML)
+                  throw new Error('Selected feature HTML marker was not found !')
 
-              this.pinMarker = this.renderPinMarker(
-                marker.getLngLat(),
-                this._calculatePinMarkerOffset(clusterHTML, selectedFeatureHTML)
-              ).addTo(this.map)
+                this.pinMarker = this.renderPinMarker(
+                  marker.getLngLat(),
+                  this._calculatePinMarkerOffset(clusterHTML, selectedFeatureHTML)
+                ).addTo(this.map)
+              }
             }
           }
 
