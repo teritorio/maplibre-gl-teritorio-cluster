@@ -44,6 +44,7 @@ export class TeritorioCluster extends EventTarget {
   map: maplibregl.Map
   clusterLeaves: Map<string, MapGeoJSONFeature[]>
   clusterMaxZoom: number
+  clusterMinZoom: number
   clusterRender?: ClusterRender
   fitBoundsOptions: FitBoundsOptions
   initialFeature?: MapGeoJSONFeature
@@ -65,6 +66,7 @@ export class TeritorioCluster extends EventTarget {
     sourceId: string,
     options?: {
       clusterMaxZoom?: number,
+      clusterMinZoom?: number,
       clusterRenderFn?: ClusterRender,
       fitBoundsOptions?: FitBoundsOptions,
       initialFeature?: MapGeoJSONFeature,
@@ -80,6 +82,7 @@ export class TeritorioCluster extends EventTarget {
     this.map = map
     this.clusterLeaves = new Map<string, MapGeoJSONFeature[]>()
     this.clusterMaxZoom = options?.clusterMaxZoom || 17
+    this.clusterMinZoom = options?.clusterMinZoom || 0
     this.clusterRender = options?.clusterRenderFn
     this.fitBoundsOptions = options?.fitBoundsOptions || { padding: 20 }
     this.initialFeature = options?.initialFeature
@@ -200,6 +203,7 @@ export class TeritorioCluster extends EventTarget {
     const features = this.map.querySourceFeatures(this.sourceId)
     const featuresMap = new Map<string, MapGeoJSONFeature>()
     const maxZoomLimit = this.map.getZoom() >= this.clusterMaxZoom
+    const minZoomLimit = this.map.getZoom() >= this.clusterMinZoom
 
     this.clusterLeaves.clear()
 
@@ -233,17 +237,21 @@ export class TeritorioCluster extends EventTarget {
           (marker && maxZoomLimit && !marker.getElement().classList.contains(UnfoldedClusterClass))
           ||
           (marker && !maxZoomLimit && marker.getElement().classList.contains(UnfoldedClusterClass) && this.markersOnScreen[id])
+          ||
+          (marker && minZoomLimit && !marker.getElement().classList.contains(UnfoldedClusterClass))
+          ||
+          (marker && !minZoomLimit && marker.getElement().classList.contains(UnfoldedClusterClass) && this.markersOnScreen[id])
         ) {
           marker = undefined
           delete this.markers[id]
-          this.markersOnScreen[id].remove();
+          this.markersOnScreen[id]?.remove();
           delete this.markersOnScreen[id]
         }
 
         if (!marker) {
           let element: HTMLDivElement
 
-          if (leaves && ((leaves.length <= this.unfoldedClusterMaxLeaves) || maxZoomLimit)) {
+          if (leaves && minZoomLimit && ((leaves.length <= this.unfoldedClusterMaxLeaves) || maxZoomLimit)) {
             element = this.renderUnfoldedCluster(id, leaves)
           } else {
             element = this.renderCluster(id, props)
