@@ -119,6 +119,10 @@ export class TeritorioCluster extends EventTarget {
     });
   }
 
+  setBoundsOptions = (options: FitBoundsOptions) => {
+    this.fitBoundsOptions = options
+  }
+
   render = () => {
     if (!this.ticking)
       requestAnimationFrame(this.updateMarkers)
@@ -164,6 +168,8 @@ export class TeritorioCluster extends EventTarget {
       : this.clusterRender(element, props)
 
     element.addEventListener('click', (e: Event) => {
+      e.stopPropagation()
+      
       if (!(e.currentTarget instanceof HTMLElement))
         return
 
