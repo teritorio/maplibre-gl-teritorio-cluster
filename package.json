@@ -1,6 +1,6 @@
 {
   "name": "@teritorio/maplibre-gl-teritorio-cluster",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Allow visualization and interaction with all markers, even when superposed. Can display and interact with small cluster without the need to zoom or uncluster.",
   "type": "module",
   "files": [
