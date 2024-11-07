@@ -1,4 +1,4 @@
-import type { FitBoundsOptions, GeoJSONSource, LngLatLike, MapGeoJSONFeature } from 'maplibre-gl'
+import type { FitBoundsOptions, GeoJSONSource, LngLatLike, MapGeoJSONFeature, MapSourceDataEvent } from 'maplibre-gl'
 import { Marker, Point } from 'maplibre-gl'
 import {
   clusterRenderDefault,
@@ -100,23 +100,14 @@ export class TeritorioCluster extends EventTarget {
     this.unfoldedClusterMaxLeaves = options?.unfoldedClusterMaxLeaves || 7
 
     // after the GeoJSON data is loaded, update markers on the screen and do so on every map move/moveend
-    map.on('data', (e: any) => {
-      if (e.sourceId !== this.sourceId || !e.isSourceLoaded)
-        return
+    map.on('data', (e: MapSourceDataEvent) => {
+      if (e.sourceId !== this.sourceId || !e.isSourceLoaded || e.sourceDataType === 'metadata')
+        return;
 
-      map.on('move', () => {
-        if (e.isSourceLoaded && e.sourceDataType !== 'metadata')
-          this.render()
-      });
-
-      map.on('moveend', () => {
-        if (e.isSourceLoaded && e.sourceDataType !== 'metadata')
-          this.render()
-      });
-
-      if (e.isSourceLoaded && e.sourceDataType !== 'metadata')
-        this.render()
+      this.render()
     });
+
+    map.on('moveend', this.render);
   }
 
   setBoundsOptions = (options: FitBoundsOptions) => {
@@ -169,7 +160,7 @@ export class TeritorioCluster extends EventTarget {
 
     element.addEventListener('click', (e: Event) => {
       e.stopPropagation()
-      
+
       if (!(e.currentTarget instanceof HTMLElement))
         return
 
@@ -435,7 +426,7 @@ export class TeritorioCluster extends EventTarget {
   }
 
   _fitBoundsToClusterLeaves(features?: MapGeoJSONFeature[]) {
-    if(!features)
+    if (!features)
       throw new Error('This cluster has no leaves !')
 
     const bounds = bbox(featureCollection(features))
