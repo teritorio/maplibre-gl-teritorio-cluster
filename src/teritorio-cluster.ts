@@ -339,8 +339,6 @@ export class TeritorioCluster extends EventTarget {
           let offset: Point | undefined
           const selectedFeature = featuresMap.get(this.selectedFeatureId)
 
-          this.resetPinMarker()
-
           // If selected feature is in a cluster
           if (!selectedFeature) {
             const iterator = this.clusterLeaves.entries()
@@ -372,8 +370,10 @@ export class TeritorioCluster extends EventTarget {
             coords = (selectedFeature.geometry as GeoJSON.Point).coordinates as LngLatLike
           }
 
-          if (coords)
+          if (coords) {
+            this.resetPinMarker()
             this.pinMarker = this.renderPinMarker(coords, offset).addTo(this.map)
+          }
         }
       }
     }
