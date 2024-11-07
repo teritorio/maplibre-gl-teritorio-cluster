@@ -427,7 +427,7 @@ export class TeritorioCluster extends EventTarget {
 
   _fitBoundsToClusterLeaves(features?: MapGeoJSONFeature[]) {
     if (!features)
-      throw new Error('This cluster has no leaves !')
+      return
 
     const bounds = bbox(featureCollection(features))
 
