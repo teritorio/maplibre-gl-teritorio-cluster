@@ -40,6 +40,7 @@ const map = new Map({
         cluster: true,
         clusterRadius: 80,
         clusterMaxZoom: 22, // Required, set a value for clusterMaxZoom
+        maxzoom: 24,
         data: {
           type: "FeatureCollection",
           features: [
@@ -70,32 +71,31 @@ const map = new Map({
 });
 
 map.on('load', () => {
-  const TeritorioCluster = new TeritorioCluster(map, 'points', options)
+  const TeritorioCluster = new TeritorioCluster(map, 'points')
 
-  // Get feature click event
   TeritorioCluster.addEventListener('click', (e) => {
     console.log(e.detail.selectedFeature)
   })
-
-  // Render feature on map data updates
-  map.on('data', (e) => {
-    if (e.sourceId !== 'points' || !e.isSourceLoaded)
-      return;
-
-    map.on('move', TeritorioCluster.render);
-    map.on('moveend', TeritorioCluster.render);
-    TeritorioCluster.render()
-  });
 })
 
 // Create whatever HTML element you want as Cluster
-const clusterRender = (element: HTMLDivElement, props: MapGeoJSONFeature['properties'], size?: number): void => {}
+const clusterRender = (
+  element: HTMLDivElement,
+  props: MapGeoJSONFeature['properties']
+) => {}
 
 // Create whatever HTML element you want as individual Marker
-const displayMarker = (element: HTMLDivElement, feature: MapGeoJSONFeature, size?: number): void => {}
+const markerRender =  (
+  element: HTMLDivElement,
+  feature: MapGeoJSONFeature,
+  markerSize: number
+) => {}
 
 // Create whatever HTML element you want as Pin Marker
-const displayPinMarker = (coords: LngLatLike, offset: Point): Marker => {}
+const pinMarkerRender = (
+  coords: LngLatLike,
+  offset: Point
+): Marker => {}
 ```
 
 ## API
