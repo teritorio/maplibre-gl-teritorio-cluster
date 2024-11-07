@@ -34,8 +34,9 @@
 
 <body>
   <header>
-    <input id="custom-url" type="url" placeholder="GeoJSON source URL..." />
+    <input id="custom-url" type="url" value="https://dev.appcarto.teritorio.xyz/content/api.teritorio/geodata/v0.1/demo_teritorio/tourism/pois/category/8273.geojson?geometry_as=point&short_description=true" placeholder="GeoJSON source URL..." />
     <button id="load-data">Load external data</button>
+    <button id="remove-data">Remove data</button>
   </header>
   <div id="map"></div>
   <script type="module">
@@ -100,6 +101,7 @@
       })
 
       document.getElementById('load-data').addEventListener('click', loadData)
+      document.getElementById('remove-data').addEventListener('click', removeData)
     })
 
     const pinMarkerRender = (coords, offset) => {
@@ -151,12 +153,21 @@
       if(!url)
         return
       
-      let vidoGeojson = await fetch(url, { method: 'GET' }).then(res => res.json())
+      let newGeojson = await fetch(url, { method: 'GET' }).then(res => res.json())
       const source = map.getSource('earthquakes')
 
       source.setData({
         type: 'FeatureCollection',
-        features: [ ...geojson.features, ...vidoGeojson.features]
+        features: [ ...geojson.features, ...newGeojson.features]
+      })
+    }
+
+    const removeData = () => {
+      const source = map.getSource('earthquakes')
+
+      source.setData({
+        type: 'FeatureCollection',
+        features: geojson.features
       })
     }
   </script>
