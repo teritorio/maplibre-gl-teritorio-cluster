@@ -338,11 +338,11 @@ export class TeritorioCluster extends EventTarget {
     }
 
     this.featuresMap.forEach(feature => {
+      const id = this.#getFeatureId(feature)
       const coords = (feature.geometry as GeoJSON.Point).coordinates as LngLatLike
-      const props = feature.properties;
+      const props = feature.properties
 
       if (props.cluster) {
-        const id = props.cluster_id.toString()
         let marker: Marker | undefined = this.markers[id];
         const leaves = this.clusterLeaves.get(id)
 
@@ -411,7 +411,6 @@ export class TeritorioCluster extends EventTarget {
           }
         }
       } else {
-        const id = this.#getFeatureId(feature)
         let marker = this.markers[id];
 
         if (!marker) {
