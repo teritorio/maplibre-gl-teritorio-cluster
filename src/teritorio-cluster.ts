@@ -1,5 +1,5 @@
 import type { FitBoundsOptions, GeoJSONSource, LngLatLike, MapGeoJSONFeature, MapSourceDataEvent } from 'maplibre-gl'
-import { Marker, Point } from 'maplibre-gl'
+import { LngLat, Marker, Point } from 'maplibre-gl'
 import {
   clusterRenderDefault,
   markerRenderDefault,
@@ -37,6 +37,8 @@ type PinMarkerRender = (
     offset: Point
   ) => Marker
 )
+type FeatureInClusterMatch = { clusterId: string, feature: MapGeoJSONFeature }
+type FeatureMatch = FeatureInClusterMatch | MapGeoJSONFeature
 
 const UnfoldedClusterClass = 'teritorio-unfolded-cluster'
 
@@ -312,6 +314,12 @@ export class TeritorioCluster extends EventTarget {
         if (!this.markersOnScreen[id]) {
           marker.addTo(this.map);
 
+          // Keep Pin Marker on top
+          if(this.pinMarker && this.selectedFeatureId === id) {
+            this.resetPinMarker()
+            this._setPinMarker(marker.getElement(), marker.getLngLat())
+          }
+
           // If initialFeature is this new marker
           // We position the Pin marker on it
           if (this.initialFeature && (this.getFeatureId(this.initialFeature) === id)) {
@@ -417,6 +425,56 @@ export class TeritorioCluster extends EventTarget {
     })
 
     this.dispatchEvent(event)
+  }
+
+  findFeature = (id: string): FeatureMatch | undefined => {
+    return this.featuresMap.get(id) ?? this.findClusterizedFeature(id)
+  }
+
+  findClusterizedFeature = (id: string): FeatureInClusterMatch | undefined => {
+    const iterator = this.clusterLeaves.entries()
+
+    for (const [key, value] of iterator) {
+      const match = value.find(feature => this.getFeatureId(feature) === id)
+
+      if (match) {
+        return { clusterId: key, feature: match }
+      }
+    }
+  }
+
+  setSelectedFeature = (feature: MapGeoJSONFeature) => {
+    const id = this.getFeatureId(feature)
+    const match = this.findFeature(id)
+    
+    if (!match) {
+      if(feature.geometry.type !== 'Point')
+        return
+
+      this.resetSelectedFeature()
+      this.selectedFeatureId = id
+      this.pinMarker = this.renderPinMarker(new LngLat(feature.geometry.coordinates[0], feature.geometry.coordinates[1])).addTo(this.map)
+      return
+    }
+
+    this.resetSelectedFeature()
+    this.selectedFeatureId = id
+
+    if ('type' in match && match.type === 'Feature' && match.geometry.type === 'Point') {
+      const coords = match.geometry.coordinates
+
+      this.pinMarker = this.renderPinMarker(new LngLat(coords[0], coords[1])).addTo(this.map)
+
+      return
+    } else if ('feature' in match && match.feature.geometry.type === 'Point') {
+      const cluster = this.markersOnScreen[match.clusterId]
+      const coords = cluster.getLngLat()
+
+      this.selectedClusterId = match.clusterId
+      this._setPinMarker(cluster.getElement(), coords)
+
+      return
+    }
   }
 
   _getClusterCenter = (cluster: HTMLElement) => {

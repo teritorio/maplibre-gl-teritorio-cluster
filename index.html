@@ -36,12 +36,16 @@
   <header>
     <input id="custom-url" type="url" placeholder="GeoJSON source URL..." />
     <button id="load-data">Load external data</button>
+    |
+    <input id="feature-id" type="text" value="us2000ahxc" />
+    <button id="select-feature">Select feature manually</button>
   </header>
   <div id="map"></div>
   <script type="module">
     import { buildCss, unfoldedClusterRenderSmart as unfoldedClusterRender, TeritorioCluster } from './src/index'
 
     let geojson;
+    let teritorioCluster;
     const map = new maplibregl.Map({
       hash: true,
       container: "map",
@@ -51,7 +55,7 @@
     map.addControl(new maplibregl.NavigationControl());
     map.on('load', async () => {
       geojson = await fetch('https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson', { method: 'GET' }).then(res => res.json())
-      
+
       // add a clustered GeoJSON source for a sample set of earthquakes
       map.addSource('earthquakes', {
         'type': 'geojson',
@@ -81,7 +85,7 @@
         }
       });
 
-      const teritorioCluster = new TeritorioCluster(
+      teritorioCluster = new TeritorioCluster(
         map,
         'earthquakes',
         {
@@ -100,6 +104,7 @@
       })
 
       document.getElementById('load-data').addEventListener('click', loadData)
+      document.getElementById('select-feature').addEventListener('click', selectFeature)
     })
 
     const pinMarkerRender = (coords, offset) => {
@@ -147,17 +152,34 @@
 
     const loadData = async () => {
       const url = document.getElementById('custom-url').value
-      
-      if(!url)
+
+      if (!url)
         return
-      
+
       let vidoGeojson = await fetch(url, { method: 'GET' }).then(res => res.json())
       const source = map.getSource('earthquakes')
 
       source.setData({
         type: 'FeatureCollection',
-        features: [ ...geojson.features, ...vidoGeojson.features]
+        features: [...geojson.features, ...vidoGeojson.features]
       })
+    }
+
+    const selectFeature = async () => {
+      const id = document.getElementById('feature-id').value
+
+      if (!id)
+        return
+
+      const data = await map.getSource('earthquakes').getData()
+      const feature = data.features.find(feature => feature.properties.id === id)
+
+      if (!feature) {
+        console.error('Feature not found !')
+        return
+      }
+
+      teritorioCluster.setSelectedFeature(feature)
     }
   </script>
 </body>
