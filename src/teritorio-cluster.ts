@@ -339,8 +339,13 @@ export class TeritorioCluster extends EventTarget {
 
     this.featuresMap.forEach(feature => {
       const id = this.#getFeatureId(feature)
-      const coords = (feature.geometry as GeoJSON.Point).coordinates as LngLatLike
+      const coords = feature.geometry.type === 'Point' ? new LngLat(feature.geometry.coordinates[0], feature.geometry.coordinates[1]) : undefined
       const props = feature.properties
+
+      if(!coords) {
+        console.error(`Feature ${id} is not Geometry.Point, thus not supported yet.`)
+        return
+      }
 
       if (props.cluster) {
         let marker: Marker | undefined = this.markers[id];
