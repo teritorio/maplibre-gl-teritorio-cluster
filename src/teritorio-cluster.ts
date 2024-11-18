@@ -46,6 +46,7 @@ export class TeritorioCluster extends EventTarget {
   clusterMaxZoom: number
   clusterMinZoom: number
   clusterRender?: ClusterRender
+  featuresMap: Map<string, MapGeoJSONFeature>
   fitBoundsOptions: FitBoundsOptions
   initialFeature?: MapGeoJSONFeature
   markers: { [key: string]: Marker }
@@ -84,6 +85,7 @@ export class TeritorioCluster extends EventTarget {
     this.clusterMaxZoom = options?.clusterMaxZoom || 17
     this.clusterMinZoom = options?.clusterMinZoom || 0
     this.clusterRender = options?.clusterRenderFn
+    this.featuresMap = new Map<string, MapGeoJSONFeature>()
     this.fitBoundsOptions = options?.fitBoundsOptions || { padding: 20 }
     this.initialFeature = options?.initialFeature
     this.markers = {}
@@ -198,17 +200,17 @@ export class TeritorioCluster extends EventTarget {
   updateMarkers = async () => {
     const newMarkers: { [key: string]: Marker } = {}
     const features = this.map.querySourceFeatures(this.sourceId)
-    const featuresMap = new Map<string, MapGeoJSONFeature>()
     const maxZoomLimit = this.map.getZoom() >= this.clusterMaxZoom
     const minZoomLimit = this.map.getZoom() >= this.clusterMinZoom
 
     this.clusterLeaves.clear()
+    this.featuresMap.clear()
 
     for (const feature of features) {
       const id = this.getFeatureId(feature)
 
       // Transform to Map in order to have unique features
-      featuresMap.set(id, feature)
+      this.featuresMap.set(id, feature)
 
       // Get cluster's leaves
       if (feature.properties.cluster) {
@@ -218,7 +220,7 @@ export class TeritorioCluster extends EventTarget {
       }
     }
 
-    featuresMap.forEach(feature => {
+    this.featuresMap.forEach(feature => {
       const coords = (feature.geometry as GeoJSON.Point).coordinates as LngLatLike
       const props = feature.properties;
 
@@ -328,7 +330,7 @@ export class TeritorioCluster extends EventTarget {
         if ((this.pinMarker && this.selectedFeatureId) && (id === this.selectedClusterId || id === this.selectedFeatureId)) {
           let coords: LngLatLike | undefined
           let offset: Point | undefined
-          const selectedFeature = featuresMap.get(this.selectedFeatureId)
+          const selectedFeature = this.featuresMap.get(this.selectedFeatureId)
 
           // If selected feature is in a cluster
           if (!selectedFeature) {
