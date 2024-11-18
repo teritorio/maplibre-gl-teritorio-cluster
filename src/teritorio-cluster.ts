@@ -154,10 +154,9 @@ export class TeritorioCluster extends EventTarget {
       return
     } else if ('feature' in match && match.feature.geometry.type === 'Point') {
       const cluster = this.markersOnScreen[match.clusterId]
-      const coords = cluster.getLngLat()
 
       this.selectedClusterId = match.clusterId
-      this.#setPinMarker(cluster.getElement(), coords)
+      this.#setPinMarker(cluster.getElement(), cluster.getLngLat())
 
       return
     }
@@ -338,17 +337,18 @@ export class TeritorioCluster extends EventTarget {
     }
 
     this.featuresMap.forEach(feature => {
-      const id = this.#getFeatureId(feature)
       const coords = feature.geometry.type === 'Point' ? new LngLat(feature.geometry.coordinates[0], feature.geometry.coordinates[1]) : undefined
-      const props = feature.properties
+      const id = this.#getFeatureId(feature)
 
       if(!coords) {
         console.error(`Feature ${id} is not Geometry.Point, thus not supported yet.`)
         return
       }
 
+      let marker: Marker | undefined = this.markersOnScreen[id]
+      const props = feature.properties
+
       if (props.cluster) {
-        let marker: Marker | undefined = this.markers[id];
         const leaves = this.clusterLeaves.get(id)
 
         if (!leaves)
@@ -416,34 +416,28 @@ export class TeritorioCluster extends EventTarget {
           }
         }
       } else {
-        let marker = this.markers[id];
-
         if (!marker) {
-          var element = this.#renderMarker(feature)
+          let element = this.#renderMarker(feature)
 
-          marker = this.markers[id] = new Marker({ element }).setLngLat(coords)
-          marker.getElement().addEventListener('click', (e: Event) => this.#featureClickHandler(e, feature))
-        }
-
-        newMarkers[id] = marker
-
-        if (!this.markersOnScreen[id]) {
-          marker.addTo(this.map);
+          marker = new Marker({ element }).setLngLat(coords).addTo(this.map)
+          element.addEventListener('click', (e: Event) => this.#featureClickHandler(e, feature))
 
           // Keep Pin Marker on top
           if(this.pinMarker && this.selectedFeatureId === id) {
             this.#resetPinMarker()
-            this.#setPinMarker(marker.getElement(), marker.getLngLat())
+            this.pinMarker = this.#renderPinMarker(coords).addTo(this.map)
           }
 
           // If initialFeature is this new marker
           // We position the Pin marker on it
           if (this.initialFeature && (this.#getFeatureId(this.initialFeature) === id)) {
             this.selectedFeatureId = id
-            this.pinMarker = this.#renderPinMarker(marker.getLngLat()).addTo(this.map)
+            this.pinMarker = this.#renderPinMarker(coords).addTo(this.map)
             this.initialFeature = undefined
           }
         }
+
+        newMarkers[id] = marker
       }
     })
 
