@@ -376,42 +376,16 @@ export class TeritorioCluster extends EventTarget {
   #featureClickHandler = (e: Event, feature: MapGeoJSONFeature) => {
     e.stopPropagation()
 
-    if (!(e.currentTarget instanceof HTMLElement))
+    if (!(e.currentTarget instanceof HTMLElement) || this.selectedFeatureId === this.#getFeatureId(feature))
       return
 
-    if (this.selectedFeatureId === e.currentTarget.id)
-      return
+    this.setSelectedFeature(feature)
 
-    const clickedEl = e.currentTarget
-    const id = clickedEl.id
-
-    if (this.selectedFeatureId === id)
-      return
-
-    this.#resetPinMarker()
-
-    if (this.markersOnScreen[id]) {
-      this.pinMarker = this.#renderPinMarker(this.markersOnScreen[id].getLngLat()).addTo(this.map)
-    } else {
-      const cluster = this.markersOnScreen[clickedEl.parentElement!.id]
-      const clusterHTML = cluster.getElement()
-
-      this.selectedClusterId = clusterHTML.id
-      this.pinMarker = this.#renderPinMarker(
-        cluster.getLngLat(),
-        this.#calculatePinMarkerOffset(clusterHTML, clickedEl)
-      ).addTo(this.map)
-    }
-
-    this.selectedFeatureId = id
-
-    const event = new CustomEvent("click", {
+    this.dispatchEvent(new CustomEvent("click", {
       detail: {
         selectedFeature: feature,
       }
-    })
-
-    this.dispatchEvent(event)
+    }))
   }
 
   setSelectedFeature = (feature: MapGeoJSONFeature) => {
@@ -422,6 +396,7 @@ export class TeritorioCluster extends EventTarget {
       if(feature.geometry.type !== 'Point')
         return
 
+      // Sets a Pin Marker on a specific coordinates which isn't related to any feature from data source
       this.resetSelectedFeature()
       this.selectedFeatureId = id
       this.pinMarker = this.#renderPinMarker(new LngLat(feature.geometry.coordinates[0], feature.geometry.coordinates[1])).addTo(this.map)
