@@ -167,7 +167,10 @@ export class TeritorioCluster extends EventTarget {
         return
 
       // Fit map to cluster leaves bounding box
-      this._fitBoundsToClusterLeaves(this.clusterLeaves.get(e.currentTarget.id))
+      const leaves = this.clusterLeaves.get(e.currentTarget.id)
+
+      if (leaves)
+        this._fitBoundsToClusterLeaves(leaves)
     })
 
     return element;
@@ -418,19 +421,18 @@ export class TeritorioCluster extends EventTarget {
 
   _getClusterCenter = (cluster: HTMLElement) => {
     const { left, right, top, bottom } = cluster.getBoundingClientRect()
+
     return { clusterXCenter: (left + right) / 2, clusterYCenter: (top + bottom) / 2 }
   }
 
   _calculatePinMarkerOffset = (cluster: HTMLElement, marker: HTMLElement) => {
     const { clusterXCenter, clusterYCenter } = this._getClusterCenter(cluster)
     const { x, y, height, width } = marker.getBoundingClientRect()
+
     return new Point(x - clusterXCenter + (width / 2), y - clusterYCenter + (height / 2))
   }
 
-  _fitBoundsToClusterLeaves(features?: MapGeoJSONFeature[]) {
-    if (!features)
-      return
-
+  _fitBoundsToClusterLeaves(features: MapGeoJSONFeature[]) {
     const bounds = bbox(featureCollection(features))
 
     this.map.fitBounds(bounds as [number, number, number, number], this.fitBoundsOptions)
