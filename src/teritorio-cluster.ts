@@ -233,12 +233,27 @@ export class TeritorioCluster extends EventTarget {
   }
 
   #isFeatureInCluster = (clusterId: string, featureId: string): boolean => {
-    if (!this.clusterLeaves.has(clusterId)) {
-      console.error(`Cluster ${clusterId} not found.`)
+    try {
+      const cluster = this.clusterLeaves.get(clusterId)
+      if (!cluster || !Array.isArray(cluster)) {
+        console.error(`Cluster with ID ${clusterId} not found or is not an array.`)
+        return false
+      }
+  
+      const featureIndex = cluster.findIndex(feature => {
+        try {
+          return this.#getFeatureId(feature) === featureId
+        } catch(error) {
+          console.error(`Error getting feature ID for feature:`, feature, error)
+          return false
+        }
+      })
+
+      return featureIndex > -1
+    } catch(error) {
+      console.error(`Error checking if feature ${featureId} is in cluster ${clusterId}:`, error)
       return false
     }
-
-    return this.clusterLeaves.get(clusterId)!.findIndex(feature => this.#getFeatureId(feature) === featureId) > -1
   }
 
   #render = (): void => {
