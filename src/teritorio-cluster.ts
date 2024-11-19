@@ -5,7 +5,7 @@ import {
   markerRenderDefault,
   pinMarkerRenderDefault,
   unfoldedClusterRenderSmart
-} from './utils/helpers';
+} from './utils/helpers'
 import bbox from '@turf/bbox'
 import { featureCollection } from '@turf/helpers'
 
@@ -51,7 +51,6 @@ export class TeritorioCluster extends EventTarget {
   featuresMap: Map<string, MapGeoJSONFeature>
   fitBoundsOptions: FitBoundsOptions
   initialFeature?: MapGeoJSONFeature
-  markers: { [key: string]: Marker }
   markerRender?: MarkerRender
   markerSize: number
   markersOnScreen: { [key: string]: Marker }
@@ -90,7 +89,6 @@ export class TeritorioCluster extends EventTarget {
     this.featuresMap = new Map<string, MapGeoJSONFeature>()
     this.fitBoundsOptions = options?.fitBoundsOptions || { padding: 20 }
     this.initialFeature = options?.initialFeature
-    this.markers = {}
     this.markerRender = options?.markerRenderFn
     this.markerSize = options?.markerSize || 24
     this.markersOnScreen = {}
@@ -106,12 +104,12 @@ export class TeritorioCluster extends EventTarget {
     // after the GeoJSON data is loaded, update markers on the screen and do so on every map move/moveend
     map.on('data', (e: MapSourceDataEvent) => {
       if (e.sourceId !== this.sourceId || !e.isSourceLoaded || e.sourceDataType === 'metadata')
-        return;
+        return
 
       this.#render()
-    });
+    })
 
-    map.on('moveend', this.#render);
+    map.on('moveend', this.#render)
   }
 
   //
@@ -269,7 +267,7 @@ export class TeritorioCluster extends EventTarget {
         this.#fitBoundsToClusterLeaves(leaves)
     })
 
-    return element;
+    return element
   }
 
   #renderMarker = (feature: MapGeoJSONFeature) => {
@@ -377,8 +375,7 @@ export class TeritorioCluster extends EventTarget {
           (marker && !minZoomLimit && marker.getElement().classList.contains(UnfoldedClusterClass) && this.markersOnScreen[id])
         ) {
           marker = undefined
-          delete this.markers[id]
-          this.markersOnScreen[id]?.remove();
+          this.markersOnScreen[id]?.remove()
           delete this.markersOnScreen[id]
         }
 
@@ -437,56 +434,11 @@ export class TeritorioCluster extends EventTarget {
 
     // for every marker we've added previously, remove those that are no longer visible
     for (const id in this.markersOnScreen) {
-      if (!newMarkers[id]) {
-        this.markersOnScreen[id].remove();
-
-        // If the removed cluster had a selected feature in it.
-        // We display the Pin marker on it's new position
-        if ((this.pinMarker && this.selectedFeatureId) && (id === this.selectedClusterId || id === this.selectedFeatureId)) {
-          let coords: LngLatLike | undefined
-          let offset: Point | undefined
-          const selectedFeature = this.featuresMap.get(this.selectedFeatureId)
-
-          // If selected feature is in a cluster
-          if (!selectedFeature) {
-            const iterator = this.clusterLeaves.entries()
-            let result = iterator.next();
-
-            while (!result.done) {
-              const [clusterId, leaves] = result.value
-              const featureIndex = leaves.findIndex(f => this.#getFeatureId(f) === this.selectedFeatureId)
-
-              if (featureIndex > -1) {
-                this.selectedClusterId = clusterId.toString()
-
-                // Get selected feature DOM element position within cluster
-                const cluster = newMarkers[this.selectedClusterId]
-                const clusterHTML = cluster.getElement()
-                coords = cluster.getLngLat()
-                const selectedFeatureHTML = clusterHTML.children[featureIndex] as HTMLElement
-
-                if (selectedFeatureHTML) {
-                  offset = this.#calculatePinMarkerOffset(clusterHTML, selectedFeatureHTML)
-                }
-
-                break
-              }
-
-              result = iterator.next()
-            }
-          } else {
-            coords = (selectedFeature.geometry as GeoJSON.Point).coordinates as LngLatLike
-          }
-
-          if (coords) {
-            this.#resetPinMarker()
-            this.#renderPinMarker(coords, offset)
-          }
-        }
-      }
+      if (!newMarkers[id])
+        this.markersOnScreen[id].remove()
     }
 
-    this.markersOnScreen = newMarkers;
+    this.markersOnScreen = newMarkers
     this.ticking = false
   }
 }
