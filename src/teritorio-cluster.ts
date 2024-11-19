@@ -187,7 +187,7 @@ export class TeritorioCluster extends EventTarget {
 
     this.setSelectedFeature(feature)
 
-    this.dispatchEvent(new CustomEvent("click", {
+    this.dispatchEvent(new CustomEvent("feature-click", {
       detail: {
         selectedFeature: feature,
       }
