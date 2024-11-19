@@ -141,7 +141,7 @@ export class TeritorioCluster extends EventTarget {
       // Sets a Pin Marker on a specific coordinates which isn't related to any feature from data source
       this.resetSelectedFeature()
       this.selectedFeatureId = id
-      this.pinMarker = this.#renderPinMarker(new LngLat(feature.geometry.coordinates[0], feature.geometry.coordinates[1])).addTo(this.map)
+      this.#renderPinMarker(new LngLat(feature.geometry.coordinates[0], feature.geometry.coordinates[1]))
 
       return
     }
@@ -152,7 +152,7 @@ export class TeritorioCluster extends EventTarget {
     if ('type' in match && match.type === 'Feature' && match.geometry.type === 'Point') {
       const coords = match.geometry.coordinates
 
-      this.pinMarker = this.#renderPinMarker(new LngLat(coords[0], coords[1])).addTo(this.map)
+      this.#renderPinMarker(new LngLat(coords[0], coords[1]))
 
       return
     } else if ('feature' in match && match.feature.geometry.type === 'Point') {
@@ -284,9 +284,11 @@ export class TeritorioCluster extends EventTarget {
   }
 
   #renderPinMarker = (coords: LngLatLike, offset: Point = new Point(0, 0)) => {
-    return !this.pinMarkerRender
+    this.pinMarker = !this.pinMarkerRender
       ? pinMarkerRenderDefault(coords, offset)
       : this.pinMarkerRender(coords, offset)
+
+    this.pinMarker.addTo(this.map)
   }
 
   #renderUnfoldedCluster = (id: string, leaves: MapGeoJSONFeature[]) => {
@@ -310,7 +312,7 @@ export class TeritorioCluster extends EventTarget {
     const isUnfoldedCluster = cluster.classList.contains(UnfoldedClusterClass)
 
     if (!isUnfoldedCluster) {
-      this.pinMarker = this.#renderPinMarker(coords).addTo(this.map)
+      this.#renderPinMarker(coords)
     } else {
       // Get selected feature DOM element position within cluster
       const selectedFeatureHTML = Array.from(cluster.children).find(el => el.id === this.selectedFeatureId) as HTMLElement
@@ -318,10 +320,7 @@ export class TeritorioCluster extends EventTarget {
       if (!selectedFeatureHTML)
         throw new Error('Selected feature HTML marker was not found !')
 
-      this.pinMarker = this.#renderPinMarker(
-        coords,
-        this.#calculatePinMarkerOffset(cluster, selectedFeatureHTML)
-      ).addTo(this.map)
+      this.#renderPinMarker(coords, this.#calculatePinMarkerOffset(cluster, selectedFeatureHTML))
     }
   }
 
@@ -420,14 +419,14 @@ export class TeritorioCluster extends EventTarget {
           // Keep Pin Marker on top
           if (this.pinMarker && this.selectedFeatureId === id) {
             this.#resetPinMarker()
-            this.pinMarker = this.#renderPinMarker(coords).addTo(this.map)
+            this.#renderPinMarker(coords)
           }
 
           // If initialFeature is this new marker
           // We position the Pin marker on it
           if (this.initialFeature && (this.#getFeatureId(this.initialFeature) === id)) {
             this.selectedFeatureId = id
-            this.pinMarker = this.#renderPinMarker(coords).addTo(this.map)
+            this.#renderPinMarker(coords)
             this.initialFeature = undefined
           }
         }
@@ -481,7 +480,7 @@ export class TeritorioCluster extends EventTarget {
 
           if (coords) {
             this.#resetPinMarker()
-            this.pinMarker = this.#renderPinMarker(coords, offset).addTo(this.map)
+            this.#renderPinMarker(coords, offset)
           }
         }
       }
