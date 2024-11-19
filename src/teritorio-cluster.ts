@@ -1,7 +1,7 @@
 import type { FitBoundsOptions, GeoJSONSource, LngLatLike, MapGeoJSONFeature, MapSourceDataEvent } from 'maplibre-gl'
 import bbox from '@turf/bbox'
 import { featureCollection } from '@turf/helpers'
-import { LngLat, Marker, Point } from 'maplibre-gl'
+import { Marker, Point } from 'maplibre-gl'
 import {
   clusterRenderDefault,
   markerRenderDefault,
@@ -127,20 +127,20 @@ export class TeritorioCluster extends EventTarget {
     this.fitBoundsOptions = options
   }
 
-  setSelectedFeature = (feature: MapGeoJSONFeature) => {
+  setSelectedFeature = (feature: GeoJSON.Feature) => {
     const id = getFeatureId(feature)
     const match = this.#findFeature(id)
 
     if (!match) {
       if (feature.geometry.type !== 'Point') {
-        console.error(`Feature ${id} is not Geometry.Point, thus not supported yet.`)
+        console.error(`Feature ${id} is not of type 'Point', and is not supported.`)
         return
       }
 
       // Sets a Pin Marker on a specific coordinates which isn't related to any feature from data source
       this.resetSelectedFeature()
       this.selectedFeatureId = id
-      this.#renderPinMarker(new LngLat(feature.geometry.coordinates[0], feature.geometry.coordinates[1]))
+      this.#renderPinMarker(feature.geometry.coordinates as LngLatLike)
 
       return
     }
@@ -149,15 +149,16 @@ export class TeritorioCluster extends EventTarget {
     this.selectedFeatureId = id
 
     if ('type' in match && match.type === 'Feature' && match.geometry.type === 'Point') {
-      const coords = match.geometry.coordinates
+      this.#renderPinMarker(match.geometry.coordinates as LngLatLike)
 
-      this.#renderPinMarker(new LngLat(coords[0], coords[1]))
+      return
     }
-    else if ('feature' in match && match.feature.geometry.type === 'Point') {
+    
+    if ('feature' in match && match.feature.geometry.type === 'Point') {
       const cluster = this.markersOnScreen.get(match.clusterId)
 
       if (!cluster) {
-        console.error(`Cluster ${match.clusterId} not found.`)
+        console.error(`Cluster with ID ${match.clusterId} not found.`)
         return
       }
 
@@ -351,8 +352,8 @@ export class TeritorioCluster extends EventTarget {
       }
     }
 
-    this.featuresMap.forEach((feature) => {
-      const coords = feature.geometry.type === 'Point' ? new LngLat(feature.geometry.coordinates[0], feature.geometry.coordinates[1]) : undefined
+    this.featuresMap.forEach(feature => {
+      const coords = feature.geometry.type === 'Point' ? feature.geometry.coordinates as LngLatLike : undefined
       const id = getFeatureId(feature)
 
       if (!coords) {
