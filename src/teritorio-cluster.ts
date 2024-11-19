@@ -159,7 +159,7 @@ export class TeritorioCluster extends EventTarget {
       const cluster = this.markersOnScreen[match.clusterId]
 
       this.selectedClusterId = match.clusterId
-      this.#setPinMarker(cluster.getElement(), cluster.getLngLat())
+      this.#renderPinMarkerInCluster(cluster.getElement(), cluster.getLngLat())
 
       return
     }
@@ -306,7 +306,7 @@ export class TeritorioCluster extends EventTarget {
     this.pinMarker = null
   }
 
-  #setPinMarker = (cluster: HTMLElement, coords: LngLatLike) => {
+  #renderPinMarkerInCluster = (cluster: HTMLElement, coords: LngLatLike) => {
     const isUnfoldedCluster = cluster.classList.contains(UnfoldedClusterClass)
 
     if (!isUnfoldedCluster) {
@@ -398,7 +398,7 @@ export class TeritorioCluster extends EventTarget {
           if (this.pinMarker && this.selectedFeatureId && this.#isFeatureInCluster(id, this.selectedFeatureId)) {
             this.selectedClusterId = id
             this.#resetPinMarker()
-            this.#setPinMarker(element, coords)
+            this.#renderPinMarkerInCluster(element, coords)
           }
 
           // If initialFeature is part of this new cluster
@@ -406,7 +406,7 @@ export class TeritorioCluster extends EventTarget {
           if (this.initialFeature && this.#isFeatureInCluster(id, this.#getFeatureId(this.initialFeature))) {
             this.selectedClusterId = id
             this.selectedFeatureId = this.#getFeatureId(this.initialFeature)
-            this.#setPinMarker(element, coords)
+            this.#renderPinMarkerInCluster(element, coords)
             this.initialFeature = undefined
           }
         }
