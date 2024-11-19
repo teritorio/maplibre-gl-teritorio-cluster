@@ -53,7 +53,7 @@ export class TeritorioCluster extends EventTarget {
   initialFeature?: MapGeoJSONFeature
   markerRender?: MarkerRender
   markerSize: number
-  markersOnScreen: { [key: string]: Marker }
+  markersOnScreen: Map<string, Marker>
   pinMarker: Marker | null
   pinMarkerRender?: PinMarkerRender
   selectedClusterId: string | null
@@ -91,7 +91,7 @@ export class TeritorioCluster extends EventTarget {
     this.initialFeature = options?.initialFeature
     this.markerRender = options?.markerRenderFn
     this.markerSize = options?.markerSize || 24
-    this.markersOnScreen = {}
+    this.markersOnScreen = new Map<string, Marker>()
     this.pinMarker = null
     this.pinMarkerRender = options?.pinMarkerRenderFn
     this.selectedClusterId = null
@@ -154,7 +154,12 @@ export class TeritorioCluster extends EventTarget {
 
       return
     } else if ('feature' in match && match.feature.geometry.type === 'Point') {
-      const cluster = this.markersOnScreen[match.clusterId]
+      const cluster = this.markersOnScreen.get(match.clusterId)
+
+      if(!cluster) {
+        console.error(`Cluster ${match.clusterId} not found.`)
+        return
+      }
 
       this.selectedClusterId = match.clusterId
       this.#renderPinMarkerInCluster(cluster.getElement(), cluster.getLngLat())
@@ -323,7 +328,7 @@ export class TeritorioCluster extends EventTarget {
   }
 
   #updateMarkers = async () => {
-    const newMarkers: { [key: string]: Marker } = {}
+    const newMarkers = new Map<string, Marker>()
     const features = this.map.querySourceFeatures(this.sourceId)
     const maxZoomLimit = this.map.getZoom() >= this.clusterMaxZoom
     const minZoomLimit = this.map.getZoom() >= this.clusterMinZoom
@@ -354,7 +359,7 @@ export class TeritorioCluster extends EventTarget {
         return
       }
 
-      let marker: Marker | undefined = this.markersOnScreen[id]
+      let marker = this.markersOnScreen.get(id)
       const props = feature.properties
 
       if (props.cluster) {
@@ -368,15 +373,15 @@ export class TeritorioCluster extends EventTarget {
         if (
           (marker && maxZoomLimit && !marker.getElement().classList.contains(UnfoldedClusterClass))
           ||
-          (marker && !maxZoomLimit && marker.getElement().classList.contains(UnfoldedClusterClass) && this.markersOnScreen[id])
+          (marker && !maxZoomLimit && marker.getElement().classList.contains(UnfoldedClusterClass) && this.markersOnScreen.has(id))
           ||
           (marker && minZoomLimit && !marker.getElement().classList.contains(UnfoldedClusterClass))
           ||
-          (marker && !minZoomLimit && marker.getElement().classList.contains(UnfoldedClusterClass) && this.markersOnScreen[id])
+          (marker && !minZoomLimit && marker.getElement().classList.contains(UnfoldedClusterClass) && this.markersOnScreen.has(id))
         ) {
           marker = undefined
-          this.markersOnScreen[id]?.remove()
-          delete this.markersOnScreen[id]
+          this.markersOnScreen.get(id)?.remove()
+          this.markersOnScreen.delete(id)
         }
 
         if (!marker) {
@@ -429,13 +434,13 @@ export class TeritorioCluster extends EventTarget {
         }
       }
 
-      newMarkers[id] = marker
+      newMarkers.set(id, marker)
     })
 
     // for every marker we've added previously, remove those that are no longer visible
-    for (const id in this.markersOnScreen) {
-      if (!newMarkers[id])
-        this.markersOnScreen[id].remove()
+    for (const [id, marker] of this.markersOnScreen.entries()) {
+      if (!newMarkers.has(id))
+        marker.remove()
     }
 
     this.markersOnScreen = newMarkers
