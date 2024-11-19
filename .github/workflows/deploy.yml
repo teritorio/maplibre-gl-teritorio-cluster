@@ -1,52 +1,102 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+name: 🚀 Test & Deploy Static Content to GitHub Pages
 
-on:
-  # Runs on pushes targeting the default branch
-  push:
-    branches: ['main']
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+on: push
 
 # Sets the GITHUB_TOKEN permissions to allow deployment to GitHub Pages
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: read  # Read access to repository contents
+  pages: write    # Write access for deployment to GitHub Pages
+  id-token: write # Allow GitHub to issue an ID token for authentication
 
-# Allow one concurrent deployment
+# Allow only one concurrent deployment at a time
 concurrency:
-  group: 'pages'
-  cancel-in-progress: true
+  group: 'pages'  # Group deployments by name for concurrency control
+  cancel-in-progress: true  # Cancel any in-progress deployments if a new one starts
 
 jobs:
-  # Single deploy job since we're just deploying
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  # Setup environment and dependencies
+  setup:
+    name: 🛠️ Setup Development Environment
     runs-on: ubuntu-latest
+    outputs:
+      node-modules-path: ${{ steps.cache-dependencies.outputs.cache-hit }}
+    
     steps:
-      - name: Checkout
+      - name: Checkout Repository 📥
         uses: actions/checkout@v4
-      - run: corepack enable
-      - name: Set up Node
-        uses: actions/setup-node@v4
+      
+      - name: Cache Dependencies 📦
+        uses: actions/cache@v4
+        id: cache-dependencies
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Setup Node.js Environment ⚙️
+        uses: ./.github/actions/setup
         with:
           node-version: 20
-          cache: 'yarn'
-      - name: Install dependencies
-        run: yarn install
-      - name: Build
-        run: yarn build:demo
-      - name: Setup Pages
+  
+      - name: Install Dependencies 🛠️
+        run: yarn install --immutable
+        if: steps.cache-dependencies.outputs.cache-hit != 'true' # Only install if cache miss
+
+  tests:
+    name: 🔍 Execute Unit Tests
+    needs: setup
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository 📥
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment ⚙️
+        uses: ./.github/actions/setup
+        with:
+          node-version: 20
+
+      - name: Install Dependencies 🛠️
+        run: yarn install --immutable
+
+      - name: Run Tests 🧪
+        run: yarn test
+
+  deploy:
+    name: 🚀 Deploy to GitHub Pages
+    needs: [setup, tests]
+    if: github.ref == 'refs/heads/main' # Only deploy from the main branch
+
+    environment:
+      name: github-pages  # Set deployment environment to GitHub Pages
+      url: ${{ steps.deployment.outputs.page_url }}  # Output page URL
+      
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository 📥
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment ⚙️
+        uses: ./.github/actions/setup
+        with:
+          node-version: 20
+
+      - name: Install Dependencies 🛠️
+        run: yarn install --immutable
+
+      - name: Build Static Content 🏗️
+        run: yarn build:demo # Build the static site with Vite
+
+      - name: Setup GitHub Pages ⚙️
         uses: actions/configure-pages@v4
-      - name: Upload artifact
+
+      - name: Upload Build Artifacts 📦
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload dist folder
-          path: './dist'
-      - name: Deploy to GitHub Pages
+          path: './dist' # Path to the build output directory
+          
+      - name: Deploy to GitHub Pages 🌐
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v4 # Deploy the build to GitHub Pages
