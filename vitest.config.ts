@@ -5,5 +5,6 @@ export default defineConfig({
     coverage: {
       reporter: ['text', 'json', 'html'],
     },
+    setupFiles: './tests/mocks/maplibre-gl.mock.ts',
   },
 })
