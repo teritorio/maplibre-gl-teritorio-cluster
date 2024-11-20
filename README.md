@@ -144,11 +144,6 @@ Install dependencies
 yarn install
 ```
 
-Enable `simple-git-hooks`
-```bash
-yarn dlx simple-git-hooks
-```
-
 Serve the demo page
 ```bash
 yarn dev
