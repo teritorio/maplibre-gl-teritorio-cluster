@@ -20,6 +20,8 @@
     "build:demo": "vite build --mode development",
     "coverage": "vitest run --coverage",
     "dev": "vite",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "preversion": "yarn build",
     "preview": "vite preview",
     "test": "vitest"
@@ -35,7 +37,9 @@
   },
   "homepage": "https://github.com/teritorio/maplibre-gl-teritorio-cluster#readme",
   "devDependencies": {
+    "@antfu/eslint-config": "^3.9.2",
     "@vitest/coverage-v8": "2.1.5",
+    "eslint": "^9.15.0",
     "typescript": "^5.6.2",
     "vite": "^5.4.4",
     "vitest": "^2.1.5"
