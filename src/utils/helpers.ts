@@ -1,4 +1,4 @@
-import type { LngLatLike, MapGeoJSONFeature } from 'maplibre-gl'
+import type { LngLatLike } from 'maplibre-gl'
 import { Marker, Point } from 'maplibre-gl'
 
 // Helper to apply styles on DOM element
@@ -10,7 +10,7 @@ export function buildCss(htmlEl: HTMLElement, styles: { [key: string]: string })
 }
 
 // Circle shape
-export function unfoldedClusterRenderCircle(parent: HTMLDivElement, items: MapGeoJSONFeature[], markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void): void {
+export function unfoldedClusterRenderCircle(parent: HTMLDivElement, items: GeoJSON.Feature[], markerSize: number, renderMarker: (feature: GeoJSON.Feature) => HTMLDivElement, clickHandler: (e: Event, feature: GeoJSON.Feature) => void): void {
   const radius = (markerSize / 2) / Math.sin(Math.PI / items.length)
   const angle = 360 / items.length
   let rot = 0
@@ -39,7 +39,7 @@ export function unfoldedClusterRenderCircle(parent: HTMLDivElement, items: MapGe
 }
 
 // HexaGrid shape
-export function unfoldedClusterRenderHexaGrid(parent: HTMLDivElement, items: MapGeoJSONFeature[], markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void): void {
+export function unfoldedClusterRenderHexaGrid(parent: HTMLDivElement, items: GeoJSON.Feature[], markerSize: number, renderMarker: (feature: GeoJSON.Feature) => HTMLDivElement, clickHandler: (e: Event, feature: GeoJSON.Feature) => void): void {
   const radius = (markerSize / 2) / Math.sin(Math.PI / items.length)
 
   buildCss(parent, {
@@ -84,7 +84,7 @@ export function unfoldedClusterRenderHexaGrid(parent: HTMLDivElement, items: Map
 }
 
 // Smart: mix between Circle and HexaGrid shape
-export function unfoldedClusterRenderSmart(parent: HTMLDivElement, items: MapGeoJSONFeature[], markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void): void {
+export function unfoldedClusterRenderSmart(parent: HTMLDivElement, items: GeoJSON.Feature[], markerSize: number, renderMarker: (feature: GeoJSON.Feature) => HTMLDivElement, clickHandler: (e: Event, feature: GeoJSON.Feature) => void): void {
   if (items.length <= 5) {
     unfoldedClusterRenderCircle(parent, items, markerSize, renderMarker, clickHandler)
   }
@@ -94,7 +94,7 @@ export function unfoldedClusterRenderSmart(parent: HTMLDivElement, items: MapGeo
 }
 
 // Grid shape
-export function unfoldedClusterRenderGrid(parent: HTMLDivElement, items: MapGeoJSONFeature[], _markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void): void {
+export function unfoldedClusterRenderGrid(parent: HTMLDivElement, items: GeoJSON.Feature[], _markerSize: number, renderMarker: (feature: GeoJSON.Feature) => HTMLDivElement, clickHandler: (e: Event, feature: GeoJSON.Feature) => void): void {
   buildCss(parent, {
     'display': 'flex',
     'gap': '2px',
@@ -113,7 +113,7 @@ export function unfoldedClusterRenderGrid(parent: HTMLDivElement, items: MapGeoJ
 }
 
 // Cluster default styles
-export function clusterRenderDefault(element: HTMLDivElement, props: MapGeoJSONFeature['properties']): void {
+export function clusterRenderDefault(element: HTMLDivElement, props: NonNullable<GeoJSON.GeoJsonProperties>): void {
   element.innerHTML = props.point_count
 
   buildCss(element, {
