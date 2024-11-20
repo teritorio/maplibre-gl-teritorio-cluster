@@ -4,14 +4,14 @@ on: push
 
 # Sets the GITHUB_TOKEN permissions to allow deployment to GitHub Pages
 permissions:
-  contents: read  # Read access to repository contents
-  pages: write    # Write access for deployment to GitHub Pages
+  contents: read # Read access to repository contents
+  pages: write # Write access for deployment to GitHub Pages
   id-token: write # Allow GitHub to issue an ID token for authentication
 
 # Allow only one concurrent deployment at a time
 concurrency:
-  group: 'pages'  # Group deployments by name for concurrency control
-  cancel-in-progress: true  # Cancel any in-progress deployments if a new one starts
+  group: pages # Group deployments by name for concurrency control
+  cancel-in-progress: true # Cancel any in-progress deployments if a new one starts
 
 jobs:
   # Setup environment and dependencies
@@ -20,11 +20,11 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       node-modules-path: ${{ steps.cache-dependencies.outputs.cache-hit }}
-    
+
     steps:
       - name: Checkout Repository 📥
         uses: actions/checkout@v4
-      
+
       - name: Cache Dependencies 📦
         uses: actions/cache@v4
         id: cache-dependencies
@@ -38,7 +38,7 @@ jobs:
         uses: ./.github/actions/setup
         with:
           node-version: 20
-  
+
       - name: Install Dependencies 🛠️
         run: yarn install --immutable
         if: steps.cache-dependencies.outputs.cache-hit != 'true' # Only install if cache miss
@@ -69,9 +69,9 @@ jobs:
     if: github.ref == 'refs/heads/main' # Only deploy from the main branch
 
     environment:
-      name: github-pages  # Set deployment environment to GitHub Pages
-      url: ${{ steps.deployment.outputs.page_url }}  # Output page URL
-      
+      name: github-pages # Set deployment environment to GitHub Pages
+      url: ${{ steps.deployment.outputs.page_url }} # Output page URL
+
     runs-on: ubuntu-latest
 
     steps:
@@ -95,8 +95,8 @@ jobs:
       - name: Upload Build Artifacts 📦
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist' # Path to the build output directory
-          
+          path: ./dist # Path to the build output directory
+
       - name: Deploy to GitHub Pages 🌐
         id: deployment
         uses: actions/deploy-pages@v4 # Deploy the build to GitHub Pages
