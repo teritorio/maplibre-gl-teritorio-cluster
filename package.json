@@ -17,7 +17,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build && tsc",
+    "build": "tsc && vite build",
     "build:demo": "vite build --mode development",
     "preview": "vite preview",
     "preversion": "yarn build"
