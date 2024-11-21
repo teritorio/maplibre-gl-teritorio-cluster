@@ -1,13 +1,13 @@
 import type { FitBoundsOptions, GeoJSONSource, LngLatLike, MapGeoJSONFeature, MapSourceDataEvent } from 'maplibre-gl'
+import bbox from '@turf/bbox'
+import { featureCollection } from '@turf/helpers'
 import { LngLat, Marker, Point } from 'maplibre-gl'
 import {
   clusterRenderDefault,
   markerRenderDefault,
   pinMarkerRenderDefault,
-  unfoldedClusterRenderSmart
+  unfoldedClusterRenderSmart,
 } from './utils/helpers'
-import bbox from '@turf/bbox'
-import { featureCollection } from '@turf/helpers'
 
 type UnfoldedCluster = (
   (
@@ -37,7 +37,7 @@ type PinMarkerRender = (
     offset: Point
   ) => Marker
 )
-type FeatureInClusterMatch = { clusterId: string, feature: MapGeoJSONFeature }
+interface FeatureInClusterMatch { clusterId: string, feature: MapGeoJSONFeature }
 type FeatureMatch = FeatureInClusterMatch | MapGeoJSONFeature
 
 const UnfoldedClusterClass = 'teritorio-unfolded-cluster'
@@ -67,17 +67,17 @@ export class TeritorioCluster extends EventTarget {
     map: maplibregl.Map,
     sourceId: string,
     options?: {
-      clusterMaxZoom?: number,
-      clusterMinZoom?: number,
-      clusterRenderFn?: ClusterRender,
-      fitBoundsOptions?: FitBoundsOptions,
-      initialFeature?: MapGeoJSONFeature,
-      markerRenderFn?: MarkerRender,
+      clusterMaxZoom?: number
+      clusterMinZoom?: number
+      clusterRenderFn?: ClusterRender
+      fitBoundsOptions?: FitBoundsOptions
+      initialFeature?: MapGeoJSONFeature
+      markerRenderFn?: MarkerRender
       markerSize?: number
-      unfoldedClusterRenderFn?: UnfoldedCluster,
-      unfoldedClusterMaxLeaves?: number,
+      unfoldedClusterRenderFn?: UnfoldedCluster
+      unfoldedClusterMaxLeaves?: number
       pinMarkerRenderFn?: PinMarkerRender
-    }
+    },
   ) {
     super()
 
@@ -116,17 +116,17 @@ export class TeritorioCluster extends EventTarget {
   // Public methods
   //
 
-  resetSelectedFeature = () => {
+  resetSelectedFeature = (): void => {
     this.selectedClusterId = null
     this.selectedFeatureId = null
     this.#resetPinMarker()
   }
 
-  setBoundsOptions = (options: FitBoundsOptions) => {
+  setBoundsOptions = (options: FitBoundsOptions): void => {
     this.fitBoundsOptions = options
   }
 
-  setSelectedFeature = (feature: MapGeoJSONFeature) => {
+  setSelectedFeature = (feature: MapGeoJSONFeature): void => {
     const id = this.#getFeatureId(feature)
     const match = this.#findFeature(id)
 
@@ -151,35 +151,32 @@ export class TeritorioCluster extends EventTarget {
       const coords = match.geometry.coordinates
 
       this.#renderPinMarker(new LngLat(coords[0], coords[1]))
-
-      return
-    } else if ('feature' in match && match.feature.geometry.type === 'Point') {
+    }
+    else if ('feature' in match && match.feature.geometry.type === 'Point') {
       const cluster = this.markersOnScreen.get(match.clusterId)
 
-      if(!cluster) {
+      if (!cluster) {
         console.error(`Cluster ${match.clusterId} not found.`)
         return
       }
 
       this.selectedClusterId = match.clusterId
       this.#renderPinMarkerInCluster(cluster.getElement(), cluster.getLngLat())
-
-      return
     }
   }
 
-  // 
+  //
   // Private methods
   //
 
-  #calculatePinMarkerOffset = (cluster: HTMLElement, marker: HTMLElement) => {
+  #calculatePinMarkerOffset = (cluster: HTMLElement, marker: HTMLElement): Point => {
     const { clusterXCenter, clusterYCenter } = this.#getClusterCenter(cluster)
     const { x, y, height, width } = marker.getBoundingClientRect()
 
     return new Point(x - clusterXCenter + (width / 2), y - clusterYCenter + (height / 2))
   }
 
-  #featureClickHandler = (e: Event, feature: MapGeoJSONFeature) => {
+  #featureClickHandler = (e: Event, feature: MapGeoJSONFeature): void => {
     e.stopPropagation()
 
     if (!(e.currentTarget instanceof HTMLElement) || this.selectedFeatureId === this.#getFeatureId(feature))
@@ -187,10 +184,10 @@ export class TeritorioCluster extends EventTarget {
 
     this.setSelectedFeature(feature)
 
-    this.dispatchEvent(new CustomEvent("feature-click", {
+    this.dispatchEvent(new CustomEvent('feature-click', {
       detail: {
         selectedFeature: feature,
-      }
+      },
     }))
   }
 
@@ -210,13 +207,13 @@ export class TeritorioCluster extends EventTarget {
     }
   }
 
-  #fitBoundsToClusterLeaves = (features: MapGeoJSONFeature[]) => {
+  #fitBoundsToClusterLeaves = (features: MapGeoJSONFeature[]): void => {
     const bounds = bbox(featureCollection(features))
 
     this.map.fitBounds(bounds as [number, number, number, number], this.fitBoundsOptions)
   }
 
-  #getClusterCenter = (cluster: HTMLElement) => {
+  #getClusterCenter = (cluster: HTMLElement): { clusterXCenter: number, clusterYCenter: number } => {
     const { left, right, top, bottom } = cluster.getBoundingClientRect()
 
     return { clusterXCenter: (left + right) / 2, clusterYCenter: (top + bottom) / 2 }
@@ -244,14 +241,14 @@ export class TeritorioCluster extends EventTarget {
     return this.clusterLeaves.get(clusterId)!.findIndex(feature => this.#getFeatureId(feature) === featureId) > -1
   }
 
-  #render = () => {
+  #render = (): void => {
     if (!this.ticking)
       requestAnimationFrame(this.#updateMarkers)
 
     this.ticking = true
   }
 
-  #renderCluster = (id: string, props: MapGeoJSONFeature['properties']) => {
+  #renderCluster = (id: string, props: MapGeoJSONFeature['properties']): HTMLDivElement => {
     const element = document.createElement('div')
     element.id = id
 
@@ -275,7 +272,7 @@ export class TeritorioCluster extends EventTarget {
     return element
   }
 
-  #renderMarker = (feature: MapGeoJSONFeature) => {
+  #renderMarker = (feature: MapGeoJSONFeature): HTMLDivElement => {
     const element = document.createElement('div')
     element.id = this.#getFeatureId(feature)
 
@@ -286,7 +283,7 @@ export class TeritorioCluster extends EventTarget {
     return element
   }
 
-  #renderPinMarker = (coords: LngLatLike, offset: Point = new Point(0, 0)) => {
+  #renderPinMarker = (coords: LngLatLike, offset: Point = new Point(0, 0)): void => {
     this.pinMarker = !this.pinMarkerRender
       ? pinMarkerRenderDefault(coords, offset)
       : this.pinMarkerRender(coords, offset)
@@ -294,7 +291,7 @@ export class TeritorioCluster extends EventTarget {
     this.pinMarker.addTo(this.map)
   }
 
-  #renderUnfoldedCluster = (id: string, leaves: MapGeoJSONFeature[]) => {
+  #renderUnfoldedCluster = (id: string, leaves: MapGeoJSONFeature[]): HTMLDivElement => {
     const element = document.createElement('div')
     element.id = id
     element.classList.add(UnfoldedClusterClass)
@@ -306,17 +303,18 @@ export class TeritorioCluster extends EventTarget {
     return element
   }
 
-  #resetPinMarker = () => {
+  #resetPinMarker = (): void => {
     this.pinMarker?.remove()
     this.pinMarker = null
   }
 
-  #renderPinMarkerInCluster = (cluster: HTMLElement, coords: LngLatLike) => {
+  #renderPinMarkerInCluster = (cluster: HTMLElement, coords: LngLatLike): void => {
     const isUnfoldedCluster = cluster.classList.contains(UnfoldedClusterClass)
 
     if (!isUnfoldedCluster) {
       this.#renderPinMarker(coords)
-    } else {
+    }
+    else {
       // Get selected feature DOM element position within cluster
       const selectedFeatureHTML = Array.from(cluster.children).find(el => el.id === this.selectedFeatureId) as HTMLElement
 
@@ -327,7 +325,7 @@ export class TeritorioCluster extends EventTarget {
     }
   }
 
-  #updateMarkers = async () => {
+  #updateMarkers = async (): Promise<void> => {
     const newMarkers = new Map<string, Marker>()
     const features = this.map.querySourceFeatures(this.sourceId)
     const maxZoomLimit = this.map.getZoom() >= this.clusterMaxZoom
@@ -350,7 +348,7 @@ export class TeritorioCluster extends EventTarget {
       }
     }
 
-    this.featuresMap.forEach(feature => {
+    this.featuresMap.forEach((feature) => {
       const coords = feature.geometry.type === 'Point' ? new LngLat(feature.geometry.coordinates[0], feature.geometry.coordinates[1]) : undefined
       const id = this.#getFeatureId(feature)
 
@@ -372,12 +370,9 @@ export class TeritorioCluster extends EventTarget {
 
         if (
           (marker && maxZoomLimit && !marker.getElement().classList.contains(UnfoldedClusterClass))
-          ||
-          (marker && !maxZoomLimit && marker.getElement().classList.contains(UnfoldedClusterClass) && this.markersOnScreen.has(id))
-          ||
-          (marker && minZoomLimit && !marker.getElement().classList.contains(UnfoldedClusterClass))
-          ||
-          (marker && !minZoomLimit && marker.getElement().classList.contains(UnfoldedClusterClass) && this.markersOnScreen.has(id))
+          || (marker && !maxZoomLimit && marker.getElement().classList.contains(UnfoldedClusterClass) && this.markersOnScreen.has(id))
+          || (marker && minZoomLimit && !marker.getElement().classList.contains(UnfoldedClusterClass))
+          || (marker && !minZoomLimit && marker.getElement().classList.contains(UnfoldedClusterClass) && this.markersOnScreen.has(id))
         ) {
           marker = undefined
           this.markersOnScreen.get(id)?.remove()
@@ -411,9 +406,10 @@ export class TeritorioCluster extends EventTarget {
             this.initialFeature = undefined
           }
         }
-      } else {
+      }
+      else {
         if (!marker) {
-          let element = this.#renderMarker(feature)
+          const element = this.#renderMarker(feature)
 
           marker = new Marker({ element }).setLngLat(coords).addTo(this.map)
           element.addEventListener('click', (e: Event) => this.#featureClickHandler(e, feature))
