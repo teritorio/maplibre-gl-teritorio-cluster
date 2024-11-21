@@ -9,6 +9,14 @@ export default defineConfig(({ command, mode }) => {
         name: 'MaplibreGlTeritorioCluster',
         fileName: 'maplibre-gl-teritorio-cluster'
       },
+      rollupOptions: {
+        external: ['maplibre-gl'], // Exclude maplibre-gl from the bundle
+        output: {
+          globals: {
+            'maplibre-gl': 'maplibregl',  // Define the global variable for maplibre-gl in the browser
+          },
+        },
+      }
     } : undefined
   }
 })
