@@ -1,14 +1,14 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { TeritorioCluster } from '../src/teritorio-cluster'
 import { Map as MapGL } from 'maplibre-gl'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { TeritorioCluster } from '../src/teritorio-cluster'
 
-describe('TeritorioCluster', () => {
+describe('teritorio cluster class implementation', () => {
   let map: MapGL
   let teritorioCluster: TeritorioCluster
 
   beforeEach(() => {
     // Create a mock map
-    map = new MapGL({ container: 'map'})
+    map = new MapGL({ container: 'map' })
 
     // Initialize the cluster
     teritorioCluster = new TeritorioCluster(map, 'sourceId')
