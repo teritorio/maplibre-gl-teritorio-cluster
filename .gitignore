@@ -1,5 +1,6 @@
 node_modules
 dist
+coverage/
 
 # Yarn v2
 .pnp.*
