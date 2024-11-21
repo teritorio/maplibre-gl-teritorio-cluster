@@ -2,13 +2,13 @@ import type { FitBoundsOptions, GeoJSONSource, LngLatLike, MapSourceDataEvent } 
 import bbox from '@turf/bbox'
 import { featureCollection } from '@turf/helpers'
 import { Marker, Point } from 'maplibre-gl'
+import { getFeatureId } from './utils/get-feature-id'
 import {
   clusterRenderDefault,
   markerRenderDefault,
   pinMarkerRenderDefault,
   unfoldedClusterRenderSmart,
 } from './utils/helpers'
-import { getFeatureId } from './utils/get-feature-id'
 
 type UnfoldedCluster = (
   (
@@ -68,12 +68,12 @@ export class TeritorioCluster extends EventTarget {
     map: maplibregl.Map,
     sourceId: string,
     options?: {
-      clusterMaxZoom?: number,
-      clusterMinZoom?: number,
-      clusterRenderFn?: ClusterRender,
-      fitBoundsOptions?: FitBoundsOptions,
-      initialFeature?: GeoJSON.Feature,
-      markerRenderFn?: MarkerRender,
+      clusterMaxZoom?: number
+      clusterMinZoom?: number
+      clusterRenderFn?: ClusterRender
+      fitBoundsOptions?: FitBoundsOptions
+      initialFeature?: GeoJSON.Feature
+      markerRenderFn?: MarkerRender
       markerSize?: number
       unfoldedClusterRenderFn?: UnfoldedCluster
       unfoldedClusterMaxLeaves?: number
@@ -127,7 +127,7 @@ export class TeritorioCluster extends EventTarget {
     this.fitBoundsOptions = options
   }
 
-  setSelectedFeature = (feature: GeoJSON.Feature) => {
+  setSelectedFeature = (feature: GeoJSON.Feature): void => {
     const id = getFeatureId(feature)
     const match = this.#findFeature(id)
 
@@ -153,7 +153,7 @@ export class TeritorioCluster extends EventTarget {
 
       return
     }
-    
+
     if ('feature' in match && match.feature.geometry.type === 'Point') {
       const cluster = this.markersOnScreen.get(match.clusterId)
 
@@ -229,17 +229,19 @@ export class TeritorioCluster extends EventTarget {
         return false
       }
 
-      const featureIndex = cluster.findIndex(feature => {
+      const featureIndex = cluster.findIndex((feature) => {
         try {
           return getFeatureId(feature) === featureId
-        } catch (error) {
+        }
+        catch (error) {
           console.error(`Error getting feature ID for feature:`, feature, error)
           return false
         }
       })
 
       return featureIndex > -1
-    } catch (error) {
+    }
+    catch (error) {
       console.error(`Error checking if feature ${featureId} is in cluster ${clusterId}:`, error)
       return false
     }
@@ -352,7 +354,7 @@ export class TeritorioCluster extends EventTarget {
       }
     }
 
-    this.featuresMap.forEach(feature => {
+    this.featuresMap.forEach((feature) => {
       const coords = feature.geometry.type === 'Point' ? feature.geometry.coordinates as LngLatLike : undefined
       const id = getFeatureId(feature)
 

@@ -1,4 +1,4 @@
-export const getFeatureId = (feature: GeoJSON.Feature): string => {
+export function getFeatureId(feature: GeoJSON.Feature): string {
   try {
     if (!feature.properties) {
       throw new Error('Feature properties are null or undefined')
@@ -25,8 +25,9 @@ export const getFeatureId = (feature: GeoJSON.Feature): string => {
     }
 
     return metadata.id.toString()
-  } catch (error) {
-    console.error("Error in getFeatureId: ", error);
+  }
+  catch (error) {
+    console.error('Error in getFeatureId: ', error)
 
     return feature.id?.toString() || 'unknown'
   }
