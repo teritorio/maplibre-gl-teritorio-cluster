@@ -10,5 +10,14 @@ vi.mock('maplibre-gl', () => {
       }),
       fitBounds: vi.fn(),
     })),
+    Marker: vi.fn().mockImplementation(() => ({
+      setLngLat: vi.fn().mockReturnThis(),
+      addTo: vi.fn().mockReturnThis(),
+      setOffset: vi.fn().mockReturnThis(),
+    })),
+    Point: vi.fn().mockImplementation((x, y) => ({
+      x,
+      y,
+    })),
   }
 })
