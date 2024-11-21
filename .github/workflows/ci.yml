@@ -43,6 +43,9 @@ jobs:
         run: yarn install --immutable
         if: steps.cache-dependencies.outputs.cache-hit != 'true' # Only install if cache miss
 
+      - name: Run Linter 🧑‍💻
+        run: yarn lint
+
   tests:
     name: 🔍 Execute Unit Tests
     needs: setup
