@@ -30,49 +30,49 @@ Or use it from CDN
 > Set your GeoJson source with `clusterMaxZoom: 22` in order to let the plugin handle cluster/individual marker rendering across all zoom level
 
 ```js
-import { Map } from "maplibre-gl"
 import { TeritorioCluster } from '@teritorio/maplibre-gl-teritorio-cluster'
+import { Map } from 'maplibre-gl'
 
 const map = new Map({
-  container: "map",
+  container: 'map',
   style: {
     version: 8,
-    name: "Empty Style",
-    metadata: { "maputnik:renderer": "mlgljs" },
+    name: 'Empty Style',
+    metadata: { 'maputnik:renderer': 'mlgljs' },
     sources: {
       points: {
-        type: "geojson",
+        type: 'geojson',
         cluster: true,
         clusterRadius: 80,
         clusterMaxZoom: 22, // Required
         data: {
-          type: "FeatureCollection",
+          type: 'FeatureCollection',
           features: [
             {
-              type: "Feature",
+              type: 'Feature',
               properties: { id: 1 },
-              geometry: { type: "Point", coordinates: [0, 0] }
+              geometry: { type: 'Point', coordinates: [0, 0] }
             },
             {
-              type: "Feature",
+              type: 'Feature',
               properties: { id: 2 },
-              geometry: { type: "Point", coordinates: [0, 1] }
+              geometry: { type: 'Point', coordinates: [0, 1] }
             }
           ]
         }
       }
     },
-    glyphs: "https://orangemug.github.io/font-glyphs/glyphs/{fontstack}/{range}.pbf",
+    glyphs: 'https://orangemug.github.io/font-glyphs/glyphs/{fontstack}/{range}.pbf',
     layers: [
       {
-        id: "cluster",
-        type: "circle",
-        source: "points"
+        id: 'cluster',
+        type: 'circle',
+        source: 'points'
       }
     ],
-    id: "muks8j3"
+    id: 'muks8j3'
   }
-});
+})
 
 map.on('load', () => {
   const teritorioCluster = new TeritorioCluster(map, 'points', options)
@@ -84,13 +84,13 @@ map.on('load', () => {
 })
 
 // Create whatever HTML element you want as Cluster
-const clusterRender = (element: HTMLDivElement, props: MapGeoJSONFeature['properties']): void => {}
+function clusterRender(element, props) {}
 
 // Create whatever HTML element you want as individual Marker
-const markerRender = (element: HTMLDivElement, feature: MapGeoJSONFeature, markerSize: number): void => {}
+function markerRender(element, feature, markerSize) {}
 
 // Create whatever HTML element you want as Pin Marker
-const pinMarkerRender = (coords: LngLatLike, offset: Point): Marker => {}
+function pinMarkerRender(coords, offset) {}
 ```
 
 ## API

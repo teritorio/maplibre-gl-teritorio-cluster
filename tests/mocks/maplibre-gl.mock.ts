@@ -9,6 +9,6 @@ vi.mock('maplibre-gl', () => {
         getClusterLeaves: vi.fn(),
       }),
       fitBounds: vi.fn(),
-    }))
+    })),
   }
 })

@@ -1,15 +1,15 @@
 name: Setup Node.js (v20) with Yarn v2 🚀
-description: 'Set up Node.js version 20 and enable Yarn v2 using Corepack'
+description: Set up Node.js version 20 and enable Yarn v2 using Corepack
 
 inputs:
   node-version:
-    description: 'The version of Node.js to set up.'
+    description: The version of Node.js to set up.
     required: true
     default: '20'
 
 outputs:
   node-version:
-    description: 'The version of Node.js that was installed.'
+    description: The version of Node.js that was installed.
 
 runs:
   using: composite
