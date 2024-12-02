@@ -36,6 +36,7 @@
   <header>
     <input id="custom-url" type="url" placeholder="GeoJSON source URL..." />
     <button id="load-data">Load external data</button>
+    <button id="remove-data">Remove external data</button>
     |
     <input id="feature-id" type="text" value="us2000ahxc" />
     <button id="select-feature">Select feature manually</button>
@@ -104,6 +105,7 @@
       })
 
       document.getElementById('load-data').addEventListener('click', loadData)
+      document.getElementById('remove-data').addEventListener('click', removeData)
       document.getElementById('select-feature').addEventListener('click', selectFeature)
     })
 
@@ -136,6 +138,18 @@
       source.setData({
         type: 'FeatureCollection',
         features: [...geojson.features, ...vidoGeojson.features]
+      })
+    }
+    
+    const removeData = () => {
+      if(teritorioCluster.ticking)
+        return
+      
+      const source = map.getSource('earthquakes')
+
+      source.setData({
+        type: 'FeatureCollection',
+        features: geojson.features
       })
     }
 
