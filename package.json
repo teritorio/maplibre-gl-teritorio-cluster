@@ -22,6 +22,7 @@
   },
   "main": "./dist/maplibre-gl-teritorio-cluster.umd.cjs",
   "module": "./dist/maplibre-gl-teritorio-cluster.js",
+  "types": "./dist/maplibre-gl-teritorio-cluster.d.ts",
   "files": [
     "dist"
   ],
@@ -57,6 +58,9 @@
     "vite": "^5.4.4",
     "vite-plugin-dts": "^4.3.0",
     "vitest": "^2.1.5"
+  },
+  "resolutions": {
+    "@microsoft/api-extractor/typescript": "^5.6.2"
   },
   "simple-git-hooks": {
     "commit-msg": "yarn dlx commitlint --edit $1",
