@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 
 export default defineConfig({
+  base: '/maplibre-gl-teritorio-cluster/',
   build: {
     lib: {
       entry: './src/index.ts',
