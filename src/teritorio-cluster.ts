@@ -101,12 +101,11 @@ export class TeritorioCluster extends EventTarget {
     this.unfoldedClusterRender = options?.unfoldedClusterRenderFn
     this.unfoldedClusterMaxLeaves = options?.unfoldedClusterMaxLeaves || 7
 
-    // after the GeoJSON data is loaded, update markers on the screen and do so on every map move/moveend
-    map.on('data', (e: MapSourceDataEvent) => {
-      if (e.sourceId !== this.sourceId || !e.isSourceLoaded || e.sourceDataType === 'metadata')
-        return
-
-      this.#render()
+    // After the GeoJSON data is loaded, update markers on the screen and do so on every map moveend
+    map.on('sourcedata', (ev: MapSourceDataEvent) => {
+      if (ev.isSourceLoaded && ev.sourceId === this.sourceId && ev.sourceDataType !== 'metadata') {
+        this.#render()
+      }
     })
 
     map.on('moveend', this.#render)
