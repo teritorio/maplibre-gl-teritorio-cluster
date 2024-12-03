@@ -149,9 +149,11 @@ Serve the demo page
 yarn dev
 ```
 
-## Requirements
+## Peer Dependencies
 
-Requires [maplibre-gl-js](https://github.com/maplibre/maplibre-gl-js) >= v4.0.0.
+This library requires the following peer dependencies to be installed in your project:
+
+- [maplibre-gl-js](https://github.com/maplibre/maplibre-gl-js) >= v4.5.0.
 
 ## Contribution
 
