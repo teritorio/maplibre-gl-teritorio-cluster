@@ -1,5 +1,5 @@
-import type { LngLatLike, MapGeoJSONFeature } from 'maplibre-gl'
-import { Marker, Point } from 'maplibre-gl'
+import type { LngLatLike, MapGeoJSONFeature, Marker, Point } from 'maplibre-gl'
+import maplibre from 'maplibre-gl'
 
 // Helper to apply styles on DOM element
 export function buildCss(htmlEl: HTMLElement, styles: { [key: string]: string }): void {
@@ -145,6 +145,6 @@ export function markerRenderDefault(element: HTMLDivElement, markerSize: number)
 }
 
 // Pin Marker default styles
-export function pinMarkerRenderDefault(coords: LngLatLike, offset: Point = new Point(0, 0)): Marker {
-  return new Marker({ anchor: 'bottom' }).setLngLat(coords).setOffset(offset)
+export function pinMarkerRenderDefault(coords: LngLatLike, offset: Point = new maplibre.Point(0, 0)): Marker {
+  return new maplibre.Marker({ anchor: 'bottom' }).setLngLat(coords).setOffset(offset)
 }

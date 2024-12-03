@@ -1,7 +1,7 @@
-import type { FitBoundsOptions, GeoJSONSource, LngLatLike, MapGeoJSONFeature, Map as MapGL, MapSourceDataEvent } from 'maplibre-gl'
+import type { FitBoundsOptions, GeoJSONSource, LngLatLike, MapGeoJSONFeature, Map as MapGL, MapSourceDataEvent, Marker, Point } from 'maplibre-gl'
 import bbox from '@turf/bbox'
 import { featureCollection } from '@turf/helpers'
-import { LngLat, Marker, Point } from 'maplibre-gl'
+import maplibre from 'maplibre-gl'
 import {
   clusterRenderDefault,
   markerRenderDefault,
@@ -139,7 +139,7 @@ export class TeritorioCluster extends EventTarget {
       // Sets a Pin Marker on a specific coordinates which isn't related to any feature from data source
       this.resetSelectedFeature()
       this.selectedFeatureId = id
-      this.#renderPinMarker(new LngLat(feature.geometry.coordinates[0], feature.geometry.coordinates[1]))
+      this.#renderPinMarker(new maplibre.LngLat(feature.geometry.coordinates[0], feature.geometry.coordinates[1]))
 
       return
     }
@@ -150,7 +150,7 @@ export class TeritorioCluster extends EventTarget {
     if ('type' in match && match.type === 'Feature' && match.geometry.type === 'Point') {
       const coords = match.geometry.coordinates
 
-      this.#renderPinMarker(new LngLat(coords[0], coords[1]))
+      this.#renderPinMarker(new maplibre.LngLat(coords[0], coords[1]))
     }
     else if ('feature' in match && match.feature.geometry.type === 'Point') {
       const cluster = this.markersOnScreen.get(match.clusterId)
@@ -173,7 +173,7 @@ export class TeritorioCluster extends EventTarget {
     const { clusterXCenter, clusterYCenter } = this.#getClusterCenter(cluster)
     const { x, y, height, width } = marker.getBoundingClientRect()
 
-    return new Point(x - clusterXCenter + (width / 2), y - clusterYCenter + (height / 2))
+    return new maplibre.Point(x - clusterXCenter + (width / 2), y - clusterYCenter + (height / 2))
   }
 
   #featureClickHandler = (e: Event, feature: MapGeoJSONFeature): void => {
@@ -283,7 +283,7 @@ export class TeritorioCluster extends EventTarget {
     return element
   }
 
-  #renderPinMarker = (coords: LngLatLike, offset: Point = new Point(0, 0)): void => {
+  #renderPinMarker = (coords: LngLatLike, offset: Point = new maplibre.Point(0, 0)): void => {
     this.pinMarker = !this.pinMarkerRender
       ? pinMarkerRenderDefault(coords, offset)
       : this.pinMarkerRender(coords, offset)
@@ -349,7 +349,7 @@ export class TeritorioCluster extends EventTarget {
     }
 
     this.featuresMap.forEach((feature) => {
-      const coords = feature.geometry.type === 'Point' ? new LngLat(feature.geometry.coordinates[0], feature.geometry.coordinates[1]) : undefined
+      const coords = feature.geometry.type === 'Point' ? new maplibre.LngLat(feature.geometry.coordinates[0], feature.geometry.coordinates[1]) : undefined
       const id = this.#getFeatureId(feature)
 
       if (!coords) {
@@ -387,7 +387,7 @@ export class TeritorioCluster extends EventTarget {
           else
             element = this.#renderCluster(id, props)
 
-          marker = new Marker({ element }).setLngLat(coords).addTo(this.map)
+          marker = new maplibre.Marker({ element }).setLngLat(coords).addTo(this.map)
 
           // If selected feature is now part of this new cluster
           // We position the Pin marker on it's new position
@@ -411,7 +411,7 @@ export class TeritorioCluster extends EventTarget {
         if (!marker) {
           const element = this.#renderMarker(feature)
 
-          marker = new Marker({ element }).setLngLat(coords).addTo(this.map)
+          marker = new maplibre.Marker({ element }).setLngLat(coords).addTo(this.map)
           element.addEventListener('click', (e: Event) => this.#featureClickHandler(e, feature))
 
           // Keep Pin Marker on top
