@@ -1,6 +1,6 @@
 import { Map as MapGL } from 'maplibre-gl'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { TeritorioCluster } from '../src/teritorio-cluster'
+import { TeritorioCluster } from '../src/index'
 
 describe('teritorio cluster class implementation', () => {
   let map: MapGL

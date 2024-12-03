@@ -22,12 +22,11 @@
   },
   "main": "./dist/maplibre-gl-teritorio-cluster.umd.cjs",
   "module": "./dist/maplibre-gl-teritorio-cluster.js",
-  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "vite build && tsc",
+    "build": "vite build",
     "build:demo": "vite build --mode development",
     "coverage": "vitest run --coverage",
     "dev": "vite",
@@ -56,6 +55,7 @@
     "simple-git-hooks": "^2.11.1",
     "typescript": "^5.6.2",
     "vite": "^5.4.4",
+    "vite-plugin-dts": "^4.3.0",
     "vitest": "^2.1.5"
   },
   "simple-git-hooks": {
