@@ -20,5 +20,8 @@ export default defineConfig(({ command, mode }) => {
           },
         }
       : undefined,
+    server: {
+      open: './demo/index.html',
+    },
   }
 })
