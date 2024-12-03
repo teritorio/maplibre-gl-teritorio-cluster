@@ -12,7 +12,7 @@ Can display and interact with small cluster without the need to zoom or uncluste
 
 See the [Demo page](https://teritorio.github.io/maplibre-gl-teritorio-cluster/index.html).
 
-![alt text](image.png)
+![alt text](public/image.png)
 
 ## Usage
 
