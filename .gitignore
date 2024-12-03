@@ -1,6 +1,7 @@
 node_modules
 dist
 coverage/
+*.tgz
 
 # Yarn v2
 .pnp.*

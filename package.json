@@ -16,6 +16,7 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/maplibre-gl-teritorio-cluster.d.ts",
       "import": "./dist/maplibre-gl-teritorio-cluster.js",
       "require": "./dist/maplibre-gl-teritorio-cluster.umd.cjs"
     }
