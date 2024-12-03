@@ -8,7 +8,7 @@ export default defineConfig(({ command, mode }) => {
           lib: {
             entry: 'src/index.ts',
             name: 'MaplibreGlTeritorioCluster',
-            fileName: 'maplibre-gl-teritorio-cluster',
+            fileName: format => `maplibre-gl-teritorio-cluster.${format}.js`,
           },
           rollupOptions: {
             external: ['maplibre-gl'], // Exclude maplibre-gl from the bundle
