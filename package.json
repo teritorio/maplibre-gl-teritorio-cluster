@@ -29,7 +29,7 @@
   ],
   "scripts": {
     "build": "vite build",
-    "build:demo": "vite build --mode development",
+    "build:demo": "vite build --mode demo",
     "coverage": "vitest run --coverage",
     "dev": "vite",
     "lint": "eslint .",

@@ -8,8 +8,6 @@
   <meta property="og:description"
     content="Allow visualization and interaction with all markers, even when superposed. Can display and interact with small cluster without the need to zoom or uncluster." />
   <title>MapLibre GL Teritorio Cluster</title>
-  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css">
-  <script type="module" src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
   <style>
     body {
       display: flex;
@@ -43,7 +41,9 @@
   </header>
   <div id="map"></div>
   <script type="module">
-    import { buildCss, unfoldedClusterRenderSmart as unfoldedClusterRender, TeritorioCluster } from '../src/index'
+    import maplibregl from 'maplibre-gl'
+    import 'maplibre-gl/dist/maplibre-gl.css'
+    import { buildCss, unfoldedClusterRenderSmart as unfoldedClusterRender, TeritorioCluster } from './src/index'
 
     let geojson;
     let teritorioCluster;
@@ -140,11 +140,11 @@
         features: [...geojson.features, ...vidoGeojson.features]
       })
     }
-    
+
     const removeData = () => {
-      if(teritorioCluster.ticking)
+      if (teritorioCluster.ticking)
         return
-      
+
       const source = map.getSource('earthquakes')
 
       source.setData({
