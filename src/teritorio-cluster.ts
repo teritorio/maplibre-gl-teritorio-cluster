@@ -1,4 +1,4 @@
-import type { FitBoundsOptions, GeoJSONSource, LngLatLike, MapGeoJSONFeature, MapSourceDataEvent } from 'maplibre-gl'
+import type { FitBoundsOptions, GeoJSONSource, LngLatLike, MapGeoJSONFeature, Map as MapGL, MapSourceDataEvent } from 'maplibre-gl'
 import bbox from '@turf/bbox'
 import { featureCollection } from '@turf/helpers'
 import { LngLat, Marker, Point } from 'maplibre-gl'
@@ -43,7 +43,7 @@ type FeatureMatch = FeatureInClusterMatch | MapGeoJSONFeature
 const UnfoldedClusterClass = 'teritorio-unfolded-cluster'
 
 export class TeritorioCluster extends EventTarget {
-  map: maplibregl.Map
+  map: MapGL
   clusterLeaves: Map<string, MapGeoJSONFeature[]>
   clusterMaxZoom: number
   clusterMinZoom: number
@@ -64,7 +64,7 @@ export class TeritorioCluster extends EventTarget {
   unfoldedClusterMaxLeaves: number
 
   constructor(
-    map: maplibregl.Map,
+    map: MapGL,
     sourceId: string,
     options?: {
       clusterMaxZoom?: number
