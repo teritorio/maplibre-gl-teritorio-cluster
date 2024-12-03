@@ -98,7 +98,7 @@ jobs:
       - name: Upload Build Artifacts 📦
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist # Path to the build output directory
+          path: ./demo # Path to the build output directory
 
       - name: Deploy to GitHub Pages 🌐
         id: deployment
