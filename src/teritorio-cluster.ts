@@ -438,6 +438,22 @@ export class TeritorioCluster extends EventTarget {
         marker.remove()
     }
 
+    if (this.initialFeature && !this.selectedFeatureId && !this.pinMarker) {
+      const id = this.#getFeatureId(this.initialFeature)
+      const coords = this.initialFeature.geometry.type === 'Point'
+        ? new maplibre.LngLat(this.initialFeature.geometry.coordinates[0], this.initialFeature.geometry.coordinates[1])
+        : undefined
+
+      if (!coords) {
+        console.error(`Coordinates not found for feature id : ${id}`)
+        return
+      }
+
+      this.selectedFeatureId = id
+      this.#renderPinMarker(coords)
+      this.initialFeature = undefined
+    }
+
     this.markersOnScreen = newMarkers
     this.ticking = false
   }
