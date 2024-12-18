@@ -23,7 +23,7 @@ yarn dev
 ### Build package
 
 Bundles the package to the `dist` folder.
-The package is bundled with [Typescript tsc CLI](https://www.typescriptlang.org/docs/handbook/compiler-options.html) into multiple formats (CommonJS, ESM).
+The package is bundled with [Vite Library Mode](https://vite.dev/guide/build#library-mode) into multiple formats (CommonJS, ESM).
 
 ```shell
 yarn build
