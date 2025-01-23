@@ -186,7 +186,7 @@
         return
 
       const data = await map.getSource('earthquakes').getData()
-      const feature = data.features.find(feature => feature.properties.id === id)
+      const feature = data.features.find(feature => (feature.properties.id || feature.properties.metadata?.id || feature.id ) === id)
 
       if (!feature) {
         console.error('Feature not found !')

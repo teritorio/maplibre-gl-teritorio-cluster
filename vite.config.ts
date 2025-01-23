@@ -21,6 +21,7 @@ export default defineConfig(({ command, mode }) => {
           name: 'MaplibreGlTeritorioCluster',
           fileName: 'maplibre-gl-teritorio-cluster',
         },
+        copyPublicDir: false,
         sourcemap: true,
         rollupOptions: {
           external: ['maplibre-gl'], // Exclude maplibre-gl from the bundle
