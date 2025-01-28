@@ -59,9 +59,10 @@ export class TeritorioCluster extends EventTarget {
   selectedClusterId: string | null
   selectedFeatureId: string | null
   sourceId: string
-  ticking: boolean
   unfoldedClusterRender?: UnfoldedCluster
   unfoldedClusterMaxLeaves: number
+  source?: GeoJSONSource
+  #abortExec: number = 0
 
   constructor(
     map: MapGL,
@@ -97,18 +98,22 @@ export class TeritorioCluster extends EventTarget {
     this.selectedClusterId = null
     this.selectedFeatureId = null
     this.sourceId = sourceId
-    this.ticking = false
     this.unfoldedClusterRender = options?.unfoldedClusterRenderFn
     this.unfoldedClusterMaxLeaves = options?.unfoldedClusterMaxLeaves || 7
 
     // After the GeoJSON data is loaded, update markers on the screen and do so on every map moveend
     map.on('sourcedata', (ev: MapSourceDataEvent) => {
       if (ev.isSourceLoaded && ev.sourceId === this.sourceId && ev.sourceDataType !== 'metadata') {
-        this.#render()
+        this.#abortExec++
+        this.source = this.map.getSource(this.sourceId) as GeoJSONSource
+        this.#updateMarkers(this.#abortExec)
       }
     })
 
-    map.on('moveend', this.#render)
+    map.on('moveend', () => {
+      this.#abortExec++
+      this.#updateMarkers(this.#abortExec)
+    })
   }
 
   //
@@ -240,13 +245,6 @@ export class TeritorioCluster extends EventTarget {
     return this.clusterLeaves.get(clusterId)!.findIndex(feature => this.#getFeatureId(feature) === featureId) > -1
   }
 
-  #render = (): void => {
-    if (!this.ticking)
-      requestAnimationFrame(this.#updateMarkers)
-
-    this.ticking = true
-  }
-
   #renderCluster = (id: string, props: MapGeoJSONFeature['properties']): HTMLDivElement => {
     const element = document.createElement('div')
     element.id = id
@@ -324,7 +322,10 @@ export class TeritorioCluster extends EventTarget {
     }
   }
 
-  #updateMarkers = async (): Promise<void> => {
+  #updateMarkers = async (updateNb: number): Promise<void> => {
+    if (this.#abortExec !== updateNb)
+      return
+
     const newMarkers = new Map<string, Marker>()
     const features = this.map.querySourceFeatures(this.sourceId)
     const maxZoomLimit = this.map.getZoom() >= this.clusterMaxZoom
@@ -334,6 +335,9 @@ export class TeritorioCluster extends EventTarget {
     this.featuresMap.clear()
 
     for (const feature of features) {
+      if (this.#abortExec !== updateNb)
+        return
+
       const id = this.#getFeatureId(feature)
 
       // Transform to Map in order to have unique features
@@ -341,9 +345,18 @@ export class TeritorioCluster extends EventTarget {
 
       // Get cluster's leaves
       if (feature.properties.cluster) {
-        const source = this.map.getSource(this.sourceId) as GeoJSONSource
-        const leaves = await source.getClusterLeaves(Number.parseInt(id), feature.properties.point_count, 0) as MapGeoJSONFeature[]
-        this.clusterLeaves.set(id, leaves)
+        try {
+          const leaves = await this.source?.getClusterLeaves(Number.parseInt(id), feature.properties.point_count, 0) as MapGeoJSONFeature[]
+
+          if (this.#abortExec !== updateNb)
+            return
+
+          this.clusterLeaves.set(id, leaves)
+        }
+        catch (error) {
+          console.warn('Error while getClusterLeaves: ', error)
+          return
+        }
       }
     }
 
@@ -455,6 +468,5 @@ export class TeritorioCluster extends EventTarget {
     }
 
     this.markersOnScreen = newMarkers
-    this.ticking = false
   }
 }
