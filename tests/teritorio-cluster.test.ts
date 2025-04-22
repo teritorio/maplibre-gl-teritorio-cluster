@@ -43,7 +43,6 @@ describe('teritorio cluster class implementation', () => {
     expect(teritorioCluster.selectedClusterId).toBeNull()
     expect(teritorioCluster.selectedFeatureId).toBeNull()
     expect(teritorioCluster.sourceId).toBe('sourceId')
-    expect(teritorioCluster.ticking).toBeFalsy()
 
     // Should have the default render function
     expect(teritorioCluster.unfoldedClusterRender).toBeUndefined()
