@@ -153,7 +153,7 @@ yarn dev
 
 This library requires the following peer dependencies to be installed in your project:
 
-- [maplibre-gl-js](https://github.com/maplibre/maplibre-gl-js) >= v4.5.0.
+- [maplibre-gl-js](https://github.com/maplibre/maplibre-gl-js) >= v5.4.0
 
 ## Contribution
 

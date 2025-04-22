@@ -40,7 +40,7 @@
     "test": "vitest"
   },
   "peerDependencies": {
-    "maplibre-gl": "^4.5.0"
+    "maplibre-gl": "^5.4.0"
   },
   "dependencies": {
     "@turf/bbox": "^7.1.0",
@@ -53,7 +53,7 @@
     "@vitest/coverage-v8": "^2.1.5",
     "eslint": "^9.15.0",
     "lint-staged": "^15.2.10",
-    "maplibre-gl": "^4.5.0",
+    "maplibre-gl": "^5.4.0",
     "simple-git-hooks": "^2.11.1",
     "typescript": "^5.6.2",
     "vite": "^5.4.4",
