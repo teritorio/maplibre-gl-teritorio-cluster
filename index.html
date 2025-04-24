@@ -45,19 +45,18 @@
     import 'maplibre-gl/dist/maplibre-gl.css'
     import { buildCss, unfoldedClusterRenderSmart as unfoldedClusterRender, TeritorioCluster } from './src/index'
 
-    let geojson;
-    let teritorioCluster;
+    let geojson = await fetch('https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson', { method: 'GET' }).then(res => res.json())
+    let teritorioLayer;
+
     const map = new maplibregl.Map({
       hash: true,
       container: "map",
-      style: 'https://api.maptiler.com/maps/openstreetmap/style.json?key=hqrbV59Y4PPzIfzhWRGC'
+      style: 'https://api.maptiler.com/maps/openstreetmap/style.json?key=hqrbV59Y4PPzIfzhWRGC',
     });
 
     map.addControl(new maplibregl.NavigationControl());
-    map.on('load', async () => {
-      geojson = await fetch('https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson', { method: 'GET' }).then(res => res.json())
 
-      // add a clustered GeoJSON source for a sample set of earthquakes
+    map.on('load', () => {
       map.addSource('earthquakes', {
         'type': 'geojson',
         'data': geojson,
@@ -67,40 +66,22 @@
         'maxzoom': 24
       })
 
-      map.addLayer({
-        'id': 'earthquake_label',
-        'type': 'symbol',
-        'source': 'earthquakes',
-        'filter': ['!=', 'cluster', true],
-        'layout': {
-          'text-field': [
-            'number-format',
-            ['get', 'mag'],
-            { 'min-fraction-digits': 1, 'max-fraction-digits': 1 }
-          ],
-          'text-font': ['Open Sans Semibold'],
-          'text-size': 10
-        },
-        'paint': {
-          'text-color': 'white'
-        }
-      });
-
-      teritorioCluster = new TeritorioCluster(
-        map,
+      teritorioLayer = new TeritorioCluster(
+        'teritorio-cluster',
         'earthquakes',
         {
-          clusterRenderFn: clusterRender,
+          clusterRender,
           fitBoundsOptions: { padding: { top: 57, bottom: 20, left: 20, right: 20 } },
-          markerRenderFn: markerRender,
+          markerRender,
           markerSize: 28,
-          unfoldedClusterRenderFn: unfoldedClusterRender,
-          pinMarkerRenderFn: pinMarkerRender
-        },
+          unfoldedClusterRender,
+          pinMarkerRender
+        }
       )
 
-      // Get feature click event
-      teritorioCluster.addEventListener('feature-click', (e) => {
+     map.addLayer(teritorioLayer)
+
+      teritorioLayer.addEventListener('feature-click', (e) => {
         console.log(e.detail.selectedFeature)
       })
 
@@ -142,9 +123,6 @@
     }
 
     const removeData = () => {
-      if (teritorioCluster.ticking)
-        return
-
       const source = map.getSource('earthquakes')
 
       source.setData({
@@ -153,8 +131,8 @@
       })
     }
 
-    const markerRender = (element, feature, markerSize) => {
-      element.textContent = feature.properties?.mag
+    const markerRender = (element, markerSize, feature) => {
+      element.textContent = feature.properties.mag
 
       buildCss(element, {
         'background-color': 'green',
@@ -186,14 +164,14 @@
         return
 
       const data = await map.getSource('earthquakes').getData()
-      const feature = data.features.find(feature => (feature.properties.id || feature.properties.metadata?.id || feature.id ) === id)
+      const feature = data.features.find(feature => (feature.properties.id || feature.properties.metadata?.id || feature.id) === id)
 
       if (!feature) {
         console.error('Feature not found !')
         return
       }
 
-      teritorioCluster.setSelectedFeature(feature)
+      teritorioLayer.setSelectedFeature(feature)
     }
   </script>
 </body>

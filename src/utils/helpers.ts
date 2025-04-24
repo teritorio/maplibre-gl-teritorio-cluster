@@ -10,7 +10,13 @@ export function buildCss(htmlEl: HTMLElement, styles: { [key: string]: string })
 }
 
 // Circle shape
-export function unfoldedClusterRenderCircle(parent: HTMLDivElement, items: MapGeoJSONFeature[], markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void): void {
+export function unfoldedClusterRenderCircle(
+  parent: HTMLDivElement,
+  items: MapGeoJSONFeature[],
+  markerSize: number,
+  renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement,
+  clickHandler: (event: Event, feature: MapGeoJSONFeature) => void,
+): void {
   const radius = (markerSize / 2) / Math.sin(Math.PI / items.length)
   const angle = 360 / items.length
   let rot = 0
@@ -33,13 +39,19 @@ export function unfoldedClusterRenderCircle(parent: HTMLDivElement, items: MapGe
 
     rot += angle
 
-    featureHTML.addEventListener('click', (e: Event) => clickHandler(e, feature))
+    featureHTML.addEventListener('click', (event: Event) => clickHandler(event, feature))
     parent.append(featureHTML)
   })
 }
 
 // HexaGrid shape
-export function unfoldedClusterRenderHexaGrid(parent: HTMLDivElement, items: MapGeoJSONFeature[], markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void): void {
+export function unfoldedClusterRenderHexaGrid(
+  parent: HTMLDivElement,
+  items: MapGeoJSONFeature[],
+  markerSize: number,
+  renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement,
+  clickHandler: (event: Event, feature: MapGeoJSONFeature) => void,
+): void {
   const radius = (markerSize / 2) / Math.sin(Math.PI / items.length)
 
   buildCss(parent, {
@@ -78,13 +90,19 @@ export function unfoldedClusterRenderHexaGrid(parent: HTMLDivElement, items: Map
       transform: `translate(${x * markerSize}px, ${y * markerSize}px)`,
     })
 
-    featureHTML.addEventListener('click', (e: Event) => clickHandler(e, feature))
+    featureHTML.addEventListener('click', (event: Event) => clickHandler(event, feature))
     parent.append(featureHTML)
   })
 }
 
 // Smart: mix between Circle and HexaGrid shape
-export function unfoldedClusterRenderSmart(parent: HTMLDivElement, items: MapGeoJSONFeature[], markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void): void {
+export function unfoldedClusterRenderSmart(
+  parent: HTMLDivElement,
+  items: MapGeoJSONFeature[],
+  markerSize: number,
+  renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement,
+  clickHandler: (event: Event, feature: MapGeoJSONFeature) => void,
+): void {
   if (items.length <= 5) {
     unfoldedClusterRenderCircle(parent, items, markerSize, renderMarker, clickHandler)
   }
@@ -94,7 +112,13 @@ export function unfoldedClusterRenderSmart(parent: HTMLDivElement, items: MapGeo
 }
 
 // Grid shape
-export function unfoldedClusterRenderGrid(parent: HTMLDivElement, items: MapGeoJSONFeature[], _markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void): void {
+export function unfoldedClusterRenderGrid(
+  parent: HTMLDivElement,
+  items: MapGeoJSONFeature[],
+  _markerSize: number,
+  renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement,
+  clickHandler: (event: Event, feature: MapGeoJSONFeature) => void,
+): void {
   buildCss(parent, {
     'display': 'flex',
     'gap': '2px',
@@ -107,7 +131,7 @@ export function unfoldedClusterRenderGrid(parent: HTMLDivElement, items: MapGeoJ
   items.forEach((feature) => {
     const featureHTML = renderMarker(feature)
 
-    featureHTML.addEventListener('click', (e: Event) => clickHandler(e, feature))
+    featureHTML.addEventListener('click', (event: Event) => clickHandler(event, feature))
     parent.append(featureHTML)
   })
 }
