@@ -1,22 +1,21 @@
-import type { CircleLayerSpecification, CustomLayerInterface, GeoJSONSource, Map as MapGL, SymbolLayerSpecification } from 'maplibre-gl'
+import type { CircleLayerSpecification, CircleLayoutPropsPossiblyEvaluated, CustomLayerInterface, FilterSpecification, GeoJSONSource, LayerSpecification, Map as MapGL, SymbolLayerSpecification } from 'maplibre-gl'
 
-interface PartialSymbolLayerSpecification {
-  layout: Partial<SymbolLayerSpecification['layout']>
-  paint: Partial<SymbolLayerSpecification['paint']>
-}
-
-interface PartialCircleLayerSpecification {
-  layout: Partial<CircleLayerSpecification['layout']>
-  paint: Partial<CircleLayerSpecification['paint']>
-}
+type SymbolOrCircleLayerSpecification =
+  | ({
+    type: Extract<LayerSpecification['type'], 'symbol'>
+    suffix: string
+    filter: FilterSpecification
+  } & Pick<SymbolLayerSpecification, 'layout' | 'paint'>)
+  | ({
+    type: Extract<LayerSpecification['type'], 'circle'>
+    suffix: string
+    filter: FilterSpecification
+  } & Pick<CircleLayerSpecification, 'layout' | 'paint'>)
 
 export class TeritorioClusterLayer implements CustomLayerInterface {
   id: string
   type: 'custom'
-  markerLayerConfig: PartialCircleLayerSpecification
-  markerSymbolLayerConfig: PartialSymbolLayerSpecification
-  clusterLayerConfig: PartialCircleLayerSpecification
-  clusterSymbolLayerConfig: PartialSymbolLayerSpecification
+  layers: SymbolOrCircleLayerSpecification[]
 
   private map: MapGL | null = null
   private sourceId: string
@@ -25,18 +24,20 @@ export class TeritorioClusterLayer implements CustomLayerInterface {
   constructor(
     id: string,
     sourceId: string,
-    markerLayerConfig: PartialCircleLayerSpecification,
-    markerSymbolLayerConfig: PartialSymbolLayerSpecification,
-    clusterLayerConfig: PartialCircleLayerSpecification,
-    clusterSymbolLayerConfig: PartialSymbolLayerSpecification,
+    markerLayerConfig: Pick<CircleLayerSpecification, 'layout' | 'paint'>,
+    markerSymbolLayerConfig: Pick<SymbolLayerSpecification, 'layout' | 'paint'>,
+    clusterLayerConfig: Pick<CircleLayerSpecification, 'layout' | 'paint'>,
+    clusterSymbolLayerConfig: Pick<SymbolLayerSpecification, 'layout' | 'paint'>,
   ) {
     this.id = id
     this.sourceId = sourceId
     this.type = 'custom'
-    this.markerLayerConfig = markerLayerConfig
-    this.markerSymbolLayerConfig = markerSymbolLayerConfig
-    this.clusterLayerConfig = clusterLayerConfig
-    this.clusterSymbolLayerConfig = clusterSymbolLayerConfig
+    this.layers = [
+      { type: 'circle', suffix: 'marker', filter: ['!=', 'cluster', true], ...markerLayerConfig },
+      { type: 'symbol', suffix: 'marker-symbol', filter: ['!=', 'cluster', true], ...markerSymbolLayerConfig },
+      { type: 'circle', suffix: 'cluster', filter: ['has', 'point_count'], ...clusterLayerConfig },
+      { type: 'symbol', suffix: 'cluster-symbol', filter: ['has', 'point_count'], ...clusterSymbolLayerConfig },
+    ]
   }
 
   onAdd(map: MapGL, gl: WebGLRenderingContext | WebGL2RenderingContext): void {
@@ -45,36 +46,51 @@ export class TeritorioClusterLayer implements CustomLayerInterface {
     if (!map.getSource(this.sourceId))
       throw new Error(`Source ${this.sourceId} is missing.`)
 
-    this.map.addLayer({
-      id: `${this.sourceId}-marker`,
-      type: 'circle',
-      source: this.sourceId,
-      filter: ['!=', 'cluster', true],
-      ...this.markerLayerConfig,
+    this.setLayers()
+    this.setupLayerInteractions()
+  }
+
+  private setLayers(): void {
+    if (!this.map)
+      throw new Error(`Call Map.addLayer() first.`)
+
+    this.layers.forEach(({ type, suffix, filter, ...rest }) => {
+      this.addLayer(type, suffix, filter, rest)
     })
+  }
+
+  private addLayer(
+    type: Extract<LayerSpecification['type'], 'symbol' | 'circle'>,
+    suffix: string,
+    filter: FilterSpecification,
+    rest: any,
+  ): void {
+    if (!this.map)
+      throw new Error(`Call Map.addLayer() first.`)
 
     this.map.addLayer({
-      id: `${this.sourceId}-marker-symbol`,
-      type: 'symbol',
+      id: `${this.sourceId}-${suffix}`,
+      type,
       source: this.sourceId,
-      filter: ['!=', 'cluster', true],
-      ...this.markerSymbolLayerConfig,
+      filter,
+      ...rest,
     })
+  }
 
-    this.map.addLayer({
-      id: `${this.sourceId}-cluster`,
-      type: 'circle',
-      source: this.sourceId,
-      filter: ['has', 'point_count'],
-      ...this.clusterLayerConfig,
-    })
+  private setupLayerInteractions(): void {
+    if (!this.map)
+      throw new Error(`Call Map.addLayer() first.`)
 
-    this.map.addLayer({
-      id: `${this.sourceId}-cluster-symbol`,
-      type: 'symbol',
-      source: this.sourceId,
-      filter: ['has', 'point_count'],
-      ...this.clusterSymbolLayerConfig,
+    const interactiveLayers = this.layers.filter(layer => layer.type === 'circle')
+
+    interactiveLayers.forEach((layer) => {
+      this.map!.on('mouseenter', `${this.sourceId}-${layer.suffix}`, () => {
+        this.map!.getCanvas().style.cursor = 'pointer'
+      })
+
+      this.map!.on('mouseleave', `${this.sourceId}-${layer.suffix}`, () => {
+        this.map!.getCanvas().style.cursor = ''
+      })
     })
   }
 
