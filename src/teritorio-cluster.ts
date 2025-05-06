@@ -1,53 +1,10 @@
-import type { CustomLayerInterface, FitBoundsOptions, GeoJSONFeature, GeoJSONSource, LngLatLike, MapGeoJSONFeature, Map as MapGL, MapSourceDataEvent, Marker, Point } from 'maplibre-gl'
+import type { CustomLayerInterface, GeoJSONFeature, GeoJSONSource, LngLatLike, MapGeoJSONFeature, Map as MapGL, MapSourceDataEvent, Marker, Point } from 'maplibre-gl'
+import type { FeatureInClusterMatch, FeatureMatch, TeritorioClusterOptions } from './types'
 import bbox from '@turf/bbox'
 import { featureCollection } from '@turf/helpers'
 import maplibre from 'maplibre-gl'
 import { deepMerge } from './utils/deep-merge'
 import { clusterRenderDefault, markerRenderDefault, pinMarkerRenderDefault, unfoldedClusterRenderSmart } from './utils/helpers'
-
-type UnfoldedCluster = (
-  (
-    parent: HTMLDivElement,
-    items: MapGeoJSONFeature[],
-    markerSize: number,
-    renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement,
-    clickHandler: (e: Event, feature: MapGeoJSONFeature) => void
-  ) => void
-)
-type ClusterRender = (
-  (
-    element: HTMLDivElement,
-    props: MapGeoJSONFeature['properties']
-  ) => void
-)
-type MarkerRender = (
-  (
-    element: HTMLDivElement,
-    markerSize: number,
-    feature?: GeoJSONFeature
-  ) => void
-)
-type PinMarkerRender = (
-  (
-    coords: LngLatLike,
-    offset: Point
-  ) => Marker
-)
-interface FeatureInClusterMatch { clusterId: string, feature: GeoJSONFeature }
-type FeatureMatch = FeatureInClusterMatch | GeoJSONFeature
-
-interface TeritorioClusterOptions {
-  clusterMaxZoom: number
-  clusterMinZoom: number
-  clusterRender: ClusterRender
-  fitBoundsOptions: FitBoundsOptions
-  initialFeature: MapGeoJSONFeature | undefined
-  markerRender: MarkerRender
-  markerSize: number
-  unfoldedClusterRender: UnfoldedCluster
-  unfoldedClusterMaxLeaves: number
-  pinMarkerRender: PinMarkerRender
-}
 
 export class TeritorioCluster extends EventTarget implements CustomLayerInterface {
   public id: string
