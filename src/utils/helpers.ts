@@ -1,13 +1,6 @@
 import type { LngLatLike, MapGeoJSONFeature, Marker, Point } from 'maplibre-gl'
 import maplibre from 'maplibre-gl'
-
-// Helper to apply styles on DOM element
-export function buildCss(htmlEl: HTMLElement, styles: { [key: string]: string }): void {
-  const rules = htmlEl.style
-
-  for (const property in styles)
-    rules.setProperty(property, styles[property])
-}
+import { buildCss } from './index'
 
 // Circle shape
 export function unfoldedClusterRenderCircle(

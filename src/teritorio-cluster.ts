@@ -10,55 +10,13 @@ import type {
   Marker,
   Point,
 } from 'maplibre-gl'
+import type { FeatureInClusterMatch, FeatureMatch, TeritorioClusterOptions } from './types'
 import bbox from '@turf/bbox'
 import { featureCollection } from '@turf/helpers'
 import maplibre from 'maplibre-gl'
 import { deepMerge } from './utils/deep-merge'
 import { clusterRenderDefault, markerRenderDefault, pinMarkerRenderDefault, unfoldedClusterRenderSmart } from './utils/helpers'
-
-type UnfoldedCluster = (
-  (
-    parent: HTMLDivElement,
-    items: MapGeoJSONFeature[],
-    markerSize: number,
-    renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement,
-    clickHandler: (event: Event, feature: MapGeoJSONFeature) => void
-  ) => void
-)
-type ClusterRender = (
-  (
-    element: HTMLDivElement,
-    props: MapGeoJSONFeature['properties']
-  ) => void
-)
-type MarkerRender = (
-  (
-    element: HTMLDivElement,
-    markerSize: number,
-    feature?: GeoJSONFeature
-  ) => void
-)
-type PinMarkerRender = (
-  (
-    coords: LngLatLike,
-    offset: Point
-  ) => Marker
-)
-interface FeatureInClusterMatch { clusterId: string, feature: GeoJSONFeature }
-type FeatureMatch = FeatureInClusterMatch | GeoJSONFeature
-
-interface TeritorioClusterOptions {
-  clusterMaxZoom: number
-  clusterMinZoom: number
-  clusterRender: ClusterRender
-  fitBoundsOptions: FitBoundsOptions
-  initialFeature: MapGeoJSONFeature | undefined
-  markerRender: MarkerRender
-  markerSize: number
-  unfoldedClusterRender: UnfoldedCluster
-  unfoldedClusterMaxLeaves: number
-  pinMarkerRender: PinMarkerRender
-}
+import { calculatePinMarkerOffset, getFeatureId, isClusterFeature } from './utils/index'
 
 export class TeritorioCluster extends EventTarget implements CustomLayerInterface {
   public id: string
@@ -148,7 +106,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
   }
 
   public setSelectedFeature = (feature: GeoJSONFeature): void => {
-    const id = this.getFeatureId(feature)
+    const id = getFeatureId(feature)
     const match = this.findFeature(id)
 
     if (!match) {
@@ -200,8 +158,13 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
   }
 
   private renderCustom = async (currentExec: number): Promise<void> => {
-    if (!this.shouldRender(currentExec))
+    if (
+      !this.map
+      || !this.map.isSourceLoaded(this.sourceId)
+      || !this.source
+      || this.abortExec !== currentExec) {
       return
+    }
 
     const features = this.map!.querySourceFeatures(this.sourceId)
     this.clearRenderState()
@@ -217,10 +180,10 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
       if (this.abortExec !== currentExec)
         return
 
-      const id = this.getFeatureId(feature)
+      const id = getFeatureId(feature)
       this.featuresMap.set(id, feature)
 
-      if (this.isClusterFeature(feature)) {
+      if (isClusterFeature(feature)) {
         const success = await this.loadClusterLeaves(id, feature)
 
         if (this.abortExec !== currentExec)
@@ -233,7 +196,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
 
     this.featuresMap.forEach((feature) => {
       const coords = feature.geometry.type === 'Point' ? new maplibre.LngLat(feature.geometry.coordinates[0], feature.geometry.coordinates[1]) : undefined
-      const id = this.getFeatureId(feature)
+      const id = getFeatureId(feature)
 
       if (!coords) {
         console.error(`Feature ${id} is not Geometry.Point, thus not supported yet.`)
@@ -281,8 +244,8 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
 
           // If initialFeature is part of this new cluster
           // We position the Pin marker on it
-          if (this.opts.initialFeature && this.isFeatureInCluster(id, this.getFeatureId(this.opts.initialFeature))) {
-            this.selectedFeatureId = this.getFeatureId(this.opts.initialFeature)
+          if (this.opts.initialFeature && this.isFeatureInCluster(id, getFeatureId(this.opts.initialFeature))) {
+            this.selectedFeatureId = getFeatureId(this.opts.initialFeature)
             this.renderPinMarkerInCluster(element, coords)
             this.opts.initialFeature = undefined
           }
@@ -303,7 +266,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
 
           // If initialFeature is this new marker
           // We position the Pin marker on it
-          if (this.opts.initialFeature && (this.getFeatureId(this.opts.initialFeature) === id)) {
+          if (this.opts.initialFeature && (getFeatureId(this.opts.initialFeature) === id)) {
             this.selectedFeatureId = id
             this.renderPinMarker(coords)
             this.opts.initialFeature = undefined
@@ -321,7 +284,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
     }
 
     if (this.opts.initialFeature && !this.selectedFeatureId && !this.pinMarker) {
-      const id = this.getFeatureId(this.opts.initialFeature)
+      const id = getFeatureId(this.opts.initialFeature)
       const coords = this.opts.initialFeature.geometry.type === 'Point'
         ? new maplibre.LngLat(this.opts.initialFeature.geometry.coordinates[0], this.opts.initialFeature.geometry.coordinates[1])
         : undefined
@@ -389,20 +352,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
       return false
     }
 
-    return this.clusterLeaves.get(clusterId)!.findIndex(feature => this.getFeatureId(feature) === featureId) > -1
-  }
-
-  private getClusterCenter = (cluster: HTMLElement): { clusterXCenter: number, clusterYCenter: number } => {
-    const { left, right, top, bottom } = cluster.getBoundingClientRect()
-
-    return { clusterXCenter: (left + right) / 2, clusterYCenter: (top + bottom) / 2 }
-  }
-
-  private calculatePinMarkerOffset = (cluster: HTMLElement, marker: HTMLElement): Point => {
-    const { clusterXCenter, clusterYCenter } = this.getClusterCenter(cluster)
-    const { x, y, height, width } = marker.getBoundingClientRect()
-
-    return new maplibre.Point(x - clusterXCenter + (width / 2), y - clusterYCenter + (height / 2))
+    return this.clusterLeaves.get(clusterId)!.findIndex(feature => getFeatureId(feature) === featureId) > -1
   }
 
   private renderPinMarkerInCluster = (cluster: HTMLElement, coords: LngLatLike): void => {
@@ -418,13 +368,13 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
       if (!selectedFeatureHTML)
         throw new Error('Selected feature HTML marker was not found !')
 
-      this.renderPinMarker(coords, this.calculatePinMarkerOffset(cluster, selectedFeatureHTML))
+      this.renderPinMarker(coords, calculatePinMarkerOffset(cluster, selectedFeatureHTML))
     }
   }
 
   private renderMarker = (feature: GeoJSONFeature): HTMLDivElement => {
     const element = document.createElement('div')
-    element.id = this.getFeatureId(feature)
+    element.id = getFeatureId(feature)
 
     this.opts.markerRender(element, this.opts.markerSize, feature)
 
@@ -439,7 +389,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
     const iterator = this.clusterLeaves.entries()
 
     for (const [key, value] of iterator) {
-      const match = value.find(feature => this.getFeatureId(feature) === id)
+      const match = value.find(feature => getFeatureId(feature) === id)
 
       if (match) {
         return { clusterId: key, feature: match }
@@ -450,7 +400,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
   private featureClickHandler = (event: Event, feature: GeoJSONFeature): void => {
     event.stopPropagation()
 
-    if (!(event.currentTarget instanceof HTMLElement) || this.selectedFeatureId === this.getFeatureId(feature))
+    if (!(event.currentTarget instanceof HTMLElement) || this.selectedFeatureId === getFeatureId(feature))
       return
 
     this.setSelectedFeature(feature)
@@ -492,42 +442,9 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
     }
   }
 
-  private shouldRender = (currentExec: number): boolean => {
-    return !!this.map
-      && this.map.isSourceLoaded(this.sourceId)
-      && !!this.source
-      && this.abortExec === currentExec
-  }
-
   private clearRenderState = (): void => {
     this.clusterLeaves.clear()
     this.featuresMap.clear()
-  }
-
-  private isClusterFeature = (feature: GeoJSONFeature): boolean => {
-    return Boolean(feature.properties?.cluster)
-  }
-
-  private getFeatureId = (feature: GeoJSONFeature): string => {
-    if (feature.properties.cluster) {
-      if (!feature.id)
-        throw new Error('Cluster feature is missing "id".')
-      return feature.id.toString()
-    }
-
-    // Vido support: shouldn't be part of this plugin
-    let metadata = feature.properties.metadata
-
-    if (typeof metadata === 'string') {
-      try {
-        metadata = JSON.parse(metadata)
-      }
-      catch {
-        metadata = undefined
-      }
-    }
-
-    return (metadata?.id ?? feature.properties?.id).toString()
   }
 
   private setSource = (): void => {
