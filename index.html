@@ -43,21 +43,20 @@
   <script type="module">
     import maplibregl from 'maplibre-gl'
     import 'maplibre-gl/dist/maplibre-gl.css'
-    import { TeritorioClusterLayer } from './src/index'
+    import { buildCss, unfoldedClusterRenderSmart as unfoldedClusterRender, TeritorioCluster } from './src/index'
 
-    let geojson;
-    let teritorioCluster;
+    let geojson = await fetch('https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson', { method: 'GET' }).then(res => res.json())
+    let teritorioLayer;
+
     const map = new maplibregl.Map({
       hash: true,
       container: "map",
-      style: 'https://api.maptiler.com/maps/openstreetmap/style.json?key=hqrbV59Y4PPzIfzhWRGC'
+      style: 'https://api.maptiler.com/maps/openstreetmap/style.json?key=hqrbV59Y4PPzIfzhWRGC',
     });
 
     map.addControl(new maplibregl.NavigationControl());
-    map.on('load', async () => {
-      geojson = await fetch('https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson', { method: 'GET' }).then(res => res.json())
 
-      // add a clustered GeoJSON source for a sample set of earthquakes
+    map.on('load', () => {
       map.addSource('earthquakes', {
         'type': 'geojson',
         'data': geojson,
@@ -67,51 +66,113 @@
         'maxzoom': 24
       })
 
-      map.addLayer(
-        new TeritorioClusterLayer(
-          'teritorio-layer',
-          'earthquakes',
-          {
-            paint: {
-              'circle-color': 'green',
-              'circle-radius': 14,
-            }
-          },
-          {
-            layout: {
-              'text-field': [
-                'number-format',
-                ['get', 'mag'],
-                { 'min-fraction-digits': 1, 'max-fraction-digits': 1 },
-              ],
-              'text-size': 12,
-              'text-font': ['Open Sans Semibold'],
-            },
-            paint: {
-              'text-color': '#FFFFFF',
-            },
-          },
-          {
-            paint: {
-              'circle-color': '#FFFFFF',
-              'circle-radius': 30,
-              'circle-stroke-color': 'green',
-              'circle-stroke-width': 2
-            }
-          },
-          {
-            layout: {
-              'text-field': ['to-string', ['get', 'point_count']],
-              'text-size': 12,
-              'text-font': ['Open Sans Semibold'],
-            },
-            paint: {
-              'text-color': '#000000',
-            }
-          }
-        )
+      teritorioLayer = new TeritorioCluster(
+        'teritorio-cluster',
+        'earthquakes',
+        {
+          clusterRender,
+          fitBoundsOptions: { padding: { top: 57, bottom: 20, left: 20, right: 20 } },
+          markerRender,
+          markerSize: 28,
+          unfoldedClusterRender,
+          pinMarkerRender
+        }
       )
+
+     map.addLayer(teritorioLayer)
+
+      teritorioLayer.addEventListener('feature-click', (e) => {
+        console.log(e.detail.selectedFeature)
+      })
+
+      document.getElementById('load-data').addEventListener('click', loadData)
+      document.getElementById('remove-data').addEventListener('click', removeData)
+      document.getElementById('select-feature').addEventListener('click', selectFeature)
     })
+
+    const clusterRender = (element, props) => {
+      element.innerHTML = props.point_count.toLocaleString();
+
+      buildCss(element, {
+        'background-color': 'white',
+        'border-radius': '100%',
+        'border': '2px solid green',
+        'justify-content': 'center',
+        'align-items': 'center',
+        'display': 'flex',
+        'color': 'black',
+        'width': `60px`,
+        'height': `60px`,
+        'cursor': 'pointer'
+      });
+    }
+
+    const loadData = async () => {
+      const url = document.getElementById('custom-url').value
+
+      if (!url)
+        return
+
+      let vidoGeojson = await fetch(url, { method: 'GET' }).then(res => res.json())
+      const source = map.getSource('earthquakes')
+
+      source.setData({
+        type: 'FeatureCollection',
+        features: [...geojson.features, ...vidoGeojson.features]
+      })
+    }
+
+    const removeData = () => {
+      const source = map.getSource('earthquakes')
+
+      source.setData({
+        type: 'FeatureCollection',
+        features: geojson.features
+      })
+    }
+
+    const markerRender = (element, markerSize, feature) => {
+      element.textContent = feature.properties.mag
+
+      buildCss(element, {
+        'background-color': 'green',
+        'border-radius': '100%',
+        'justify-content': 'center',
+        'align-items': 'center',
+        'display': 'flex',
+        'color': 'white',
+        'width': `${markerSize}px`,
+        'height': `${markerSize}px`,
+        'cursor': 'pointer'
+      });
+    }
+
+    const pinMarkerRender = (coords, offset) => {
+      return new maplibregl.Marker({
+        scale: 1.3,
+        color: '#f44336',
+        anchor: 'bottom'
+      })
+        .setLngLat(coords)
+        .setOffset(offset)
+    }
+
+    const selectFeature = async () => {
+      const id = document.getElementById('feature-id').value
+
+      if (!id)
+        return
+
+      const data = await map.getSource('earthquakes').getData()
+      const feature = data.features.find(feature => (feature.properties.id || feature.properties.metadata?.id || feature.id) === id)
+
+      if (!feature) {
+        console.error('Feature not found !')
+        return
+      }
+
+      teritorioLayer.setSelectedFeature(feature)
+    }
   </script>
 </body>
 
