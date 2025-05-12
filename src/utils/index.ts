@@ -1,5 +1,5 @@
-import type { GeoJSONFeature } from 'maplibre-gl'
-import { Point } from 'maplibre-gl'
+import type { GeoJSONFeature, Point } from 'maplibre-gl'
+import maplibre from 'maplibre-gl'
 
 /**
  * Determines if a given GeoJSON feature is a cluster.
@@ -60,7 +60,7 @@ export function getFeatureId(feature: GeoJSONFeature): string {
 export function calculatePinMarkerOffset(cluster: HTMLElement, marker: HTMLElement): Point {
   const { clusterXCenter, clusterYCenter } = getClusterCenter(cluster)
   const { x, y, height, width } = marker.getBoundingClientRect()
-  return new Point(x - clusterXCenter + width / 2, y - clusterYCenter + height / 2)
+  return new maplibre.Point(x - clusterXCenter + width / 2, y - clusterYCenter + height / 2)
 }
 
 /**

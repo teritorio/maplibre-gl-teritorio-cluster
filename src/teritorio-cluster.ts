@@ -1,4 +1,4 @@
-import type { CustomLayerInterface, GeoJSONFeature, GeoJSONSource, LngLatLike, MapGeoJSONFeature, Map as MapGL, MapSourceDataEvent, Marker, Point } from 'maplibre-gl'
+import type { CustomLayerInterface, FitBoundsOptions, GeoJSONFeature, GeoJSONSource, LngLatLike, MapGeoJSONFeature, Map as MapGL, MapSourceDataEvent, Marker, Point } from 'maplibre-gl'
 import type { FeatureInClusterMatch, FeatureMatch, TeritorioClusterOptions } from './types'
 import bbox from '@turf/bbox'
 import { featureCollection } from '@turf/helpers'
@@ -189,6 +189,10 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
 
       this.renderPinMarkerInCluster(cluster.getElement(), cluster.getLngLat())
     }
+  }
+
+  public setBoundsOptions = (options: FitBoundsOptions): void => {
+    this.opts.fitBoundsOptions = options
   }
 
   /**
