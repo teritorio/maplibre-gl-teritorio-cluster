@@ -2,7 +2,18 @@ import type { LngLatLike, MapGeoJSONFeature, Marker, Point } from 'maplibre-gl'
 import maplibre from 'maplibre-gl'
 import { buildCss } from './index'
 
-// Circle shape
+/**
+ * Renders an unfolded cluster in a circular shape.
+ *
+ * The items are positioned on a circle with a calculated radius and angle.
+ * Each feature is represented by a marker, and a click event is added to each.
+ *
+ * @param parent The parent HTML div element where the unfolded cluster will be appended.
+ * @param items An array of GeoJSON features to be displayed in the unfolded cluster.
+ * @param markerSize The size of each marker.
+ * @param renderMarker A function to render a marker for each feature.
+ * @param clickHandler A function to handle click events on each feature.
+ */
 export function unfoldedClusterRenderCircle(parent: HTMLDivElement, items: MapGeoJSONFeature[], markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void): void {
   const radius = (markerSize / 2) / Math.sin(Math.PI / items.length)
   const angle = 360 / items.length
@@ -31,7 +42,18 @@ export function unfoldedClusterRenderCircle(parent: HTMLDivElement, items: MapGe
   })
 }
 
-// HexaGrid shape
+/**
+ * Renders an unfolded cluster in a hexagonal grid shape.
+ *
+ * The items are positioned in a hexagonal pattern.
+ * Each feature is represented by a marker, and a click event is added to each.
+ *
+ * @param parent The parent HTML div element where the unfolded cluster will be appended.
+ * @param items An array of GeoJSON features to be displayed in the unfolded cluster.
+ * @param markerSize The size of each marker.
+ * @param renderMarker A function to render a marker for each feature.
+ * @param clickHandler A function to handle click events on each feature.
+ */
 export function unfoldedClusterRenderHexaGrid(parent: HTMLDivElement, items: MapGeoJSONFeature[], markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void): void {
   const radius = (markerSize / 2) / Math.sin(Math.PI / items.length)
 
@@ -76,7 +98,18 @@ export function unfoldedClusterRenderHexaGrid(parent: HTMLDivElement, items: Map
   })
 }
 
-// Smart: mix between Circle and HexaGrid shape
+/**
+ * Renders an unfolded cluster in a smart shape based on the number of items.
+ *
+ * If the number of items is less than or equal to 5, the items will be rendered in a circular shape.
+ * Otherwise, they will be rendered in a hexagonal grid shape.
+ *
+ * @param parent The parent HTML div element where the unfolded cluster will be appended.
+ * @param items An array of GeoJSON features to be displayed in the unfolded cluster.
+ * @param markerSize The size of each marker.
+ * @param renderMarker A function to render a marker for each feature.
+ * @param clickHandler A function to handle click events on each feature.
+ */
 export function unfoldedClusterRenderSmart(parent: HTMLDivElement, items: MapGeoJSONFeature[], markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void): void {
   if (items.length <= 5) {
     unfoldedClusterRenderCircle(parent, items, markerSize, renderMarker, clickHandler)
@@ -86,7 +119,18 @@ export function unfoldedClusterRenderSmart(parent: HTMLDivElement, items: MapGeo
   }
 }
 
-// Grid shape
+/**
+ * Renders an unfolded cluster in a grid shape.
+ *
+ * Positions the items in a flexible, wrap-around layout with a gap between items.
+ * Each feature is represented by a marker, and a click event is added to each feature.
+ *
+ * @param parent The parent HTML div element where the unfolded cluster will be appended.
+ * @param items An array of GeoJSON features to be displayed in the unfolded cluster.
+ * @param _markerSize The size of each marker.
+ * @param renderMarker A function to render a marker for each feature.
+ * @param clickHandler A function to handle click events on each feature.
+ */
 export function unfoldedClusterRenderGrid(parent: HTMLDivElement, items: MapGeoJSONFeature[], _markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void): void {
   buildCss(parent, {
     'display': 'flex',
@@ -105,7 +149,14 @@ export function unfoldedClusterRenderGrid(parent: HTMLDivElement, items: MapGeoJ
   })
 }
 
-// Cluster default styles
+/**
+ * Renders the default styles for a cluster.
+ *
+ * The cluster is styled with a circular red background, white text, and centered content.
+ *
+ * @param element The HTML div element representing the cluster.
+ * @param props The properties of the GeoJSON feature associated with the cluster.
+ */
 export function clusterRenderDefault(element: HTMLDivElement, props: MapGeoJSONFeature['properties']): void {
   element.innerHTML = props.point_count
 
@@ -122,7 +173,14 @@ export function clusterRenderDefault(element: HTMLDivElement, props: MapGeoJSONF
   })
 }
 
-// Single Marker default styles
+/**
+ * Renders the default styles for a single marker.
+ *
+ * The marker is styled with a blue background, white text, and centered content.
+ *
+ * @param element The HTML div element representing the marker.
+ * @param markerSize The size of the marker.
+ */
 export function markerRenderDefault(element: HTMLDivElement, markerSize: number): void {
   buildCss(element, {
     'background-color': 'blue',
@@ -137,7 +195,16 @@ export function markerRenderDefault(element: HTMLDivElement, markerSize: number)
   })
 }
 
-// Pin Marker default styles
+/**
+ * Renders a pin marker at specified coordinates.
+ *
+ * The pin marker is positioned based on the provided coordinates and offset.
+ *
+ * @param coords The coordinates (LngLatLike) where the pin marker should be placed.
+ * @param offset The offset applied to the pin position.
+ *
+ * @returns A Marker object representing the pin marker on the map.
+ */
 export function pinMarkerRenderDefault(coords: LngLatLike, offset: Point = new maplibre.Point(0, 0)): Marker {
   return new maplibre.Marker({ anchor: 'bottom' }).setLngLat(coords).setOffset(offset)
 }
