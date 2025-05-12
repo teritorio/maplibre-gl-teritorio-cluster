@@ -117,6 +117,8 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
     this.map.off('moveend', this.onMoveEnd)
     this.markersOnScreen.forEach(marker => marker.remove())
     this.resetPinMarker()
+
+    this.map.removeLayer(`${this.id}-hidden`)
   }
 
   /**
