@@ -302,6 +302,10 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
     this.markersOnScreen = newMarkers
   }
 
+  public getOptionsForTesting(): Required<TeritorioClusterOptions> {
+    return this.opts
+  }
+
   private renderUnfoldedCluster = (id: string, leaves: MapGeoJSONFeature[]): HTMLDivElement => {
     const element = document.createElement('div')
     element.id = id
