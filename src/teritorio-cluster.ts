@@ -34,7 +34,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
     pinMarkerRender: pinMarkerRenderDefault,
   } satisfies TeritorioClusterOptions
 
-  // Internal map and layer configuration
+  // Internal layer configuration
   private map: MapGL | null = null
   private readonly sourceId: string
   private source: GeoJSONSource | null = null
@@ -51,7 +51,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
   private abortExec: number = 0
 
   /**
-   * Constructs a new TeritorioCluster.
+   * Creates a new instance of the TeritorioCluster custom layer.
    * @param id - Unique ID for the layer.
    * @param sourceId - ID of the GeoJSON source.
    * @param options - Optional configuration overrides.
@@ -69,9 +69,9 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
   }
 
   /**
-   * Called when the layer is added to the map.
+   * Initializes the cluster layer when added to the map.
    *
-   * @param map - The map instance to which the layer is being added.
+   * @param map - The MapLibre GL map instance.
    *
    * @remarks
    * This method is called when the layer is first added to the map. It performs the following actions:
@@ -193,6 +193,12 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
     }
   }
 
+  /**
+   * Updates the fit bounds configuration used for clustering.
+   *
+   * @param options - The options to apply when fitting the bounds,
+   * such as padding, maximum zoom level, and animation settings.
+   */
   public setBoundsOptions = (options: FitBoundsOptions): void => {
     this.opts.fitBoundsOptions = options
   }

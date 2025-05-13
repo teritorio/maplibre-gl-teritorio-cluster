@@ -90,47 +90,7 @@
       document.getElementById('select-feature').addEventListener('click', selectFeature)
     })
 
-    const clusterRender = (element, props) => {
-      element.innerHTML = props.point_count.toLocaleString();
-
-      buildCss(element, {
-        'background-color': 'white',
-        'border-radius': '100%',
-        'border': '2px solid green',
-        'justify-content': 'center',
-        'align-items': 'center',
-        'display': 'flex',
-        'color': 'black',
-        'width': `60px`,
-        'height': `60px`,
-        'cursor': 'pointer'
-      });
-    }
-
-    const loadData = async () => {
-      const url = document.getElementById('custom-url').value
-
-      if (!url)
-        return
-
-      let vidoGeojson = await fetch(url, { method: 'GET' }).then(res => res.json())
-      const source = map.getSource('earthquakes')
-
-      source.setData({
-        type: 'FeatureCollection',
-        features: [...geojson.features, ...vidoGeojson.features]
-      })
-    }
-
-    const removeData = () => {
-      const source = map.getSource('earthquakes')
-
-      source.setData({
-        type: 'FeatureCollection',
-        features: geojson.features
-      })
-    }
-
+    // Custom rendering functions
     const markerRender = (element, markerSize, feature) => {
       element.textContent = feature.properties.mag
 
@@ -155,6 +115,48 @@
       })
         .setLngLat(coords)
         .setOffset(offset)
+    }
+
+    const clusterRender = (element, props) => {
+      element.innerHTML = props.point_count.toLocaleString();
+
+      buildCss(element, {
+        'background-color': 'white',
+        'border-radius': '100%',
+        'border': '2px solid green',
+        'justify-content': 'center',
+        'align-items': 'center',
+        'display': 'flex',
+        'color': 'black',
+        'width': `60px`,
+        'height': `60px`,
+        'cursor': 'pointer'
+      });
+    }
+
+    // Specific features showcase functions
+    const loadData = async () => {
+      const url = document.getElementById('custom-url').value
+
+      if (!url)
+        return
+
+      let vidoGeojson = await fetch(url, { method: 'GET' }).then(res => res.json())
+      const source = map.getSource('earthquakes')
+
+      source.setData({
+        type: 'FeatureCollection',
+        features: [...geojson.features, ...vidoGeojson.features]
+      })
+    }
+
+    const removeData = () => {
+      const source = map.getSource('earthquakes')
+
+      source.setData({
+        type: 'FeatureCollection',
+        features: geojson.features
+      })
     }
 
     const selectFeature = async () => {
