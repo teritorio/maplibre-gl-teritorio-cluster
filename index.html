@@ -45,19 +45,18 @@
     import 'maplibre-gl/dist/maplibre-gl.css'
     import { buildCss, unfoldedClusterRenderSmart as unfoldedClusterRender, TeritorioCluster } from './src/index'
 
-    let geojson;
-    let teritorioCluster;
+    let geojson = await fetch('https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson', { method: 'GET' }).then(res => res.json())
+    let teritorioLayer;
+
     const map = new maplibregl.Map({
       hash: true,
       container: "map",
-      style: 'https://api.maptiler.com/maps/openstreetmap/style.json?key=hqrbV59Y4PPzIfzhWRGC'
+      style: 'https://api.maptiler.com/maps/openstreetmap/style.json?key=hqrbV59Y4PPzIfzhWRGC',
     });
 
     map.addControl(new maplibregl.NavigationControl());
-    map.on('load', async () => {
-      geojson = await fetch('https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson', { method: 'GET' }).then(res => res.json())
 
-      // add a clustered GeoJSON source for a sample set of earthquakes
+    map.on('load', () => {
       map.addSource('earthquakes', {
         'type': 'geojson',
         'data': geojson,
@@ -67,40 +66,22 @@
         'maxzoom': 24
       })
 
-      map.addLayer({
-        'id': 'earthquake_label',
-        'type': 'symbol',
-        'source': 'earthquakes',
-        'filter': ['!=', 'cluster', true],
-        'layout': {
-          'text-field': [
-            'number-format',
-            ['get', 'mag'],
-            { 'min-fraction-digits': 1, 'max-fraction-digits': 1 }
-          ],
-          'text-font': ['Open Sans Semibold'],
-          'text-size': 10
-        },
-        'paint': {
-          'text-color': 'white'
-        }
-      });
-
-      teritorioCluster = new TeritorioCluster(
-        map,
+      teritorioLayer = new TeritorioCluster(
+        'teritorio-cluster',
         'earthquakes',
         {
-          clusterRenderFn: clusterRender,
+          clusterRender,
           fitBoundsOptions: { padding: { top: 57, bottom: 20, left: 20, right: 20 } },
-          markerRenderFn: markerRender,
+          markerRender,
           markerSize: 28,
-          unfoldedClusterRenderFn: unfoldedClusterRender,
-          pinMarkerRenderFn: pinMarkerRender
-        },
+          unfoldedClusterRender,
+          pinMarkerRender
+        }
       )
 
-      // Get feature click event
-      teritorioCluster.addEventListener('feature-click', (e) => {
+     map.addLayer(teritorioLayer)
+
+      teritorioLayer.addEventListener('feature-click', (e) => {
         console.log(e.detail.selectedFeature)
       })
 
@@ -109,52 +90,9 @@
       document.getElementById('select-feature').addEventListener('click', selectFeature)
     })
 
-    const clusterRender = (element, props) => {
-      element.innerHTML = props.point_count.toLocaleString();
-
-      buildCss(element, {
-        'background-color': 'white',
-        'border-radius': '100%',
-        'border': '2px solid green',
-        'justify-content': 'center',
-        'align-items': 'center',
-        'display': 'flex',
-        'color': 'black',
-        'width': `60px`,
-        'height': `60px`,
-        'cursor': 'pointer'
-      });
-    }
-
-    const loadData = async () => {
-      const url = document.getElementById('custom-url').value
-
-      if (!url)
-        return
-
-      let vidoGeojson = await fetch(url, { method: 'GET' }).then(res => res.json())
-      const source = map.getSource('earthquakes')
-
-      source.setData({
-        type: 'FeatureCollection',
-        features: [...geojson.features, ...vidoGeojson.features]
-      })
-    }
-
-    const removeData = () => {
-      if (teritorioCluster.ticking)
-        return
-
-      const source = map.getSource('earthquakes')
-
-      source.setData({
-        type: 'FeatureCollection',
-        features: geojson.features
-      })
-    }
-
-    const markerRender = (element, feature, markerSize) => {
-      element.textContent = feature.properties?.mag
+    // Custom rendering functions
+    const markerRender = (element, markerSize, feature) => {
+      element.textContent = feature.properties.mag
 
       buildCss(element, {
         'background-color': 'green',
@@ -179,6 +117,48 @@
         .setOffset(offset)
     }
 
+    const clusterRender = (element, props) => {
+      element.innerHTML = props.point_count.toLocaleString();
+
+      buildCss(element, {
+        'background-color': 'white',
+        'border-radius': '100%',
+        'border': '2px solid green',
+        'justify-content': 'center',
+        'align-items': 'center',
+        'display': 'flex',
+        'color': 'black',
+        'width': `60px`,
+        'height': `60px`,
+        'cursor': 'pointer'
+      });
+    }
+
+    // Specific features showcase functions
+    const loadData = async () => {
+      const url = document.getElementById('custom-url').value
+
+      if (!url)
+        return
+
+      let vidoGeojson = await fetch(url, { method: 'GET' }).then(res => res.json())
+      const source = map.getSource('earthquakes')
+
+      source.setData({
+        type: 'FeatureCollection',
+        features: [...geojson.features, ...vidoGeojson.features]
+      })
+    }
+
+    const removeData = () => {
+      const source = map.getSource('earthquakes')
+
+      source.setData({
+        type: 'FeatureCollection',
+        features: geojson.features
+      })
+    }
+
     const selectFeature = async () => {
       const id = document.getElementById('feature-id').value
 
@@ -186,14 +166,14 @@
         return
 
       const data = await map.getSource('earthquakes').getData()
-      const feature = data.features.find(feature => (feature.properties.id || feature.properties.metadata?.id || feature.id ) === id)
+      const feature = data.features.find(feature => (feature.properties.id || feature.properties.metadata?.id || feature.id) === id)
 
       if (!feature) {
         console.error('Feature not found !')
         return
       }
 
-      teritorioCluster.setSelectedFeature(feature)
+      teritorioLayer.setSelectedFeature(feature)
     }
   </script>
 </body>

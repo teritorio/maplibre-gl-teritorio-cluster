@@ -1,52 +1,88 @@
-import { Map as MapGL } from 'maplibre-gl'
-import { beforeEach, describe, expect, it } from 'vitest'
+import maplibre from 'maplibre-gl'
+import { describe, expect, it, vi } from 'vitest'
 import { TeritorioCluster } from '../src/index'
 
 describe('teritorio cluster class implementation', () => {
-  let map: MapGL
-  let teritorioCluster: TeritorioCluster
+  it('should call onAdd when map.addLayer is used', () => {
+    const map = new maplibre.Map({ container: 'map' })
 
-  beforeEach(() => {
-    // Create a mock map
-    map = new MapGL({ container: 'map' })
+    map.on('load', () => {
+      map.addSource('earthquakes', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: [],
+        },
+        cluster: true,
+        clusterRadius: 80,
+        clusterMaxZoom: 22,
+        maxzoom: 24,
+      })
 
-    // Initialize the cluster
-    teritorioCluster = new TeritorioCluster(map, 'sourceId')
+      const teritorioLayer = new TeritorioCluster(
+        'layerId',
+        'sourceId',
+        {
+          clusterRender: vi.fn(),
+          markerRender: vi.fn(),
+          unfoldedClusterRender: vi.fn(),
+          pinMarkerRender: vi.fn(),
+        },
+      )
+      const onAddSpy = vi.spyOn(teritorioLayer, 'onAdd')
+
+      map.addLayer(teritorioLayer)
+
+      expect(onAddSpy).toHaveBeenCalledOnce()
+      expect(onAddSpy).toHaveBeenCalledWith(map)
+    })
   })
 
   it('should initialize with default values', () => {
-    expect(teritorioCluster.map).toMatchObject(map)
-    expect(teritorioCluster.clusterLeaves).toBeInstanceOf(Map)
-    expect(teritorioCluster.clusterLeaves.size).toBe(0)
-    expect(teritorioCluster.clusterMaxZoom).toBe(17)
-    expect(teritorioCluster.clusterMinZoom).toBe(0)
+    const teritorioCluster = new TeritorioCluster('layerId', 'sourceId')
+    const opts = teritorioCluster.getOptionsForTesting()
 
-    // Should have the default render function
-    expect(teritorioCluster.clusterRender).toBeUndefined()
+    expect(teritorioCluster.id).toBe('layerId')
+    expect(opts.clusterMaxZoom).toBe(17)
+    expect(opts.clusterMinZoom).toBe(0)
+    expect(opts.markerSize).toBe(24)
+    expect(opts.unfoldedClusterMaxLeaves).toBe(7)
+    expect(opts.fitBoundsOptions).toEqual({ padding: 20 })
+    expect(opts.initialFeature).toBeUndefined()
+    expect(typeof opts.clusterRender).toBe('function')
+    expect(typeof opts.markerRender).toBe('function')
+    expect(typeof opts.pinMarkerRender).toBe('function')
+    expect(typeof opts.unfoldedClusterRender).toBe('function')
+  })
 
-    expect(teritorioCluster.featuresMap).toBeInstanceOf(Map)
-    expect(teritorioCluster.featuresMap.size).toBe(0)
-    expect(teritorioCluster.fitBoundsOptions).toMatchObject({ padding: 20 })
-    expect(teritorioCluster.initialFeature).toBeUndefined()
+  it('should initialize with user values', () => {
+    const teritorioCluster = new TeritorioCluster(
+      'layerId',
+      'sourceId',
+      {
+        clusterMaxZoom: 22,
+        clusterMinZoom: 2,
+        clusterRender: vi.fn(),
+        fitBoundsOptions: { padding: { top: 57, bottom: 20, left: 20, right: 20 } },
+        markerRender: vi.fn(),
+        markerSize: 28,
+        unfoldedClusterRender: vi.fn(),
+        unfoldedClusterMaxLeaves: 8,
+        pinMarkerRender: vi.fn(),
+      },
+    )
+    const opts = teritorioCluster.getOptionsForTesting()
 
-    // Should have the default render function
-    expect(teritorioCluster.markerRender).toBeUndefined()
-
-    expect(teritorioCluster.markerSize).toBe(24)
-    expect(teritorioCluster.markersOnScreen).toBeInstanceOf(Map)
-    expect(teritorioCluster.markersOnScreen.size).toBe(0)
-    expect(teritorioCluster.pinMarker).toBeNull()
-
-    // Should have the default render function
-    expect(teritorioCluster.pinMarkerRender).toBeUndefined()
-
-    expect(teritorioCluster.selectedClusterId).toBeNull()
-    expect(teritorioCluster.selectedFeatureId).toBeNull()
-    expect(teritorioCluster.sourceId).toBe('sourceId')
-
-    // Should have the default render function
-    expect(teritorioCluster.unfoldedClusterRender).toBeUndefined()
-
-    expect(teritorioCluster.unfoldedClusterMaxLeaves).toBe(7)
+    expect(teritorioCluster.id).toBe('layerId')
+    expect(opts.clusterMaxZoom).toBe(22)
+    expect(opts.clusterMinZoom).toBe(2)
+    expect(opts.markerSize).toBe(28)
+    expect(opts.unfoldedClusterMaxLeaves).toBe(8)
+    expect(opts.fitBoundsOptions).toEqual({ padding: { top: 57, bottom: 20, left: 20, right: 20 } })
+    expect(opts.initialFeature).toBeUndefined()
+    expect(typeof opts.clusterRender).toBe('function')
+    expect(typeof opts.markerRender).toBe('function')
+    expect(typeof opts.pinMarkerRender).toBe('function')
+    expect(typeof opts.unfoldedClusterRender).toBe('function')
   })
 })

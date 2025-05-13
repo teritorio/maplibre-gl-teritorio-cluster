@@ -1,24 +1,25 @@
 # MapLibre GL Teritorio Cluster
 
-Render native MapLibre GL JS clusters as HTML marker.
+Enhance MapLibre GL JS with fully interactive HTML-based clusters and markers.
 
-Renders:
-- HTML cluster
-- HTML Unfolded cluster defined by a minimum leaves and min / max zoom threshold
-- Pin Marker on feature click
+**Features:**
+- 🧱 Renders native MapLibre GL JS clusters as HTML elements
+- 🌀 Smart unfolded clusters (circle, hexagrid, grid) based on zoom level and item count
+- 📌 Pin marker display on feature click
+- 🔍 Interact with overlapping markers without needing to zoom in
+- 🚫 Avoids the need to uncluster or zoom for interaction
+---
+## Demo
 
-Allow visualization and interaction with all markers, even when superposed.
-Can display and interact with small cluster without the need to zoom or uncluster.
+👉 [**Live Demo**](https://teritorio.github.io/maplibre-gl-teritorio-cluster/index.html)
 
-See the [Demo page](https://teritorio.github.io/maplibre-gl-teritorio-cluster/index.html).
+![Demo screenshot](public/image.png)
+## Installation
 
-![alt text](public/image.png)
+Install @teritorio/maplibre-gl-teritorio-cluster with yarn
 
-## Usage
-
-Install as a dependency
 ```bash
-yarn add @teritorio/maplibre-gl-teritorio-cluster
+  yarn add @teritorio/maplibre-gl-teritorio-cluster
 ```
 
 Or use it from CDN
@@ -26,14 +27,17 @@ Or use it from CDN
 <script type="module" src="https://unpkg.com/@teritorio/maplibre-gl-teritorio-cluster/dist/maplibre-gl-teritorio-cluster.js"></script>
 ```
 
+## Usage/Examples
+
 > [!WARNING]
-> Set your GeoJson source with `clusterMaxZoom: 22` in order to let the plugin handle cluster/individual marker rendering across all zoom level
+> Set your GeoJSON source with `clusterMaxZoom: 22` in order to let the plugin handle cluster/individual marker rendering across all zoom level
 
-```js
+```javascript
 import { TeritorioCluster } from '@teritorio/maplibre-gl-teritorio-cluster'
-import { Map } from 'maplibre-gl'
+import maplibregl from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
 
-const map = new Map({
+const map = new maplibregl.Map({
   container: 'map',
   style: {
     version: 8,
@@ -63,23 +67,24 @@ const map = new Map({
       }
     },
     glyphs: 'https://orangemug.github.io/font-glyphs/glyphs/{fontstack}/{range}.pbf',
-    layers: [
-      {
-        id: 'cluster',
-        type: 'circle',
-        source: 'points'
-      }
-    ],
+    layers: [],
     id: 'muks8j3'
   }
 })
 
 map.on('load', () => {
-  const teritorioCluster = new TeritorioCluster(map, 'points', options)
+  const teritorioLayer = new TeritorioCluster(
+    'teritorio-cluster-layer',
+    'points',
+    options
+  )
 
-  // Get feature click event
-  teritorioCluster.addEventListener('click', (e) => {
-    console.log(e.detail.selectedFeature)
+  // Add the layer to map
+  map.addLayer(teritorioLayer)
+
+  // Subscribe to feature click event
+  teritorioLayer.addEventListener('feature-click', (event) => {
+    console.log(event.detail.selectedFeature)
   })
 })
 
@@ -93,72 +98,77 @@ function markerRender(element, feature, markerSize) {}
 function pinMarkerRender(coords, offset) {}
 ```
 
-## API
+## API Reference
 
-- [TeritorioCluster](#teritoriocluster)
-  - [Parameters](#parameters)
-  - [Options](#options)
-  - [Methods](#methods)
-  - [addEventListener](#addeventlistener)
+#### Constructor
 
-### TeritorioCluster
+```js
+const teritorioLayer = new TeritorioCluster(id, sourceId, options)
+```
 
-Create a new Maplibre GL JS plugin for feature (cluster / individual marker) rendering
-
-#### Parameters
-| Name     | Type                                                               | Description                                                                                      | Required | Default value |
-|----------|--------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|----------|---------------|
-| map      | [`Map`](https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/) | The Map object represents the map on your page                                                   | ✅        | ❌             |
-| sourceId | `string`                                                           | The ID of the source. Should be a vector source, preferably of type GeoJSON and not vector tiles | ✅        | ❌             |
-| options  | `object`                                                           | Options to configure the plugin                                                                  | ❌        | `undefined`   |
+| Parameter  | Type                               | Description                              |
+| ---------- | ---------------------------------- | ---------------------------------------- |
+| `id`       | `string`                           | Unique ID for the layer.          |
+| `sourceId` | `string`                           | ID of the GeoJSON source.                 |
+| `options`  | `Partial<TeritorioClusterOptions>` | Optional configuration overrides. |
 
 #### Options
-| Name                          | Type                                                                                                                                                                                                           | Description                                                                                             | Required | Default value                                       |
-|-------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|----------|-----------------------------------------------------|
-| clusterMaxZoom                | `number`                                                                                                                                                                                                       | Maximal zoom level at which we force the rendering of the Unfolded Cluster                              | ❌        | `17`                                                |
-| clusterMinZoom                | `number`                                                                                                                                                                                                       | Minimal zoom level at which we force the rendering of the Unfolded Cluster                              | ❌        | `0`                                                 |
-| clusterRenderFn               | `(element: HTMLDivElement, props: MapGeoJSONFeature['properties']): void`                                                                                                                                      | Cluster render function                                                                                 | ❌        | `src/utils/helpers.ts/clusterRenderDefault()`       |
-| fitBoundsOptions              | [`FitBoundsOptions`](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/FitBoundsOptions)                                                                                                               | Options for [Map#fitBounds](https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/#fitbounds) method | ❌        | `{ padding: 20 }`                                   |
-| initialFeature                | [`MapGeoJSONFeature`](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/MapGeoJSONFeature/)                                                                                                            | Feature to select on initial rendering                                                                  | ❌        | `undefined`                                         |
-| markerRenderFn                | `(element: HTMLDivElement, feature: MapGeoJSONFeature, markerSize: number): void`                                                                                                                              | Individual Marker render function                                                                       | ❌        | `src/utils/helpers.ts/markerRenderDefault()`        |
-| markerSize                    | `number` (in px)                                                                                                                                                                                               | Size of Marker                                                                                          | ❌        | `24`                                                |
-| unfoldedClusterRenderFn       | `(parent: HTMLDivElement, items: MapGeoJSONFeature[], markerSize: number, renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement, clickHandler: (e: Event, feature: MapGeoJSONFeature) => void) => void` | Unfolded Cluster render function                                                                        | ❌        | `src/utils/helpers.ts/unfoldedClusterRenderSmart()` |
-| unfoldedClusterRenderSmart    | Mix between Circular and HexaShape shape Unfolded Cluster render function                                                                                                                                      | -                                                                                                       | -        | -                                                   |
-| unfoldedClusterRenderGrid     | Grid shape Unfolded Cluster render function function                                                                                                                                                           | -                                                                                                       | -        | -                                                   |
-| unfoldedClusterRenderCircle   | Circular shape Unfolded Cluster render function function                                                                                                                                                       | -                                                                                                       | -        | -                                                   |
-| unfoldedClusterRenderHexaGrid | HexaGrid shape Unfolded Cluster render function function                                                                                                                                                       | -                                                                                                       | -        | -                                                   |
-| unfoldedClusterMaxLeaves      | `number`                                                                                                                                                                                                       | Unfolded Cluster max leaves number                                                                      | ❌        | `7`                                                 |
-| pinMarkerRenderFn             | `(coords: LngLatLike, offset: Point): Marker`                                                                                                                                                                  | Pin Marker render function                                                                              | ❌        | `src/utils/helpers.ts/pinMarkerRenderDefault()`     |
 
-#### Methods
-| Name                 | Type                                                                                                                   | Description                                                                                                     |
-|----------------------|------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| addEventListener     | ('feature-click', (e: Event) => void)                                                                                  | Listen to feature click and return a [`MapGeoJSONFeature`](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/MapGeoJSONFeature/) from `e.detail.selectedFeature` for external control. |
-| resetSelectedFeature | () => void                                                                                                             | Remove selected feature and associated Pin Marker                                                               |
-| setBoundsOptions     | (options: [`FitBoundsOptions`](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/FitBoundsOptions)) => void    | Update Map's visible area                                                                                       |
-| setSelectedFeature   | (feature: [`MapGeoJSONFeature`](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/MapGeoJSONFeature/)) => void | Set selected feature and display Pin Marker on top of it                                                        |
+| Option                     | Type                          | Default                      | Description                                                    |
+| -------------------------- | ----------------------------- | ---------------------------- | -------------------------------------------------------------- |
+| `clusterMaxZoom`           | `number`                      | `17`                         | Maximum zoom level where clusters are visible.                 |
+| `clusterMinZoom`           | `number`                      | `0`                          | Minimum zoom level where clustering starts.                    |
+| `clusterRender`            | `(feature) => HTMLElement`    | `clusterRenderDefault`       | Custom function to render cluster.                     |
+| `markerRender`             | `(feature) => HTMLElement`    | `markerRenderDefault`        | Custom function to render individual markers.                  |
+| `markerSize`               | `number`                      | `24`                         | Pixel size of rendered markers.                                |
+| `unfoldedClusterRender`    | `(features) => HTMLElement[]` | `unfoldedClusterRenderSmart` | Function to render unfolded cluster.                   |
+| `unfoldedClusterMaxLeaves` | `number`                      | `7`                          | Maximum number of features to show when a cluster is unfolded. |
+| `fitBoundsOptions`         | `mapboxgl.FitBoundsOptions`   | `{ padding: 20 }`            | Options for [fitBounds](https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/#fitbounds) method                              |
+| `initialFeature`           | `GeoJSONFeature \| undefined` | `undefined`                  | Feature to auto-select on load.                                |
+| `pinMarkerRender`          | `(feature) => HTMLElement`    | `pinMarkerRenderDefault`     | Custom renderer for the pinned marker.                         |
 
-## Dev
+## Events
+
+```js
+teritorioLayer.addEventListener('feature-click', (event) => {
+  console.log('Selected feature:', event.detail.selectedFeature)
+})
+```
+## Run Locally
+
+Clone the project
+
+```bash
+  git clone https://github.com/teritorio/maplibre-gl-teritorio-cluster.git
+```
+
+Go to the project directory
+
+```bash
+  cd maplibre-gl-teritorio-cluster
+```
+
 Install dependencies
+
 ```bash
-yarn install
+  yarn install
 ```
 
-Serve the demo page
+Start the server
+
 ```bash
-yarn dev
+  yarn dev
 ```
 
-## Peer Dependencies
+## Contributing
 
-This library requires the following peer dependencies to be installed in your project:
+Contributions are always welcome!
 
-- [maplibre-gl-js](https://github.com/maplibre/maplibre-gl-js) >= v5.4.0
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for ways to get started.
 
-## Contribution
+## Authors
 
-Please see the [contribution guide](CONTRIBUTING.md).
+- [Teritorio](https://teritorio.fr)
+## License
 
-## Author
-
-[Teritorio](https://teritorio.fr)
+[MIT](https://choosealicense.com/licenses/mit/)
