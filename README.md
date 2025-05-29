@@ -3,11 +3,20 @@
 Enhance MapLibre GL JS with fully interactive HTML-based clusters and markers.
 
 **Features:**
-- 🧱 Renders native MapLibre GL JS clusters as HTML elements
-- 🌀 Smart unfolded clusters (circle, hexagrid, grid) based on zoom level and item count
-- 📌 Pin marker display on feature click
-- 🔍 Interact with overlapping markers without needing to zoom in
-- 🚫 Avoids the need to uncluster or zoom for interaction
+- 🧱 Renders MapLibre GL JS clusters as HTML elements.
+- 📌 Displays a pinned marker when a feature is clicked.
+- 🚫 Unfolded small clusters to avoid requiring zoom or manual ungrouping.
+
+**3 Cluster States:**
+- Cluster Marker: A single marker representing a cluster, eg. displaying the number of features.
+- Unfolded Cluster: Displays individual features grouped from a small cluster or when at the highest zoom level.
+-  Unclustered Features
+
+**Customization Callbacks:**
+- Custom function to render cluster.
+- Custom function to render individual markers.
+- Custom function to render unfolded cluster.
+
 ---
 ## Demo
 
@@ -19,7 +28,7 @@ Enhance MapLibre GL JS with fully interactive HTML-based clusters and markers.
 Install @teritorio/maplibre-gl-teritorio-cluster with yarn
 
 ```bash
-  yarn add @teritorio/maplibre-gl-teritorio-cluster
+yarn add @teritorio/maplibre-gl-teritorio-cluster
 ```
 
 Or use it from CDN
@@ -30,7 +39,7 @@ Or use it from CDN
 ## Usage/Examples
 
 > [!WARNING]
-> Set your GeoJSON source with `clusterMaxZoom: 22` in order to let the plugin handle cluster/individual marker rendering across all zoom level
+> Set your GeoJSON source with `clusterMaxZoom: 22` in order to let the plugin handle individual marker rendering at the highest zoom level.
 
 ```javascript
 import { TeritorioCluster } from '@teritorio/maplibre-gl-teritorio-cluster'
@@ -41,8 +50,7 @@ const map = new maplibregl.Map({
   container: 'map',
   style: {
     version: 8,
-    name: 'Empty Style',
-    metadata: { 'maputnik:renderer': 'mlgljs' },
+    name: 'MapLibre GL Teritorio Cluster',
     sources: {
       points: {
         type: 'geojson',
@@ -68,22 +76,22 @@ const map = new maplibregl.Map({
     },
     glyphs: 'https://orangemug.github.io/font-glyphs/glyphs/{fontstack}/{range}.pbf',
     layers: [],
-    id: 'muks8j3'
+    id: 'maplibre-gl-teritorio-cluster'
   }
 })
 
 map.on('load', () => {
-  const teritorioLayer = new TeritorioCluster(
+  const clusterLayer = new TeritorioCluster(
     'teritorio-cluster-layer',
     'points',
     options
   )
 
   // Add the layer to map
-  map.addLayer(teritorioLayer)
+  map.addLayer(clusterLayer)
 
   // Subscribe to feature click event
-  teritorioLayer.addEventListener('feature-click', (event) => {
+  clusterLayer.addEventListener('feature-click', (event) => {
     console.log(event.detail.selectedFeature)
   })
 })
@@ -103,7 +111,7 @@ function pinMarkerRender(coords, offset) {}
 #### Constructor
 
 ```js
-const teritorioLayer = new TeritorioCluster(id, sourceId, options)
+const clusterLayer = new TeritorioCluster(id, sourceId, options)
 ```
 
 | Parameter  | Type                               | Description                              |
@@ -118,10 +126,10 @@ const teritorioLayer = new TeritorioCluster(id, sourceId, options)
 | -------------------------- | ----------------------------- | ---------------------------- | -------------------------------------------------------------- |
 | `clusterMaxZoom`           | `number`                      | `17`                         | Maximum zoom level where clusters are visible.                 |
 | `clusterMinZoom`           | `number`                      | `0`                          | Minimum zoom level where clustering starts.                    |
-| `clusterRender`            | `(feature) => HTMLElement`    | `clusterRenderDefault`       | Custom function to render cluster.                     |
+| `clusterRender`            | `(feature) => HTMLElement`    | `clusterRenderDefault`       | Custom function to render cluster.                             |
 | `markerRender`             | `(feature) => HTMLElement`    | `markerRenderDefault`        | Custom function to render individual markers.                  |
 | `markerSize`               | `number`                      | `24`                         | Pixel size of rendered markers.                                |
-| `unfoldedClusterRender`    | `(features) => HTMLElement[]` | `unfoldedClusterRenderSmart` | Function to render unfolded cluster.                   |
+| `unfoldedClusterRender`    | `(features) => HTMLElement[]` | `unfoldedClusterRenderSmart` | Custom function to render unfolded cluster.                    |
 | `unfoldedClusterMaxLeaves` | `number`                      | `7`                          | Maximum number of features to show when a cluster is unfolded. |
 | `fitBoundsOptions`         | `mapboxgl.FitBoundsOptions`   | `{ padding: 20 }`            | Options for [fitBounds](https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/#fitbounds) method                              |
 | `initialFeature`           | `GeoJSONFeature \| undefined` | `undefined`                  | Feature to auto-select on load.                                |
@@ -130,7 +138,7 @@ const teritorioLayer = new TeritorioCluster(id, sourceId, options)
 ## Events
 
 ```js
-teritorioLayer.addEventListener('feature-click', (event) => {
+clusterLayer.addEventListener('feature-click', (event) => {
   console.log('Selected feature:', event.detail.selectedFeature)
 })
 ```
@@ -139,25 +147,25 @@ teritorioLayer.addEventListener('feature-click', (event) => {
 Clone the project
 
 ```bash
-  git clone https://github.com/teritorio/maplibre-gl-teritorio-cluster.git
+git clone https://github.com/teritorio/maplibre-gl-teritorio-cluster.git
 ```
 
 Go to the project directory
 
 ```bash
-  cd maplibre-gl-teritorio-cluster
+cd maplibre-gl-teritorio-cluster
 ```
 
 Install dependencies
 
 ```bash
-  yarn install
+yarn install
 ```
 
 Start the server
 
 ```bash
-  yarn dev
+yarn dev
 ```
 
 ## Contributing
@@ -169,6 +177,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for ways to get started.
 ## Authors
 
 - [Teritorio](https://teritorio.fr)
+
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
