@@ -46,7 +46,7 @@
     import { buildCss, unfoldedClusterRenderSmart as unfoldedClusterRender, TeritorioCluster } from './src/index'
 
     let geojson = await fetch('https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson', { method: 'GET' }).then(res => res.json())
-    let teritorioLayer;
+    let clusterLayer;
 
     const map = new maplibregl.Map({
       hash: true,
@@ -66,7 +66,7 @@
         'maxzoom': 24
       })
 
-      teritorioLayer = new TeritorioCluster(
+      clusterLayer = new TeritorioCluster(
         'teritorio-cluster',
         'earthquakes',
         {
@@ -79,9 +79,9 @@
         }
       )
 
-     map.addLayer(teritorioLayer)
+      map.addLayer(clusterLayer)
 
-      teritorioLayer.addEventListener('feature-click', (e) => {
+      clusterLayer.addEventListener('feature-click', (e) => {
         console.log(e.detail.selectedFeature)
       })
 
@@ -173,7 +173,7 @@
         return
       }
 
-      teritorioLayer.setSelectedFeature(feature)
+      clusterLayer.setSelectedFeature(feature)
     }
   </script>
 </body>
