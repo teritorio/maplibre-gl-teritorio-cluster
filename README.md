@@ -10,7 +10,7 @@ Enhance MapLibre GL JS with fully interactive HTML-based clusters and markers.
 **3 Cluster States:**
 - Cluster Marker: A single marker representing a cluster, eg. displaying the number of features.
 - Unfolded Cluster: Displays individual features grouped from a small cluster or when at the highest zoom level.
--  Unclustered Features
+- Unclustered Features
 
 **Customization Callbacks:**
 - Custom function to render cluster.
@@ -23,6 +23,7 @@ Enhance MapLibre GL JS with fully interactive HTML-based clusters and markers.
 👉 [**Live Demo**](https://teritorio.github.io/maplibre-gl-teritorio-cluster/index.html)
 
 ![Demo screenshot](public/image.png)
+
 ## Installation
 
 Install @teritorio/maplibre-gl-teritorio-cluster with yarn
@@ -42,7 +43,7 @@ Or use it from CDN
 > Set your GeoJSON source with `clusterMaxZoom: 22` in order to let the plugin handle individual marker rendering at the highest zoom level.
 
 ```javascript
-import { TeritorioCluster } from '@teritorio/maplibre-gl-teritorio-cluster'
+import { buildCss, TeritorioCluster } from '@teritorio/maplibre-gl-teritorio-cluster'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
@@ -80,11 +81,60 @@ const map = new maplibregl.Map({
   }
 })
 
+// Create whatever HTML element you want as Cluster
+function clusterRender(element, props) {
+  element.innerHTML = props.point_count.toLocaleString()
+  element.style.setProperty('background-color', 'white')
+  element.style.setProperty('border-radius', '100%')
+  element.style.setProperty('border', '2px solid green')
+  element.style.setProperty('justify-content', 'center')
+  element.style.setProperty('align-items', 'center')
+  element.style.setProperty('display', 'flex')
+  element.style.setProperty('color', 'black')
+  element.style.setProperty('width', '60px')
+  element.style.setProperty('height', '60px')
+  element.style.setProperty('cursor', 'pointer')
+}
+
+// Create whatever HTML element you want as individual Marker
+// You can you buildCss helper as well (exported by @teritorio/maplibre-gl-teritorio-cluster)
+function markerRender(element, feature, markerSize) {
+  element.innerHTML = props.point_count.toLocaleString()
+
+  buildCss(element, {
+    'background-color': 'white',
+    'border-radius': '100%',
+    'border': '2px solid green',
+    'justify-content': 'center',
+    'align-items': 'center',
+    'display': 'flex',
+    'color': 'black',
+    'width': `60px`,
+    'height': `60px`,
+    'cursor': 'pointer'
+  })
+}
+
+// Create whatever HTML element you want as Pin Marker
+function pinMarkerRender(coords, offset) {
+  return new maplibregl.Marker({
+    scale: 1.3,
+    color: '#f44336',
+    anchor: 'bottom'
+  })
+    .setLngLat(coords)
+    .setOffset(offset)
+}
+
 map.on('load', () => {
   const clusterLayer = new TeritorioCluster(
     'teritorio-cluster-layer',
     'points',
-    options
+    {
+      clusterRender,
+      markerRender,
+      pinMarkerRender
+    }
   )
 
   // Add the layer to map
@@ -95,15 +145,6 @@ map.on('load', () => {
     console.log(event.detail.selectedFeature)
   })
 })
-
-// Create whatever HTML element you want as Cluster
-function clusterRender(element, props) {}
-
-// Create whatever HTML element you want as individual Marker
-function markerRender(element, feature, markerSize) {}
-
-// Create whatever HTML element you want as Pin Marker
-function pinMarkerRender(coords, offset) {}
 ```
 
 ## API Reference
@@ -135,11 +176,18 @@ const clusterLayer = new TeritorioCluster(id, sourceId, options)
 | `initialFeature`           | `GeoJSONFeature \| undefined` | `undefined`                  | Feature to auto-select on load.                                |
 | `pinMarkerRender`          | `(feature) => HTMLElement`    | `pinMarkerRenderDefault`     | Custom renderer for the pinned marker.                         |
 
+##### unfoldedClusterRender
+The following rendering function are at your disposal:
+- `unfoldedClusterRenderCircle`: Renders an unfolded cluster in a circular shape.
+- `unfoldedClusterRenderHexaGrid`: Renders an unfolded cluster in a hexagonal grid spiral.
+- `unfoldedClusterRenderGrid`: Renders an unfolded cluster in a square grid.
+- `unfoldedClusterRenderSmart` (default): Renders an unfolded cluster in a smart shape based on the number of items.
+
 ## Events
 
 ```js
 clusterLayer.addEventListener('feature-click', (event) => {
-  console.log('Selected feature:', event.detail.selectedFeature)
+  console.info('Selected feature:', event.detail.selectedFeature)
 })
 ```
 ## Run Locally
@@ -167,6 +215,12 @@ Start the server
 ```bash
 yarn dev
 ```
+
+## Peer Dependencies
+
+This library requires the following peer dependencies to be installed in your project:
+
+- [maplibre-gl-js](https://github.com/maplibre/maplibre-gl-js) >= v5.4.0
 
 ## Contributing
 
