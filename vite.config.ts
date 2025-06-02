@@ -8,6 +8,7 @@ export default defineConfig(({ command, mode }) => {
       base: '/maplibre-gl-teritorio-cluster/',
       build: {
         outDir: './demo',
+        target: 'esnext',
       },
     }
   }
