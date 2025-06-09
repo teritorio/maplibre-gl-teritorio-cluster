@@ -26,7 +26,7 @@ Enhance MapLibre GL JS with fully interactive HTML-based clusters and markers.
 
 ## Installation
 
-Install @teritorio/maplibre-gl-teritorio-cluster with yarn
+Install `@teritorio/maplibre-gl-teritorio-cluster` with yarn
 
 ```bash
 yarn add @teritorio/maplibre-gl-teritorio-cluster
@@ -97,7 +97,7 @@ function clusterRender(element, props) {
 }
 
 // Create whatever HTML element you want as individual Marker
-// You can you buildCss helper as well (exported by @teritorio/maplibre-gl-teritorio-cluster)
+// You can use buildCss helper as well (exported by @teritorio/maplibre-gl-teritorio-cluster)
 function markerRender(element, feature, markerSize) {
   element.innerHTML = props.point_count.toLocaleString()
 
@@ -155,26 +155,26 @@ map.on('load', () => {
 const clusterLayer = new TeritorioCluster(id, sourceId, options)
 ```
 
-| Parameter  | Type                               | Description                              |
-| ---------- | ---------------------------------- | ---------------------------------------- |
+| Parameter  | Type                               | Description                       |
+|------------|------------------------------------|-----------------------------------|
 | `id`       | `string`                           | Unique ID for the layer.          |
-| `sourceId` | `string`                           | ID of the GeoJSON source.                 |
+| `sourceId` | `string`                           | ID of the GeoJSON source.         |
 | `options`  | `Partial<TeritorioClusterOptions>` | Optional configuration overrides. |
 
 #### Options
 
-| Option                     | Type                          | Default                      | Description                                                    |
-| -------------------------- | ----------------------------- | ---------------------------- | -------------------------------------------------------------- |
-| `clusterMaxZoom`           | `number`                      | `17`                         | Maximum zoom level where clusters are visible.                 |
-| `clusterMinZoom`           | `number`                      | `0`                          | Minimum zoom level where clustering starts.                    |
-| `clusterRender`            | `(feature) => HTMLElement`    | `clusterRenderDefault`       | Custom function to render cluster.                             |
-| `markerRender`             | `(feature) => HTMLElement`    | `markerRenderDefault`        | Custom function to render individual markers.                  |
-| `markerSize`               | `number`                      | `24`                         | Pixel size of rendered markers.                                |
-| `unfoldedClusterRender`    | `(features) => HTMLElement[]` | `unfoldedClusterRenderSmart` | Custom function to render unfolded cluster.                    |
-| `unfoldedClusterMaxLeaves` | `number`                      | `7`                          | Maximum number of features to show when a cluster is unfolded. |
-| `fitBoundsOptions`         | `mapboxgl.FitBoundsOptions`   | `{ padding: 20 }`            | Options for [fitBounds](https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/#fitbounds) method                              |
-| `initialFeature`           | `GeoJSONFeature \| undefined` | `undefined`                  | Feature to auto-select on load.                                |
-| `pinMarkerRender`          | `(feature) => HTMLElement`    | `pinMarkerRenderDefault`     | Custom renderer for the pinned marker.                         |
+| Option                     | Type                          | Default                      | Description                                                                                         |
+|----------------------------|-------------------------------|------------------------------|-----------------------------------------------------------------------------------------------------|
+| `clusterMaxZoom`           | `number`                      | `17`                         | Maximum zoom level where clusters are visible.                                                      |
+| `clusterMinZoom`           | `number`                      | `0`                          | Minimum zoom level where clustering starts.                                                         |
+| `clusterRender`            | `(feature) => HTMLElement`    | `clusterRenderDefault`       | Custom function to render cluster.                                                                  |
+| `markerRender`             | `(feature) => HTMLElement`    | `markerRenderDefault`        | Custom function to render individual markers.                                                       |
+| `markerSize`               | `number`                      | `24`                         | Pixel size of rendered markers.                                                                     |
+| `unfoldedClusterRender`    | `(features) => HTMLElement[]` | `unfoldedClusterRenderSmart` | Custom function to render unfolded cluster.                                                         |
+| `unfoldedClusterMaxLeaves` | `number`                      | `7`                          | Maximum number of features to show when a cluster is unfolded.                                      |
+| `fitBoundsOptions`         | `mapboxgl.FitBoundsOptions`   | `{ padding: 20 }`            | Options for [fitBounds](https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/#fitbounds) method |
+| `initialFeature`           | `GeoJSONFeature \ undefined`  | `undefined`                  | Feature to auto-select on load.                                                                     |
+| `pinMarkerRender`          | `(feature) => HTMLElement`    | `pinMarkerRenderDefault`     | Custom renderer for the pinned marker.                                                              |
 
 ##### unfoldedClusterRender
 The following rendering function are at your disposal:
