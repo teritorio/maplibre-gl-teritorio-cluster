@@ -18,7 +18,8 @@ export function isClusterFeature(feature: GeoJSONFeature): boolean {
  * Retrieves the ID of a feature.
  *
  * If the feature is a cluster, it returns the `id` of the cluster.
- * If the feature is not a cluster, it tries to get the `id` from its metadata or properties.
+ * If the feature is not a cluster, it uses `feature.id` when available (GeoJSON spec identifier),
+ * then falls back to `properties.metadata.id` or `properties.id`.
  *
  * @param feature The GeoJSON feature whose ID is to be retrieved.
  *

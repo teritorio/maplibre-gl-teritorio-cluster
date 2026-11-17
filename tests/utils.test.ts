@@ -42,6 +42,11 @@ describe('getFeatureId', () => {
       expect(getFeatureId(feature)).toBe('abc')
     })
 
+    it('returns "0" when feature.id is 0 (falsy but valid)', () => {
+      const feature = makeFeature({ id: 0, properties: { metadata: { id: 99 } } })
+      expect(getFeatureId(feature)).toBe('0')
+    })
+
     it('returns distinct ids for features sharing the same metadata.id but with unique feature.id', () => {
       const f1 = makeFeature({ id: 1, properties: { metadata: { id: 100 } } })
       const f2 = makeFeature({ id: 2, properties: { metadata: { id: 100 } } })
