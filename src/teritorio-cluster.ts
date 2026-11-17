@@ -307,6 +307,11 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
       if (this.abortExec !== currentExec)
         return
 
+      // Non-Point, non-cluster features (polygons, lines…) are rendered by
+      // vector tiles — skip them entirely so they don't pollute featuresMap.
+      if (!isClusterFeature(feature) && feature.geometry.type !== 'Point')
+        continue
+
       const id = getFeatureId(feature)
       this.featuresMap.set(id, feature)
 
@@ -327,10 +332,8 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
         : undefined
       const id = getFeatureId(feature)
 
-      if (!coords) {
-        console.error(`Feature ${id} is not Geometry.Point, thus not supported yet.`)
+      if (!coords)
         return
-      }
 
       let marker = this.markersOnScreen.get(id)
       const props = feature.properties
