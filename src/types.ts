@@ -21,7 +21,7 @@ export type UnfoldedCluster = (
   items: MapGeoJSONFeature[],
   markerSize: number,
   renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement,
-  clickHandler: (event: Event, feature: MapGeoJSONFeature) => void
+  clickHandler: (event: Event, feature: MapGeoJSONFeature) => void,
 ) => void
 
 /**
@@ -32,7 +32,7 @@ export type UnfoldedCluster = (
  */
 export type ClusterRender = (
   element: HTMLDivElement,
-  props: MapGeoJSONFeature['properties']
+  props: MapGeoJSONFeature['properties'],
 ) => void
 
 /**
@@ -45,7 +45,7 @@ export type ClusterRender = (
 export type MarkerRender = (
   element: HTMLDivElement,
   markerSize: number,
-  feature?: GeoJSONFeature
+  feature?: GeoJSONFeature,
 ) => void
 
 /**
@@ -58,7 +58,7 @@ export type MarkerRender = (
  */
 export type PinMarkerRender = (
   coords: LngLatLike,
-  offset: Point
+  offset: Point,
 ) => Marker
 
 /**

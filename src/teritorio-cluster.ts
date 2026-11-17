@@ -288,7 +288,8 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
       !this.map
       || !this.map.isSourceLoaded(this.sourceId)
       || !this.source
-      || this.abortExec !== currentExec) {
+      || this.abortExec !== currentExec
+    ) {
       return
     }
 
@@ -321,7 +322,9 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
     }
 
     this.featuresMap.forEach((feature) => {
-      const coords = feature.geometry.type === 'Point' ? new maplibre.LngLat(feature.geometry.coordinates[0], feature.geometry.coordinates[1]) : undefined
+      const coords = feature.geometry.type === 'Point'
+        ? new maplibre.LngLat(feature.geometry.coordinates[0], feature.geometry.coordinates[1])
+        : undefined
       const id = getFeatureId(feature)
 
       if (!coords) {

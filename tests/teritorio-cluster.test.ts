@@ -63,7 +63,14 @@ describe('teritorio cluster class implementation', () => {
         clusterMaxZoom: 22,
         clusterMinZoom: 2,
         clusterRender: vi.fn(),
-        fitBoundsOptions: { padding: { top: 57, bottom: 20, left: 20, right: 20 } },
+        fitBoundsOptions: {
+          padding: {
+            top: 57,
+            bottom: 20,
+            left: 20,
+            right: 20,
+          },
+        },
         markerRender: vi.fn(),
         markerSize: 28,
         unfoldedClusterRender: vi.fn(),
@@ -78,7 +85,14 @@ describe('teritorio cluster class implementation', () => {
     expect(opts.clusterMinZoom).toBe(2)
     expect(opts.markerSize).toBe(28)
     expect(opts.unfoldedClusterMaxLeaves).toBe(8)
-    expect(opts.fitBoundsOptions).toEqual({ padding: { top: 57, bottom: 20, left: 20, right: 20 } })
+    expect(opts.fitBoundsOptions).toEqual({
+      padding: {
+        top: 57,
+        bottom: 20,
+        left: 20,
+        right: 20,
+      },
+    })
     expect(opts.initialFeature).toBeUndefined()
     expect(typeof opts.clusterRender).toBe('function')
     expect(typeof opts.markerRender).toBe('function')

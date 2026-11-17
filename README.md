@@ -64,12 +64,18 @@ const map = new maplibregl.Map({
             {
               type: 'Feature',
               properties: { id: 1 },
-              geometry: { type: 'Point', coordinates: [0, 0] }
+              geometry: {
+                type: 'Point',
+                coordinates: [0, 0]
+              }
             },
             {
               type: 'Feature',
               properties: { id: 2 },
-              geometry: { type: 'Point', coordinates: [0, 1] }
+              geometry: {
+                type: 'Point',
+                coordinates: [0, 1]
+              }
             }
           ]
         }
@@ -149,7 +155,7 @@ map.on('load', () => {
 
 ## API Reference
 
-#### Constructor
+### Constructor
 
 ```js
 const clusterLayer = new TeritorioCluster(id, sourceId, options)
