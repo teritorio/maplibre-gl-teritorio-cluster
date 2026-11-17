@@ -37,7 +37,7 @@ jobs:
       - name: Setup Node.js Environment ⚙️
         uses: ./.github/actions/setup
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install Dependencies 🛠️
         run: yarn install --immutable
@@ -58,7 +58,7 @@ jobs:
       - name: Setup Node.js Environment ⚙️
         uses: ./.github/actions/setup
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install Dependencies 🛠️
         run: yarn install --immutable
@@ -84,7 +84,7 @@ jobs:
       - name: Setup Node.js Environment ⚙️
         uses: ./.github/actions/setup
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install Dependencies 🛠️
         run: yarn install --immutable
