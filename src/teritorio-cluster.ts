@@ -13,7 +13,7 @@ import type {
 import type { FeatureInClusterMatch, FeatureMatch, TeritorioClusterOptions } from './types'
 import bbox from '@turf/bbox'
 import { featureCollection } from '@turf/helpers'
-import maplibre from 'maplibre-gl'
+import * as maplibre from 'maplibre-gl'
 import { deepMerge } from './utils/deep-merge'
 import { clusterRenderDefault, markerRenderDefault, pinMarkerRenderDefault, unfoldedClusterRenderSmart } from './utils/helpers'
 import { calculatePinMarkerOffset, getFeatureId, isClusterFeature } from './utils/index'
@@ -403,7 +403,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
         }
       }
 
-      newMarkers.set(id, marker)
+      newMarkers.set(id, marker!)
     })
 
     // for every marker we've added previously, remove those that are no longer visible

@@ -1,4 +1,4 @@
-import maplibre from 'maplibre-gl'
+import * as maplibre from 'maplibre-gl'
 import { describe, expect, it, vi } from 'vitest'
 import { TeritorioCluster } from '../src/index'
 

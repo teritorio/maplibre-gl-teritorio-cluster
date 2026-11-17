@@ -1,5 +1,5 @@
 import type { LngLatLike, MapGeoJSONFeature, Marker, Point } from 'maplibre-gl'
-import maplibre from 'maplibre-gl'
+import * as maplibre from 'maplibre-gl'
 import { buildCss } from './index'
 
 /**

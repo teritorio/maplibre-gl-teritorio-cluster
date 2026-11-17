@@ -1,5 +1,5 @@
 import type { GeoJSONFeature, Point } from 'maplibre-gl'
-import maplibre from 'maplibre-gl'
+import * as maplibre from 'maplibre-gl'
 
 /**
  * Determines if a given GeoJSON feature is a cluster.
