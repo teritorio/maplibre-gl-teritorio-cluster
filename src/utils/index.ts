@@ -35,7 +35,7 @@ export function getFeatureId(feature: GeoJSONFeature): string {
   }
 
   // feature.id is the standard GeoJSON unique identifier — prefer it when set
-  if (feature.id !== undefined && feature.id !== null)
+  if (feature.id !== undefined && feature.id !== null && feature.id !== '')
     return feature.id.toString()
 
   // Vido support: shouldn't be part of this plugin

@@ -42,6 +42,11 @@ describe('getFeatureId', () => {
       expect(getFeatureId(feature)).toBe('abc')
     })
 
+    it('falls through to fallback when feature.id is "" (empty string)', () => {
+      const feature = makeFeature({ id: '', properties: { metadata: { id: 55 } } })
+      expect(getFeatureId(feature)).toBe('55')
+    })
+
     it('returns "0" when feature.id is 0 (falsy but valid)', () => {
       const feature = makeFeature({ id: 0, properties: { metadata: { id: 99 } } })
       expect(getFeatureId(feature)).toBe('0')
