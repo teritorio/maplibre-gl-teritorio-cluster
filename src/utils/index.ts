@@ -49,7 +49,10 @@ export function getFeatureId(feature: GeoJSONFeature): string {
     }
   }
 
-  return (metadata?.id ?? feature.properties?.id).toString()
+  const id = metadata?.id ?? feature.properties?.id
+  if (id == null)
+    throw new Error('Feature is missing an "id" in properties or metadata.')
+  return id.toString()
 }
 
 /**
