@@ -182,7 +182,7 @@ export function unfoldedClusterRenderGrid(
  * @param props The properties of the GeoJSON feature associated with the cluster.
  */
 export function clusterRenderDefault(element: HTMLDivElement, props: MapGeoJSONFeature['properties']): void {
-  element.innerHTML = props.point_count
+  element.textContent = String(props.point_count)
 
   buildCss(element, {
     'background-color': 'red',
