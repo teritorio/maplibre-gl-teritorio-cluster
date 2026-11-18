@@ -315,9 +315,6 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
     const maxZoomLimit = this.map!.getZoom() >= this.opts.clusterMaxZoom
     const minZoomLimit = this.map!.getZoom() >= this.opts.clusterMinZoom
 
-    this.clusterLeaves.clear()
-    this.featuresMap.clear()
-
     for (const feature of features) {
       if (this.abortExec !== currentExec)
         return
