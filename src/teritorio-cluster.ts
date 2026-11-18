@@ -59,6 +59,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
   // UI state
   private pinMarker: Marker | null = null
   private selectedFeatureId: string | null = null
+  private pendingSelectedFeature: GeoJSONFeature | null = null
   private abortExec: number = 0
 
   /**
@@ -152,6 +153,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
    */
   public resetSelectedFeature = (): void => {
     this.selectedFeatureId = null
+    this.pendingSelectedFeature = null
     this.resetPinMarker()
   }
 
@@ -196,7 +198,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
       const cluster = this.markersOnScreen.get(match.clusterId)
 
       if (!cluster) {
-        console.warn(`Cluster ${match.clusterId} not found, data may have been refreshed`)
+        this.pendingSelectedFeature = feature
         this.selectedFeatureId = null
         return
       }
@@ -373,6 +375,16 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
           if (this.pinMarker && this.selectedFeatureId && this.isFeatureInCluster(id, this.selectedFeatureId)) {
             this.resetPinMarker()
             this.renderPinMarkerInCluster(element, coords)
+          }
+
+          // If a selection was deferred because the cluster wasn't rendered yet, apply it now
+          if (this.pendingSelectedFeature) {
+            const pendingId = getFeatureId(this.pendingSelectedFeature)
+            if (this.isFeatureInCluster(id, pendingId)) {
+              this.selectedFeatureId = pendingId
+              this.renderPinMarkerInCluster(element, coords)
+              this.pendingSelectedFeature = null
+            }
           }
 
           // If initialFeature is part of this new cluster
