@@ -352,15 +352,15 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
           return
         }
 
-        if (
-          (marker && maxZoomLimit && !marker.getElement().classList.contains(this.UNFOLDED_CLASS))
-          || (marker && !maxZoomLimit && marker.getElement().classList.contains(this.UNFOLDED_CLASS) && this.markersOnScreen.has(id))
-          || (marker && minZoomLimit && !marker.getElement().classList.contains(this.UNFOLDED_CLASS))
-          || (marker && !minZoomLimit && marker.getElement().classList.contains(this.UNFOLDED_CLASS) && this.markersOnScreen.has(id))
-        ) {
-          marker = undefined
-          this.markersOnScreen.get(id)?.remove()
-          this.markersOnScreen.delete(id)
+        if (marker) {
+          const isUnfolded = marker.getElement().classList.contains(this.UNFOLDED_CLASS)
+          const shouldUnfold = minZoomLimit && (leaves.length <= this.opts.unfoldedClusterMaxLeaves || maxZoomLimit)
+
+          if (isUnfolded !== shouldUnfold) {
+            marker.remove()
+            this.markersOnScreen.delete(id)
+            marker = undefined
+          }
         }
 
         if (!marker) {
