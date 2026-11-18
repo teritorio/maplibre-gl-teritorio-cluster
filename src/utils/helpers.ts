@@ -21,6 +21,16 @@ export function unfoldedClusterRenderCircle(
   renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement,
   clickHandler: (event: Event, feature: MapGeoJSONFeature) => void,
 ): void {
+  if (items.length === 0)
+    return
+
+  if (items.length === 1) {
+    const featureHTML = renderMarker(items[0])
+    featureHTML.addEventListener('click', (event: Event) => clickHandler(event, items[0]))
+    parent.append(featureHTML)
+    return
+  }
+
   const radius = (markerSize / 2) / Math.sin(Math.PI / items.length)
   const angle = 360 / items.length
   let rot = 0
@@ -67,6 +77,16 @@ export function unfoldedClusterRenderHexaGrid(
   renderMarker: (feature: MapGeoJSONFeature) => HTMLDivElement,
   clickHandler: (event: Event, feature: MapGeoJSONFeature) => void,
 ): void {
+  if (items.length === 0)
+    return
+
+  if (items.length === 1) {
+    const featureHTML = renderMarker(items[0])
+    featureHTML.addEventListener('click', (event: Event) => clickHandler(event, items[0]))
+    parent.append(featureHTML)
+    return
+  }
+
   const radius = (markerSize / 2) / Math.sin(Math.PI / items.length)
 
   buildCss(parent, {
