@@ -166,7 +166,10 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
    *
    * @remarks
    * If the feature is part of the visible map markers, a pin marker will be placed on its coordinates.
-   * If the feature is part of a cluster, the function will attempt to render the pin marker at the cluster's coordinates.
+   * If the feature is part of a cluster whose marker is not yet rendered (e.g. during a `flyTo` animation
+   * or a data source refresh), the selection is deferred: the feature is stored in `pendingSelectedFeature`
+   * and the pin is applied by the next `renderCustom` cycle once the cluster marker appears on screen.
+   * The pending selection is cleared by `resetSelectedFeature` or when it is resolved by `renderCustom`.
    * If the feature is not part of the cluster or map, the method will place the pin marker on the given coordinates directly.
    */
   public setSelectedFeature = (feature: GeoJSONFeature): void => {
