@@ -328,7 +328,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
           return
 
         if (!success)
-          return
+          continue
       }
     }
 
