@@ -367,6 +367,14 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
             this.markersOnScreen.delete(id)
             marker = undefined
           }
+          else {
+            marker.setLngLat(coords)
+
+            if (this.pinMarker && this.selectedFeatureId && this.isFeatureInCluster(id, this.selectedFeatureId)) {
+              this.resetPinMarker()
+              this.renderPinMarkerInCluster(marker.getElement(), coords)
+            }
+          }
         }
 
         if (!marker) {
