@@ -161,7 +161,6 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
    * @param feature - The GeoJSON feature to select. Must be of type `Point` geometry.
    *
    * @throws Throws an error if the feature is not of type `Point` geometry when not found in the cluster.
-   * @throws Throws an error if the cluster associated with a feature cannot be found.
    *
    * @remarks
    * If the feature is part of the visible map markers, a pin marker will be placed on its coordinates.
@@ -198,6 +197,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
 
       if (!cluster) {
         console.warn(`Cluster ${match.clusterId} not found, data may have been refreshed`)
+        this.selectedFeatureId = null
         return
       }
 
