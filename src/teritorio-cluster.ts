@@ -137,6 +137,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
     this.featuresMap.clear()
     this.selectedFeatureId = null
     this.pendingSelectedFeature = null
+    this.abortExec++
     this.map = null
     this.source = null
   }
