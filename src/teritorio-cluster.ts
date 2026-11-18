@@ -131,6 +131,14 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
     this.resetPinMarker()
 
     this.map.removeLayer(`${this.id}-hidden`)
+
+    this.markersOnScreen.clear()
+    this.clusterLeaves.clear()
+    this.featuresMap.clear()
+    this.selectedFeatureId = null
+    this.pendingSelectedFeature = null
+    this.map = null
+    this.source = null
   }
 
   /**
