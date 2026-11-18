@@ -197,7 +197,8 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
       const cluster = this.markersOnScreen.get(match.clusterId)
 
       if (!cluster) {
-        throw new Error(`Cluster ${match.clusterId} not found.`)
+        console.warn(`Cluster ${match.clusterId} not found, data may have been refreshed`)
+        return
       }
 
       this.renderPinMarkerInCluster(cluster.getElement(), cluster.getLngLat())
