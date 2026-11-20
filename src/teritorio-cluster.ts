@@ -91,7 +91,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
    * - Stores a reference to the map instance.
    * - Sets the GeoJSON source using `setSource()`.
    * - Adds a transparent circle layer to the map to enable access to the source data.
-   * - Registers event listeners for `sourcedata` and `moveend` to trigger re-rendering when source data changes or the map is moved.
+   * - Registers event listeners for `sourcedata`, `moveend`, and `zoom` to trigger re-rendering when source data changes, the map is moved, or a zoom animation is in progress.
    */
   public onAdd = (map: MapGL): void => {
     this.map = map
@@ -119,7 +119,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
    * @remarks
    * This method is triggered when the layer is removed from the map, typically during map cleanup or when
    * switching layers. It performs necessary cleanup by:
-   * - Removing event listeners that were previously added for map movements and source data changes (`moveend`, `sourcedata`).
+   * - Removing event listeners that were previously added for map movements and source data changes (`moveend`, `sourcedata`, `zoom`).
    * - Removing all markers currently on screen.
    * - Resetting the pin marker, if present.
    */
