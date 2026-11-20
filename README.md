@@ -43,7 +43,7 @@ Or use it from CDN
 > Set your GeoJSON source with `clusterMaxZoom: 22` in order to let the plugin handle individual marker rendering at the highest zoom level.
 
 ```javascript
-import { buildCss, TeritorioCluster } from '@teritorio/maplibre-gl-teritorio-cluster'
+import { TeritorioCluster } from '@teritorio/maplibre-gl-teritorio-cluster'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
@@ -103,21 +103,19 @@ function clusterRender(element, props) {
 }
 
 // Create whatever HTML element you want as individual Marker
-// You can use buildCss helper as well (exported by @teritorio/maplibre-gl-teritorio-cluster)
 function markerRender(element, feature, markerSize) {
-  element.innerHTML = props.point_count.toLocaleString()
+  element.textContent = feature.properties.mag
 
-  buildCss(element, {
-    'background-color': 'white',
-    'border-radius': '100%',
-    'border': '2px solid green',
-    'justify-content': 'center',
-    'align-items': 'center',
-    'display': 'flex',
-    'color': 'black',
-    'width': `60px`,
-    'height': `60px`,
-    'cursor': 'pointer'
+  Object.assign(element.style, {
+    backgroundColor: 'green',
+    borderRadius: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    display: 'flex',
+    color: 'white',
+    width: `${markerSize}px`,
+    height: `${markerSize}px`,
+    cursor: 'pointer'
   })
 }
 
