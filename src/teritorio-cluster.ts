@@ -61,6 +61,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
   private selectedFeatureId: string | null = null
   private pendingSelectedFeature: GeoJSONFeature | null = null
   private abortExec: number = 0
+  private zoomThrottleTimer: ReturnType<typeof setTimeout> | null = null
 
   /**
    * Creates a new instance of the TeritorioCluster custom layer.
@@ -109,6 +110,7 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
 
     this.map.on('sourcedata', this.onSourceData)
     this.map.on('moveend', this.onMoveEnd)
+    this.map.on('zoom', this.onZoom)
   }
 
   /**
@@ -127,6 +129,12 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
 
     this.map.off('sourcedata', this.onSourceData)
     this.map.off('moveend', this.onMoveEnd)
+    this.map.off('zoom', this.onZoom)
+
+    if (this.zoomThrottleTimer !== null) {
+      clearTimeout(this.zoomThrottleTimer)
+      this.zoomThrottleTimer = null
+    }
     this.markersOnScreen.forEach(marker => marker.remove())
     this.resetPinMarker()
 
@@ -274,6 +282,21 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
   private onMoveEnd = (): void => {
     this.abortExec++
     this.renderCustom(this.abortExec)
+  }
+
+  /**
+   * Fired during zoom animation; triggers a throttled re-render so clusters fold/unfold
+   * before the animation ends rather than only at moveend.
+   */
+  private onZoom = (): void => {
+    if (this.zoomThrottleTimer !== null)
+      return
+
+    this.abortExec++
+    this.renderCustom(this.abortExec)
+    this.zoomThrottleTimer = setTimeout(() => {
+      this.zoomThrottleTimer = null
+    }, 150)
   }
 
   /**
