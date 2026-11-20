@@ -40,7 +40,7 @@ describe('teritorio cluster class implementation', () => {
 
   it('should initialize with default values', () => {
     const teritorioCluster = new TeritorioCluster('layerId', 'sourceId')
-    const opts = teritorioCluster.getOptionsForTesting()
+    const opts = (teritorioCluster as any).opts
 
     expect(teritorioCluster.id).toBe('layerId')
     expect(opts.clusterMaxZoom).toBe(17)
@@ -78,7 +78,7 @@ describe('teritorio cluster class implementation', () => {
         pinMarkerRender: vi.fn(),
       },
     )
-    const opts = teritorioCluster.getOptionsForTesting()
+    const opts = (teritorioCluster as any).opts
 
     expect(teritorioCluster.id).toBe('layerId')
     expect(opts.clusterMaxZoom).toBe(22)

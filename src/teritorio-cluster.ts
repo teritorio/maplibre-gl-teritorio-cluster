@@ -238,20 +238,6 @@ export class TeritorioCluster extends EventTarget implements CustomLayerInterfac
   }
 
   /**
-   * Returns the current options (useful for testing).
-   *
-   * @returns The current options object, including all required configuration values.
-   *
-   * @remarks
-   * The returned object will include the default options merged with any user-provided options
-   * passed during the instantiation of the `TeritorioCluster`. This can be helpful when validating
-   * the behavior of the cluster and ensuring the correct settings are being applied during tests.
-   */
-  public getOptionsForTesting(): Required<TeritorioClusterOptions> {
-    return this.opts
-  }
-
-  /**
    * Fired when source data has changed; triggers re-render.
    *
    * @param event - The event object that contains details about the source data change.
