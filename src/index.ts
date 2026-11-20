@@ -5,4 +5,3 @@ export {
   unfoldedClusterRenderHexaGrid,
   unfoldedClusterRenderSmart,
 } from './utils/helpers'
-export { buildCss } from './utils/index'
