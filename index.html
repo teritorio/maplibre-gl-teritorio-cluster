@@ -43,7 +43,7 @@
   <script type="module">
     import * as maplibregl from 'maplibre-gl'
     import 'maplibre-gl/dist/maplibre-gl.css'
-    import { buildCss, unfoldedClusterRenderSmart as unfoldedClusterRender, TeritorioCluster } from './src/index'
+    import { unfoldedClusterRenderSmart as unfoldedClusterRender, TeritorioCluster } from './src/index'
 
     let geojson = await fetch('https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson', { method: 'GET' }).then(res => res.json())
     let clusterLayer;
@@ -94,16 +94,16 @@
     const markerRender = (element, markerSize, feature) => {
       element.textContent = feature.properties.mag
 
-      buildCss(element, {
-        'background-color': 'green',
-        'border-radius': '100%',
-        'justify-content': 'center',
-        'align-items': 'center',
-        'display': 'flex',
-        'color': 'white',
-        'width': `${markerSize}px`,
-        'height': `${markerSize}px`,
-        'cursor': 'pointer'
+      Object.assign(element.style, {
+        backgroundColor: 'green',
+        borderRadius: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        display: 'flex',
+        color: 'white',
+        width: `${markerSize}px`,
+        height: `${markerSize}px`,
+        cursor: 'pointer',
       });
     }
 
@@ -120,17 +120,17 @@
     const clusterRender = (element, props) => {
       element.innerHTML = props.point_count.toLocaleString();
 
-      buildCss(element, {
-        'background-color': 'white',
-        'border-radius': '100%',
-        'border': '2px solid green',
-        'justify-content': 'center',
-        'align-items': 'center',
-        'display': 'flex',
-        'color': 'black',
-        'width': `60px`,
-        'height': `60px`,
-        'cursor': 'pointer'
+      Object.assign(element.style, {
+        backgroundColor: 'white',
+        borderRadius: '100%',
+        border: '2px solid green',
+        justifyContent: 'center',
+        alignItems: 'center',
+        display: 'flex',
+        color: 'black',
+        width: '60px',
+        height: '60px',
+        cursor: 'pointer',
       });
     }
 
